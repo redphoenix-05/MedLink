@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { User, Pharmacy } = require('../models');
 const { Op } = require('sequelize');
 
 // Generate JWT Token
@@ -14,7 +14,7 @@ const generateToken = (id) => {
 // @access  Public
 const signupUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, pharmacyName, address, licenseNumber, phone } = req.body;
 
     // Validation
     if (!name || !email || !password) {
@@ -27,6 +27,25 @@ const signupUser = async (req, res) => {
     // Validate role (only allow customer and pharmacy for public signup)
     const allowedRoles = ['customer', 'pharmacy'];
     const userRole = role && allowedRoles.includes(role) ? role : 'customer';
+
+    // Additional validation for pharmacy signup
+    if (userRole === 'pharmacy') {
+      if (!pharmacyName || !address || !licenseNumber || !phone) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide pharmacy name, address, phone number, and license number'
+        });
+      }
+
+      // Check if license number is already in use
+      const existingLicense = await Pharmacy.findOne({ where: { licenseNumber } });
+      if (existingLicense) {
+        return res.status(400).json({
+          success: false,
+          message: 'License number already registered'
+        });
+      }
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
@@ -45,21 +64,49 @@ const signupUser = async (req, res) => {
       role: userRole
     });
 
+    // If pharmacy role, create pharmacy record automatically
+    let pharmacy = null;
+    if (userRole === 'pharmacy') {
+      pharmacy = await Pharmacy.create({
+        userId: user.id,
+        name: pharmacyName,
+        address,
+        phone: phone || '',
+        licenseNumber,
+        status: 'pending'
+      });
+    }
+
     // Generate token
     const token = generateToken(user.id);
 
+    const responseData = {
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      }
+    };
+
+    // Include pharmacy info if created
+    if (pharmacy) {
+      responseData.pharmacy = {
+        id: pharmacy.id,
+        name: pharmacy.name,
+        address: pharmacy.address,
+        licenseNumber: pharmacy.licenseNumber,
+        status: pharmacy.status
+      };
+    }
+
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
-      data: {
-        token,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        }
-      }
+      message: userRole === 'pharmacy' 
+        ? 'Pharmacy account created successfully. Awaiting admin approval.'
+        : 'User registered successfully',
+      data: responseData
     });
   } catch (error) {
     console.error('Signup error:', error);

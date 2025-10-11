@@ -20,7 +20,7 @@ const connectDB = async () => {
     await sequelize.sync({ alter: true });
     console.log('✅ Database models synchronized');
   } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
+    console.error('❌ Database connection failed:', error);
     process.exit(1);
   }
 };

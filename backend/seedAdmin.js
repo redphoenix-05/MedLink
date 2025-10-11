@@ -8,19 +8,32 @@ const createAdmin = async () => {
     // Sync database
     await sequelize.sync();
     
-    // Check if admin user already exists
-    const existingAdmin = await User.findOne({ 
+    // Find all admin users
+    const adminUsers = await User.findAll({ 
       where: { 
-        name: 'medlinkadmin' 
+        role: 'admin' 
       } 
     });
 
-    if (existingAdmin) {
-      console.log('Admin user already exists');
-      process.exit(0);
+    console.log(`Found ${adminUsers.length} admin users`);
+
+    // If there are multiple admins, delete all and create the single correct one
+    if (adminUsers.length > 1) {
+      console.log('Multiple admin users found. Removing all and creating single admin...');
+      await User.destroy({ where: { role: 'admin' } });
+    } else if (adminUsers.length === 1) {
+      // Check if the existing admin has the correct credentials
+      const existingAdmin = adminUsers[0];
+      if (existingAdmin.name === 'medlinkadmin' && existingAdmin.email === 'admin@medlink.com') {
+        console.log('Correct admin user already exists');
+        process.exit(0);
+      } else {
+        console.log('Incorrect admin user found. Removing and creating correct one...');
+        await User.destroy({ where: { role: 'admin' } });
+      }
     }
 
-    // Create admin user
+    // Create the single correct admin user
     const adminUser = await User.create({
       name: 'medlinkadmin',
       email: 'admin@medlink.com',
@@ -28,7 +41,7 @@ const createAdmin = async () => {
       role: 'admin'
     });
 
-    console.log('Admin user created successfully:', {
+    console.log('Single admin user created successfully:', {
       id: adminUser.id,
       name: adminUser.name,
       email: adminUser.email,

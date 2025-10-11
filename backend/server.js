@@ -4,6 +4,13 @@ require('dotenv').config();
 
 const { connectDB } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
+const pharmacyRoutes = require('./routes/pharmacyRoutes');
+const medicineRoutes = require('./routes/medicineRoutes');
+const inventoryRoutes = require('./routes/inventoryRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+
+// Initialize models and associations
+require('./models');
 
 const app = express();
 
@@ -21,6 +28,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/pharmacies', pharmacyRoutes);
+app.use('/api/medicines', medicineRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
