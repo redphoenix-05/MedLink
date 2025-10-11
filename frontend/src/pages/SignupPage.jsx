@@ -9,27 +9,31 @@ const SignupPage = () => {
   const { signup, loading, error, clearError, isAuthenticated } = useAuth();
   
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    // Common fields
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'customer' // Default to customer
+    role: 'customer', // Default to customer
+    // Customer fields
+    firstName: '',
+    lastName: '',
+    // Pharmacy fields
+    pharmacyName: '',
+    ownerName: '',
+    address: '',
+    licenseNumber: '',
+    phone: ''
   });
 
   const [validationError, setValidationError] = useState('');
 
-  // Emergency reset function
-  const handleEmergencyReset = () => {
-    localStorage.clear();
-    window.location.reload();
-  };
 
-  // Only redirect if authenticated and not loading
+
+  // Only redirect if authenticated and not loading, but don't redirect during signup process
   useEffect(() => {
-    console.log('SignupPage auth state:', { isAuthenticated, loading });
     if (isAuthenticated && !loading) {
-      console.log('User is authenticated, redirecting to dashboard');
+      // Don't redirect if we're in the middle of a signup process
+      // The handleSubmit will handle navigation after successful signup
       navigate('/dashboard'); // Let DashboardRouter handle role-based routing
     }
   }, [isAuthenticated, navigate, loading]);
@@ -52,10 +56,19 @@ const SignupPage = () => {
       setValidationError('Password must be at least 6 characters long');
       return false;
     }
-    if (!formData.firstName.trim() || !formData.lastName.trim()) {
-      setValidationError('First name and last name are required');
-      return false;
+    
+    if (formData.role === 'customer') {
+      if (!formData.firstName.trim() || !formData.lastName.trim()) {
+        setValidationError('First name and last name are required');
+        return false;
+      }
+    } else if (formData.role === 'pharmacy') {
+      if (!formData.pharmacyName.trim() || !formData.ownerName.trim() || !formData.address.trim() || !formData.licenseNumber.trim() || !formData.phone.trim()) {
+        setValidationError('All pharmacy fields are required');
+        return false;
+      }
     }
+    
     return true;
   };
 
@@ -67,15 +80,40 @@ const SignupPage = () => {
     }
 
     try {
-  const { confirmPassword, firstName, lastName, ...signupData } = formData;
-      // Combine first and last name for backend
-      const dataToSend = {
-        ...signupData,
-        name: `${firstName.trim()} ${lastName.trim()}`,
-        role: formData.role // Use the selected role
-      };
-      await signup(dataToSend);
-      navigate('/dashboard'); // Let DashboardRouter handle role-based routing
+      const { confirmPassword, ...signupData } = formData;
+      
+      let dataToSend;
+      if (formData.role === 'customer') {
+        const { firstName, lastName, pharmacyName, ownerName, address, licenseNumber, ...customerData } = signupData;
+        dataToSend = {
+          ...customerData,
+          name: `${firstName.trim()} ${lastName.trim()}`,
+          role: 'customer'
+        };
+      } else if (formData.role === 'pharmacy') {
+        const { firstName, lastName, pharmacyName, ownerName, address, licenseNumber, phone, ...pharmacyData } = signupData;
+        dataToSend = {
+          ...pharmacyData,
+          name: ownerName.trim(), // Owner name becomes the user name
+          role: 'pharmacy',
+          // Store pharmacy details for pharmacy registration
+          pharmacyName: pharmacyName.trim(),
+          address: address.trim(),
+          licenseNumber: licenseNumber.trim(),
+          phone: phone.trim()
+        };
+      }
+      
+      const response = await signup(dataToSend);
+      
+      // Navigate based on role after successful signup
+      if (response && response.success) {
+        if (formData.role === 'pharmacy') {
+          navigate('/pharmacy/dashboard');
+        } else {
+          navigate('/customer/dashboard');
+        }
+      }
     } catch (err) {
       console.error('Signup error:', err);
     }
@@ -83,15 +121,7 @@ const SignupPage = () => {
 
   const currentError = validationError || error;
 
-  // Debug info
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center">
-        <LoadingSpinner size="large" text="Loading..." />
-        <p className="mt-4 text-gray-600">Auth loading: {String(loading)}</p>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center">
@@ -123,53 +153,11 @@ const SignupPage = () => {
               />
             )}
 
-            {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  autoComplete="given-name"
-                  required
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="First name"
-                />
-              </div>
-              <div>
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  autoComplete="family-name"
-                  required
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Last name"
-                />
-              </div>
-            </div>
-
-            {/* Email */}
+            {/* Role Selection - Moved to Top */}
             <div>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Email address"
-              />
-            </div>
-
-            {/* Role Selection */}
-            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Account Type
+              </label>
               <select
                 id="role"
                 name="role"
@@ -184,6 +172,118 @@ const SignupPage = () => {
               <div className="text-xs text-gray-500 mt-1">
                 Choose your account type
               </div>
+            </div>
+
+            {/* Dynamic Fields Based on Role */}
+            {formData.role === 'customer' ? (
+              // Customer Fields
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <input
+                    id="firstName"
+                    name="firstName"
+                    type="text"
+                    autoComplete="given-name"
+                    required
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="First name"
+                  />
+                </div>
+                <div>
+                  <input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    autoComplete="family-name"
+                    required
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Last name"
+                  />
+                </div>
+              </div>
+            ) : (
+              // Pharmacy Fields
+              <>
+                <div>
+                  <input
+                    id="pharmacyName"
+                    name="pharmacyName"
+                    type="text"
+                    required
+                    value={formData.pharmacyName}
+                    onChange={handleChange}
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Pharmacy Name"
+                  />
+                </div>
+                <div>
+                  <input
+                    id="ownerName"
+                    name="ownerName"
+                    type="text"
+                    required
+                    value={formData.ownerName}
+                    onChange={handleChange}
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Owner Name"
+                  />
+                </div>
+                <div>
+                  <textarea
+                    id="address"
+                    name="address"
+                    rows="3"
+                    required
+                    value={formData.address}
+                    onChange={handleChange}
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                    placeholder="Pharmacy Address"
+                  />
+                </div>
+                <div>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    required
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Phone Number"
+                  />
+                </div>
+                <div>
+                  <input
+                    id="licenseNumber"
+                    name="licenseNumber"
+                    type="text"
+                    required
+                    value={formData.licenseNumber}
+                    onChange={handleChange}
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="License Number"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Email */}
+            <div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Email address"
+              />
             </div>
             
             {/* Password */}
@@ -251,19 +351,7 @@ const SignupPage = () => {
           </Link>
         </div>
 
-        {/* Debug Info */}
-        <div className="mt-4 p-4 bg-yellow-100 rounded-lg text-sm">
-          <p><strong>Debug Info:</strong></p>
-          <p>Loading: {String(loading)}</p>
-          <p>Authenticated: {String(isAuthenticated)}</p>
-          <p>Error: {error || 'None'}</p>
-          <button
-            onClick={handleEmergencyReset}
-            className="mt-2 px-3 py-1 bg-red-500 text-white rounded text-xs"
-          >
-            Clear Storage & Reload
-          </button>
-        </div>
+
 
         {/* Footer */}
         <div className="mt-8 text-center">

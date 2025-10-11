@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem('token');
         const user = authService.getCurrentUser();
         
-        console.log('Auth initialization:', { token: !!token, user });
+
         
         if (token && user) {
           dispatch({

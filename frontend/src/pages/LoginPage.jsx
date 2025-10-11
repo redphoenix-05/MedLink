@@ -13,17 +13,11 @@ const LoginPage = () => {
     password: ''
   });
 
-  // Emergency reset function
-  const handleEmergencyReset = () => {
-    localStorage.clear();
-    window.location.reload();
-  };
+
 
   // Redirect if already authenticated
   useEffect(() => {
-    console.log('LoginPage auth state:', { isAuthenticated, loading });
     if (isAuthenticated && !loading) {
-      console.log('User is authenticated, redirecting to dashboard');
       navigate('/dashboard'); // Let DashboardRouter handle role-based routing
     }
   }, [isAuthenticated, navigate, loading]);
@@ -40,26 +34,24 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       const response = await login(formData);
-      console.log('Login response:', response);
-      // After successful login, navigate to dashboard
-      // DashboardRouter will handle role-based routing
-      if (response && response.success) {
-        navigate('/dashboard');
+
+      // After successful login, navigate directly to role-specific dashboard
+      if (response && response.success && response.data?.user?.role) {
+        const userRole = response.data.user.role;
+        if (userRole === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (userRole === 'pharmacy') {
+          navigate('/pharmacy/dashboard');
+        } else {
+          navigate('/customer/dashboard');
+        }
       }
     } catch (err) {
       console.error('Login error:', err);
     }
   };
 
-  // Debug info
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center">
-        <LoadingSpinner size="large" text="Logging in..." />
-        <p className="mt-4 text-gray-600">Auth loading: {String(loading)}</p>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center">
@@ -166,19 +158,7 @@ const LoginPage = () => {
           </div>
         </div>
 
-        {/* Debug Info */}
-        <div className="mt-4 p-4 bg-yellow-100 rounded-lg text-sm">
-          <p><strong>Debug Info:</strong></p>
-          <p>Loading: {String(loading)}</p>
-          <p>Authenticated: {String(isAuthenticated)}</p>
-          <p>Error: {error || 'None'}</p>
-          <button
-            onClick={handleEmergencyReset}
-            className="mt-2 px-3 py-1 bg-red-500 text-white rounded text-xs"
-          >
-            Clear Storage & Reload
-          </button>
-        </div>
+
 
         {/* Footer */}
         <div className="mt-8 text-center">
