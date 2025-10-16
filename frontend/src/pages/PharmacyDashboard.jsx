@@ -25,6 +25,8 @@ const PharmacyDashboard = () => {
     address: '',
     phone: '',
     licenseNumber: '',
+    latitude: '',
+    longitude: '',
   });
 
   // Inventory form state
@@ -73,6 +75,8 @@ const PharmacyDashboard = () => {
           address: pharmacyData.address || '',
           phone: pharmacyData.phone || '',
           licenseNumber: pharmacyData.licenseNumber || '',
+          latitude: pharmacyData.latitude || '',
+          longitude: pharmacyData.longitude || '',
         });
       }
 
@@ -463,6 +467,49 @@ const PharmacyDashboard = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter pharmacy license number"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Latitude
+                    <span className="text-xs text-gray-500 ml-1">(for map location)</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={profileForm.latitude}
+                    onChange={(e) => setProfileForm({...profileForm, latitude: e.target.value})}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="e.g., 23.8759"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Longitude
+                    <span className="text-xs text-gray-500 ml-1">(for map location)</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={profileForm.longitude}
+                    onChange={(e) => setProfileForm({...profileForm, longitude: e.target.value})}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="e.g., 90.3795"
+                  />
+                </div>
+              </div>
+
+              <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-md">
+                <p className="font-medium text-blue-800 mb-1">📍 Location Help:</p>
+                <p>You can find your coordinates using Google Maps:</p>
+                <ol className="list-decimal list-inside mt-1 space-y-1">
+                  <li>Go to Google Maps and search for your pharmacy</li>
+                  <li>Right-click on your location</li>
+                  <li>Click the coordinates that appear at the top</li>
+                  <li>Copy and paste the latitude and longitude here</li>
+                </ol>
               </div>
 
               <div className="pt-4">
