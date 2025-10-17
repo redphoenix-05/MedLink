@@ -36,4 +36,41 @@ API.interceptors.response.use(
   }
 );
 
+// ==========================================
+// RESERVATION API
+// ==========================================
+export const reservationAPI = {
+  // Create a new reservation
+  create: (data) => API.post('/reservations', data),
+  
+  // Get customer reservations
+  getCustomerReservations: (customerId) => API.get(`/reservations/customer/${customerId}`),
+  
+  // Get pharmacy reservations
+  getPharmacyReservations: (pharmacyId) => API.get(`/reservations/pharmacy/${pharmacyId}`),
+  
+  // Update reservation status
+  updateStatus: (reservationId, status) => API.put(`/reservations/${reservationId}/status`, { status }),
+  
+  // Cancel reservation
+  cancel: (reservationId) => API.delete(`/reservations/${reservationId}`)
+};
+
+// ==========================================
+// DELIVERY API
+// ==========================================
+export const deliveryAPI = {
+  // Create delivery
+  create: (data) => API.post('/deliveries', data),
+  
+  // Get pharmacy deliveries
+  getPharmacyDeliveries: (pharmacyId) => API.get(`/deliveries/pharmacy/${pharmacyId}`),
+  
+  // Get delivery details
+  getDetails: (deliveryId) => API.get(`/deliveries/${deliveryId}`),
+  
+  // Update delivery status
+  updateStatus: (deliveryId, data) => API.put(`/deliveries/${deliveryId}/status`, data)
+};
+
 export default API;

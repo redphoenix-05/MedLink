@@ -8,6 +8,9 @@ const pharmacyRoutes = require('./routes/pharmacyRoutes');
 const medicineRoutes = require('./routes/medicineRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const searchRoutes = require('./routes/searchRoutes');
+const reservationRoutes = require('./routes/reservationRoutes');
+const deliveryRoutes = require('./routes/deliveryRoutes');
 
 // Initialize models and associations
 require('./models');
@@ -32,6 +35,9 @@ app.use('/api/pharmacies', pharmacyRoutes);
 app.use('/api/medicines', medicineRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/reservations', reservationRoutes);
+app.use('/api/deliveries', deliveryRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
