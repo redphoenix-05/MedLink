@@ -19,7 +19,7 @@ const MyReservationsList = () => {
     try {
       setLoading(true);
       const response = await reservationAPI.getCustomerReservations(user.id);
-      setReservations(response.data.reservations);
+      setReservations(response.data.data.reservations);
     } catch (error) {
       console.error('Error fetching reservations:', error);
       setAlert({

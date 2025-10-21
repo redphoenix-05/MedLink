@@ -30,8 +30,8 @@ const PharmacyOrders = ({ pharmacyId }) => {
         reservationAPI.getPharmacyReservations(pharmacyId),
         deliveryAPI.getPharmacyDeliveries(pharmacyId)
       ]);
-      setReservations(resResponse.data.reservations);
-      setDeliveries(delResponse.data.deliveries);
+      setReservations(resResponse.data.data.reservations);
+      setDeliveries(delResponse.data.data.deliveries);
     } catch (error) {
       console.error('Error fetching data:', error);
       setAlert({
