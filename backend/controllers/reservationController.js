@@ -12,13 +12,13 @@ const createReservation = async (req, res) => {
     // Validate input
     if (!pharmacyId || !medicineId || !quantity || !deliveryOption) {
       await transaction.rollback();
-      return res.status(400).json({ message: 'Missing required fields' });
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
 
     // Check if delivery address is provided when delivery option is selected
     if (deliveryOption === 'delivery' && !address) {
       await transaction.rollback();
-      return res.status(400).json({ message: 'Delivery address is required for delivery option' });
+      return res.status(400).json({ success: false, message: 'Delivery address is required for delivery option' });
     }
 
     // Get pharmacy inventory to check stock and price
@@ -29,12 +29,13 @@ const createReservation = async (req, res) => {
 
     if (!inventory) {
       await transaction.rollback();
-      return res.status(404).json({ message: 'Medicine not available at this pharmacy' });
+      return res.status(404).json({ success: false, message: 'Medicine not available at this pharmacy' });
     }
 
     if (inventory.stock < quantity) {
       await transaction.rollback();
       return res.status(400).json({ 
+        success: false,
         message: `Insufficient stock. Only ${inventory.stock} available` 
       });
     }
@@ -65,14 +66,15 @@ const createReservation = async (req, res) => {
     });
 
     res.status(201).json({
+      success: true,
       message: 'Reservation created successfully',
-      reservation: fullReservation
+      data: { reservation: fullReservation }
     });
 
   } catch (error) {
     await transaction.rollback();
     console.error('Create reservation error:', error);
-    res.status(500).json({ message: 'Failed to create reservation', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to create reservation', error: error.message });
   }
 };
 
@@ -83,7 +85,7 @@ const getCustomerReservations = async (req, res) => {
 
     // Verify user can only access their own reservations
     if (req.user.id !== parseInt(customerId) && req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Unauthorized access' });
+      return res.status(403).json({ success: false, message: 'Unauthorized access' });
     }
 
     const reservations = await Reservation.findAll({
@@ -96,11 +98,14 @@ const getCustomerReservations = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
 
-    res.json({ reservations });
+    res.json({ 
+      success: true,
+      data: { reservations }
+    });
 
   } catch (error) {
     console.error('Get customer reservations error:', error);
-    res.status(500).json({ message: 'Failed to fetch reservations', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to fetch reservations', error: error.message });
   }
 };
 
@@ -126,11 +131,14 @@ const getPharmacyReservations = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
 
-    res.json({ reservations });
+    res.json({ 
+      success: true,
+      data: { reservations }
+    });
 
   } catch (error) {
     console.error('Get pharmacy reservations error:', error);
-    res.status(500).json({ message: 'Failed to fetch reservations', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to fetch pharmacy reservations', error: error.message });
   }
 };
 
@@ -144,7 +152,7 @@ const updateReservationStatus = async (req, res) => {
 
     if (!['accepted', 'rejected', 'delivered'].includes(status)) {
       await transaction.rollback();
-      return res.status(400).json({ message: 'Invalid status' });
+      return res.status(400).json({ success: false, message: 'Invalid status' });
     }
 
     const reservation = await Reservation.findByPk(reservationId, {
@@ -157,14 +165,14 @@ const updateReservationStatus = async (req, res) => {
 
     if (!reservation) {
       await transaction.rollback();
-      return res.status(404).json({ message: 'Reservation not found' });
+      return res.status(404).json({ success: false, message: 'Reservation not found' });
     }
 
     // Verify pharmacy ownership
     const pharmacy = await Pharmacy.findOne({ where: { userId: req.user.id }, transaction });
     if (!pharmacy || pharmacy.id !== reservation.pharmacyId) {
       await transaction.rollback();
-      return res.status(403).json({ message: 'Unauthorized access' });
+      return res.status(403).json({ success: false, message: 'Unauthorized access' });
     }
 
     // Update reservation status
@@ -206,14 +214,15 @@ const updateReservationStatus = async (req, res) => {
     });
 
     res.json({
+      success: true,
       message: 'Reservation status updated successfully',
-      reservation: updatedReservation
+      data: { reservation: updatedReservation }
     });
 
   } catch (error) {
     await transaction.rollback();
     console.error('Update reservation status error:', error);
-    res.status(500).json({ message: 'Failed to update reservation status', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to update reservation status', error: error.message });
   }
 };
 
@@ -225,26 +234,29 @@ const cancelReservation = async (req, res) => {
     const reservation = await Reservation.findByPk(reservationId);
 
     if (!reservation) {
-      return res.status(404).json({ message: 'Reservation not found' });
+      return res.status(404).json({ success: false, message: 'Reservation not found' });
     }
 
     // Verify customer ownership
     if (reservation.customerId !== req.user.id) {
-      return res.status(403).json({ message: 'Unauthorized access' });
+      return res.status(403).json({ success: false, message: 'Unauthorized access' });
     }
 
     // Can only cancel if pending
     if (reservation.status !== 'pending') {
-      return res.status(400).json({ message: 'Can only cancel pending reservations' });
+      return res.status(400).json({ success: false, message: 'Can only cancel pending reservations' });
     }
 
     await reservation.destroy();
 
-    res.json({ message: 'Reservation cancelled successfully' });
+    res.json({ 
+      success: true,
+      message: 'Reservation cancelled successfully'
+    });
 
   } catch (error) {
     console.error('Cancel reservation error:', error);
-    res.status(500).json({ message: 'Failed to cancel reservation', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to cancel reservation', error: error.message });
   }
 };
 

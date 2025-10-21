@@ -6,7 +6,7 @@ const createDelivery = async (req, res) => {
     const { reservationId, address, deliveryPerson } = req.body;
 
     if (!reservationId || !address) {
-      return res.status(400).json({ message: 'Missing required fields' });
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
 
     // Get reservation and verify it exists and is accepted
@@ -15,27 +15,27 @@ const createDelivery = async (req, res) => {
     });
 
     if (!reservation) {
-      return res.status(404).json({ message: 'Reservation not found' });
+      return res.status(404).json({ success: false, message: 'Reservation not found' });
     }
 
     // Verify pharmacy ownership
     const pharmacy = await Pharmacy.findOne({ where: { userId: req.user.id } });
     if (!pharmacy || pharmacy.id !== reservation.pharmacyId) {
-      return res.status(403).json({ message: 'Unauthorized access' });
+      return res.status(403).json({ success: false, message: 'Unauthorized access' });
     }
 
     if (reservation.status !== 'accepted') {
-      return res.status(400).json({ message: 'Can only create delivery for accepted reservations' });
+      return res.status(400).json({ success: false, message: 'Can only create delivery for accepted reservations' });
     }
 
     if (reservation.deliveryOption !== 'delivery') {
-      return res.status(400).json({ message: 'Reservation is not for delivery' });
+      return res.status(400).json({ success: false, message: 'Reservation is not for delivery' });
     }
 
     // Check if delivery already exists
     const existingDelivery = await Delivery.findOne({ where: { reservationId } });
     if (existingDelivery) {
-      return res.status(400).json({ message: 'Delivery record already exists for this reservation' });
+      return res.status(400).json({ success: false, message: 'Delivery record already exists for this reservation' });
     }
 
     // Create delivery
@@ -60,13 +60,14 @@ const createDelivery = async (req, res) => {
     });
 
     res.status(201).json({
+      success: true,
       message: 'Delivery record created successfully',
-      delivery: fullDelivery
+      data: { delivery: fullDelivery }
     });
 
   } catch (error) {
     console.error('Create delivery error:', error);
-    res.status(500).json({ message: 'Failed to create delivery', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to create delivery', error: error.message });
   }
 };
 
@@ -78,7 +79,7 @@ const getPharmacyDeliveries = async (req, res) => {
     // Verify pharmacy ownership
     const pharmacy = await Pharmacy.findOne({ where: { userId: req.user.id } });
     if (!pharmacy || pharmacy.id !== parseInt(pharmacyId)) {
-      return res.status(403).json({ message: 'Unauthorized access' });
+      return res.status(403).json({ success: false, message: 'Unauthorized access' });
     }
 
     // Get all deliveries for this pharmacy
@@ -95,11 +96,14 @@ const getPharmacyDeliveries = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
 
-    res.json({ deliveries });
+    res.json({ 
+      success: true,
+      data: { deliveries }
+    });
 
   } catch (error) {
     console.error('Get pharmacy deliveries error:', error);
-    res.status(500).json({ message: 'Failed to fetch deliveries', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to fetch deliveries', error: error.message });
   }
 };
 
@@ -110,7 +114,7 @@ const updateDeliveryStatus = async (req, res) => {
     const { deliveryStatus, deliveryPerson } = req.body;
 
     if (!['pending', 'out_for_delivery', 'delivered'].includes(deliveryStatus)) {
-      return res.status(400).json({ message: 'Invalid delivery status' });
+      return res.status(400).json({ success: false, message: 'Invalid delivery status' });
     }
 
     const delivery = await Delivery.findByPk(deliveryId, {
@@ -122,13 +126,13 @@ const updateDeliveryStatus = async (req, res) => {
     });
 
     if (!delivery) {
-      return res.status(404).json({ message: 'Delivery not found' });
+      return res.status(404).json({ success: false, message: 'Delivery not found' });
     }
 
     // Verify pharmacy ownership
     const pharmacy = await Pharmacy.findOne({ where: { userId: req.user.id } });
     if (!pharmacy || pharmacy.id !== delivery.reservation.pharmacyId) {
-      return res.status(403).json({ message: 'Unauthorized access' });
+      return res.status(403).json({ success: false, message: 'Unauthorized access' });
     }
 
     // Update delivery
@@ -158,13 +162,14 @@ const updateDeliveryStatus = async (req, res) => {
     });
 
     res.json({
+      success: true,
       message: 'Delivery status updated successfully',
-      delivery: updatedDelivery
+      data: { delivery: updatedDelivery }
     });
 
   } catch (error) {
     console.error('Update delivery status error:', error);
-    res.status(500).json({ message: 'Failed to update delivery status', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to update delivery status', error: error.message });
   }
 };
 
@@ -186,7 +191,7 @@ const getDeliveryDetails = async (req, res) => {
     });
 
     if (!delivery) {
-      return res.status(404).json({ message: 'Delivery not found' });
+      return res.status(404).json({ success: false, message: 'Delivery not found' });
     }
 
     // Verify access (customer or pharmacy)
@@ -195,14 +200,17 @@ const getDeliveryDetails = async (req, res) => {
     const isPharmacy = pharmacy && pharmacy.id === delivery.reservation.pharmacyId;
 
     if (!isCustomer && !isPharmacy && req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Unauthorized access' });
+      return res.status(403).json({ success: false, message: 'Unauthorized access' });
     }
 
-    res.json({ delivery });
+    res.json({ 
+      success: true,
+      data: { delivery }
+    });
 
   } catch (error) {
     console.error('Get delivery details error:', error);
-    res.status(500).json({ message: 'Failed to fetch delivery details', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to fetch delivery details', error: error.message });
   }
 };
 

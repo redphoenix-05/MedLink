@@ -217,27 +217,34 @@ const getDashboardStats = async (req, res) => {
     const revenue = revenueResult || 0;
 
     // Get medicine popularity (top 10)
-    const medicineTrends = await Reservation.findAll({
-      attributes: [
-        'medicineId',
-        [sequelize.fn('COUNT', sequelize.col('Reservation.id')), 'orderCount']
-      ],
-      include: [{
-        model: Medicine,
-        as: 'medicine',
-        attributes: ['id', 'name', 'brand']
-      }],
-      group: ['medicineId', 'medicine.id', 'medicine.name', 'medicine.brand'],
-      order: [[sequelize.literal('orderCount'), 'DESC']],
-      limit: 10,
-      raw: false
-    });
+    let formattedTrends = [];
+    try {
+      const medicineTrends = await Reservation.findAll({
+        attributes: [
+          'medicineId',
+          [sequelize.fn('COUNT', sequelize.col('Reservation.id')), 'orderCount']
+        ],
+        include: [{
+          model: Medicine,
+          as: 'medicine',
+          attributes: ['id', 'name', 'brand'],
+          required: true // Only include reservations with valid medicine
+        }],
+        group: ['medicineId', 'medicine.id', 'medicine.name', 'medicine.brand'],
+        order: [[sequelize.literal('orderCount'), 'DESC']],
+        limit: 10,
+        raw: false
+      });
 
-    const formattedTrends = medicineTrends.map(item => ({
-      name: item.medicine.name,
-      brand: item.medicine.brand,
-      orders: parseInt(item.dataValues.orderCount)
-    }));
+      formattedTrends = medicineTrends.map(item => ({
+        name: item.medicine?.name || 'Unknown',
+        brand: item.medicine?.brand || 'Unknown',
+        orders: parseInt(item.dataValues.orderCount) || 0
+      }));
+    } catch (trendError) {
+      console.warn('Failed to fetch medicine trends:', trendError.message);
+      formattedTrends = [];
+    }
 
     // Get recent registrations (last 30 days)
     const thirtyDaysAgo = new Date();
