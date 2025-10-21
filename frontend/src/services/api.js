@@ -73,4 +73,34 @@ export const deliveryAPI = {
   updateStatus: (deliveryId, data) => API.put(`/deliveries/${deliveryId}/status`, data)
 };
 
+// ==========================================
+// ADMIN API
+// ==========================================
+export const adminAPI = {
+  // Dashboard statistics
+  getStats: () => API.get('/admin/dashboard-stats'),
+  
+  // User management
+  getAllUsers: (params) => API.get('/admin/users', { params }),
+  updateUserStatus: (userId, status) => API.put(`/admin/users/${userId}/status`, { status }),
+  
+  // Pharmacy management
+  getPendingPharmacies: (params) => API.get('/admin/pharmacies/pending', { params }),
+  getApprovedPharmacies: (params) => API.get('/admin/pharmacies/approved', { params }),
+  approvePharmacy: (pharmacyId) => API.put(`/admin/pharmacies/${pharmacyId}/approve`),
+  rejectPharmacy: (pharmacyId, reason) => API.put(`/admin/pharmacies/${pharmacyId}/reject`, { reason }),
+  
+  // Reservations
+  getAllReservations: (params) => API.get('/admin/reservations', { params }),
+  
+  // Deliveries
+  getAllDeliveries: (params) => API.get('/admin/deliveries', { params }),
+  
+  // Medicines
+  getAllMedicines: (params) => API.get('/admin/medicines', { params }),
+  
+  // Activity logs
+  getActivityLogs: () => API.get('/admin/activity-logs')
+};
+
 export default API;

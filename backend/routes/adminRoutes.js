@@ -5,15 +5,19 @@ const {
   rejectPharmacy,
   getDashboardStats,
   getPendingPharmacies,
+  getApprovedPharmacies,
   getAllUsers,
   getActivityLogs,
+  updateUserStatus,
+  getAllReservations,
+  getAllDeliveries,
+  getAllMedicines
 } = require('../controllers/adminController');
-const { authMiddleware: auth } = require('../middleware/auth');
-const roleMiddleware = require('../middleware/roleMiddleware');
+const { authMiddleware: auth, verifyAdmin } = require('../middleware/auth');
 
 // All routes require admin authentication
 router.use(auth);
-router.use(roleMiddleware('admin'));
+router.use(verifyAdmin);
 
 // @route   PUT /api/admin/pharmacies/:id/approve
 // @desc    Approve pharmacy
@@ -35,6 +39,11 @@ router.get('/dashboard-stats', getDashboardStats);
 // @access  Private (Admin only)
 router.get('/pharmacies/pending', getPendingPharmacies);
 
+// @route   GET /api/admin/pharmacies/approved
+// @desc    Get approved pharmacies
+// @access  Private (Admin only)
+router.get('/pharmacies/approved', getApprovedPharmacies);
+
 // @route   GET /api/admin/users
 // @desc    Get all users (Admin view)
 // @access  Private (Admin only)
@@ -44,5 +53,25 @@ router.get('/users', getAllUsers);
 // @desc    Get system activity logs
 // @access  Private (Admin only)
 router.get('/activity-logs', getActivityLogs);
+
+// @route   PUT /api/admin/users/:id/status
+// @desc    Update user status (activate/deactivate)
+// @access  Private (Admin only)
+router.put('/users/:id/status', updateUserStatus);
+
+// @route   GET /api/admin/reservations
+// @desc    Get all reservations
+// @access  Private (Admin only)
+router.get('/reservations', getAllReservations);
+
+// @route   GET /api/admin/deliveries
+// @desc    Get all deliveries
+// @access  Private (Admin only)
+router.get('/deliveries', getAllDeliveries);
+
+// @route   GET /api/admin/medicines
+// @desc    Get all medicines
+// @access  Private (Admin only)
+router.get('/medicines', getAllMedicines);
 
 module.exports = router;

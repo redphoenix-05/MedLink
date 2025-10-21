@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
-import API from '../services/api';
+import { adminAPI } from '../services/api';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -12,16 +13,23 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // State for different sections
+  //State for different sections
   const [stats, setStats] = useState({
     users: { total: 0, customer: 0, pharmacy: 0, admin: 0 },
     pharmacies: { total: 0, pending: 0, approved: 0, rejected: 0 },
-    orders: { total: 0, pending: 0, delivered: 0, confirmed: 0, preparing: 0, ready: 0, cancelled: 0 },
+    reservations: { total: 0, pending: 0, accepted: 0, delivered: 0, rejected: 0 },
+    deliveries: { total: 0, pending: 0, out_for_delivery: 0, delivered: 0 },
+    totalMedicines: 0,
+    revenue: 0,
+    medicineTrends: [],
+    recentActivity: { users: 0, pharmacies: 0 }
   });
   
   const [pendingPharmacies, setPendingPharmacies] = useState([]);
   const [approvedPharmacies, setApprovedPharmacies] = useState([]);
   const [users, setUsers] = useState([]);
+  const [reservations, setReservations] = useState([]);
+  const [deliveries, setDeliveries] = useState([]);
   
   // Modal states
   const [selectedPharmacy, setSelectedPharmacy] = useState(null);
@@ -40,6 +48,10 @@ const AdminDashboard = () => {
       fetchApprovedPharmacies();
     } else if (activeTab === 'users') {
       fetchUsers();
+    } else if (activeTab === 'reservations') {
+      fetchReservations();
+    } else if (activeTab === 'deliveries') {
+      fetchDeliveries();
     }
   }, [activeTab]);
 
@@ -50,12 +62,20 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await API.get('/admin/dashboard-stats');
+      console.log('🔍 Fetching admin stats...');
+      const response = await adminAPI.getStats();
+      console.log('📊 Admin stats response:', response.data);
       if (response.data.success) {
         setStats(response.data.data);
+        console.log('✅ Stats updated:', response.data.data);
+      } else {
+        console.error('❌ Stats fetch failed:', response.data);
+        setError('Failed to load dashboard statistics');
       }
     } catch (err) {
-      setError('Failed to load dashboard statistics');
+      console.error('❌ Stats fetch error:', err);
+      console.error('Error details:', err.response?.data);
+      setError(err.response?.data?.message || 'Failed to load dashboard statistics');
     } finally {
       setLoading(false);
     }
@@ -64,7 +84,7 @@ const AdminDashboard = () => {
   const fetchPendingPharmacies = async () => {
     try {
       setLoading(true);
-      const response = await API.get('/admin/pharmacies/pending');
+      const response = await adminAPI.getPendingPharmacies();
       if (response.data.success) {
         setPendingPharmacies(response.data.data.pharmacies);
       }
@@ -78,12 +98,15 @@ const AdminDashboard = () => {
   const fetchApprovedPharmacies = async () => {
     try {
       setLoading(true);
-      const response = await API.get('/pharmacies?status=approved');
+      console.log('🔍 Fetching approved pharmacies...');
+      const response = await adminAPI.getApprovedPharmacies();
+      console.log('✅ Approved pharmacies response:', response.data);
       if (response.data.success) {
-        setApprovedPharmacies(response.data.data.pharmacies);
+        setApprovedPharmacies(response.data.data.pharmacies || []);
       }
     } catch (err) {
-      setError('Failed to load approved pharmacies');
+      console.error('❌ Failed to load approved pharmacies:', err);
+      setError(err.response?.data?.message || 'Failed to load approved pharmacies');
     } finally {
       setLoading(false);
     }
@@ -92,7 +115,7 @@ const AdminDashboard = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await API.get('/admin/users');
+      const response = await adminAPI.getAllUsers();
       if (response.data.success) {
         setUsers(response.data.data.users);
       }
@@ -103,9 +126,37 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchReservations = async () => {
+    try {
+      setLoading(true);
+      const response = await adminAPI.getAllReservations();
+      if (response.data.success) {
+        setReservations(response.data.data.reservations);
+      }
+    } catch (err) {
+      setError('Failed to load reservations');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDeliveries = async () => {
+    try {
+      setLoading(true);
+      const response = await adminAPI.getAllDeliveries();
+      if (response.data.success) {
+        setDeliveries(response.data.data.deliveries);
+      }
+    } catch (err) {
+      setError('Failed to load deliveries');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleApprovePharmacy = async (pharmacyId) => {
     try {
-      const response = await API.put(`/admin/pharmacies/${pharmacyId}/approve`);
+      const response = await adminAPI.approvePharmacy(pharmacyId);
       if (response.data.success) {
         setSuccess('Pharmacy approved successfully!');
         fetchPendingPharmacies();
@@ -119,7 +170,7 @@ const AdminDashboard = () => {
   const handleRejectPharmacy = async (pharmacyId) => {
     if (window.confirm('Are you sure you want to reject this pharmacy?')) {
       try {
-        const response = await API.put(`/admin/pharmacies/${pharmacyId}/reject`);
+        const response = await adminAPI.rejectPharmacy(pharmacyId);
         if (response.data.success) {
           setSuccess('Pharmacy rejected successfully!');
           fetchPendingPharmacies();
@@ -204,8 +255,8 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Orders Pending</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.orders.pending}</p>
+              <p className="text-sm font-medium text-gray-500">Reservations Pending</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.reservations.pending}</p>
             </div>
           </div>
         </div>
@@ -218,8 +269,8 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Orders Delivered</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.orders.delivered}</p>
+              <p className="text-sm font-medium text-gray-500">Reservations Delivered</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.reservations.delivered}</p>
             </div>
           </div>
         </div>
