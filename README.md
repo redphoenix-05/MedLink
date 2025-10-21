@@ -81,70 +81,102 @@ MedLink/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v16 or higher)
-- PostgreSQL (v12 or higher)
+- Node.js (v18 or higher)
+- PostgreSQL (v14 or higher)
 - npm or yarn
 
-### Environment Setup
+### Quick Start Options
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd MedLink-Neighborhood-Medicine-Availability-Pharmacy-Locator
+Choose your preferred method:
+
+#### Option 1: Local Development (Recommended) ⚡
+
+**Simple 3-step setup:**
+
+1. **Run Database Setup**
+   ```powershell
+   .\setup-database.ps1
    ```
 
-2. **Set up PostgreSQL Database**
-   - Create a new database named `medlink_db`
-   - Update the DATABASE_URL in `server/.env`
+2. **Configure Environment Variables**
+   - Update `.env` file with your email and payment credentials
 
-3. **Configure Environment Variables**
-   
-   Update `server/.env`:
-   ```env
-   NODE_ENV=development
-   PORT=5000
-   CLIENT_URL=http://localhost:5173
-   
-   # Database
-   DATABASE_URL=postgresql://username:password@localhost:5432/medlink_db
-   
-   # JWT
-   JWT_SECRET=your_super_secret_jwt_key_here_make_it_long_and_secure
-   TOKEN_EXPIRE=7d
+3. **Start the Application**
+   ```powershell
+   .\start.ps1
    ```
 
-### Installation & Running
+**Done!** The application will start on:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:5000
 
-#### Backend Setup
+📖 **For detailed instructions, see [LOCAL_SETUP.md](LOCAL_SETUP.md)**
+
+#### Option 2: Docker (Alternative) 🐳
+
+If you prefer Docker:
+
 ```bash
-# Navigate to backend directory
+# Build and start all services
+docker-compose up --build
+
+# Stop services
+docker-compose down
+```
+
+Access the application at http://localhost:5173
+
+### Manual Setup (If Scripts Don't Work)
+
+#### 1. Set up PostgreSQL Database
+```powershell
+# Connect to PostgreSQL
+psql -U postgres
+
+# Create database and user
+CREATE USER medlink_user WITH PASSWORD 'medlink_pass';
+CREATE DATABASE medlink_db OWNER medlink_user;
+GRANT ALL PRIVILEGES ON DATABASE medlink_db TO medlink_user;
+\q
+```
+
+#### 2. Configure Environment Variables
+   
+Update `.env` file:
+```env
+# Database
+DATABASE_URL=postgresql://medlink_user:medlink_pass@localhost:5432/medlink_db
+
+# Email (Update with your credentials)
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+
+# Payment (Update with your SSLCommerz credentials)
+STORE_ID=your-store-id
+STORE_PASSWORD=your-store-password
+```
+
+#### 3. Start Backend
+```powershell
 cd backend
-
-# Install dependencies
 npm install
-
-# Initialize database (optional - runs automatically on server start)
-npm run init-db
-
-# Start development server
-npm run dev
+node server.js
 ```
 
-The backend will run on `http://localhost:5000`
-
-#### Frontend Setup
-```bash
-# Navigate to frontend directory
+#### 4. Start Frontend (New Terminal)
+```powershell
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
 
-The frontend will run on `http://localhost:5173`
+### Create Admin User
+
+After backend is running:
+```powershell
+cd backend
+node scripts/createAdmin.js
+```
 
 ## 🔐 Authentication System
 
