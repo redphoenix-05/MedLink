@@ -48,9 +48,31 @@ const Reservation = sequelize.define('Reservation', {
     defaultValue: 'pickup'
   },
   status: {
-    type: DataTypes.ENUM('pending', 'accepted', 'rejected', 'delivered'),
+    type: DataTypes.ENUM('pending', 'confirmed', 'accepted', 'rejected', 'delivered'),
     allowNull: false,
     defaultValue: 'pending'
+  },
+  paymentStatus: {
+    type: DataTypes.ENUM('pending', 'paid', 'failed', 'cancelled', 'refunded'),
+    allowNull: false,
+    defaultValue: 'pending'
+  },
+  transactionId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true
+  },
+  validationId: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  paymentMethod: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  paidAt: {
+    type: DataTypes.DATE,
+    allowNull: true
   },
   createdAt: {
     type: DataTypes.DATE,

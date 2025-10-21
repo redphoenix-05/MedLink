@@ -61,7 +61,7 @@ const createReservation = async (req, res) => {
       include: [
         { model: User, as: 'customer', attributes: ['id', 'name', 'email', 'phone'] },
         { model: Pharmacy, as: 'pharmacy', attributes: ['id', 'name', 'address', 'phone', 'latitude', 'longitude'] },
-        { model: Medicine, as: 'medicine', attributes: ['id', 'name', 'brand', 'type', 'description'] }
+        { model: Medicine, as: 'medicine', attributes: ['id', 'name', 'brand', 'category', 'description'] }
       ]
     });
 
@@ -92,7 +92,7 @@ const getCustomerReservations = async (req, res) => {
       where: { customerId },
       include: [
         { model: Pharmacy, as: 'pharmacy', attributes: ['id', 'name', 'address', 'phone', 'latitude', 'longitude'] },
-        { model: Medicine, as: 'medicine', attributes: ['id', 'name', 'brand', 'type', 'description'] },
+        { model: Medicine, as: 'medicine', attributes: ['id', 'name', 'brand', 'category', 'description'] },
         { model: Delivery, as: 'delivery' }
       ],
       order: [['createdAt', 'DESC']]
@@ -125,7 +125,7 @@ const getPharmacyReservations = async (req, res) => {
       where: { pharmacyId },
       include: [
         { model: User, as: 'customer', attributes: ['id', 'name', 'email', 'phone'] },
-        { model: Medicine, as: 'medicine', attributes: ['id', 'name', 'brand', 'type', 'description'] },
+        { model: Medicine, as: 'medicine', attributes: ['id', 'name', 'brand', 'category', 'description'] },
         { model: Delivery, as: 'delivery' }
       ],
       order: [['createdAt', 'DESC']]
@@ -208,7 +208,7 @@ const updateReservationStatus = async (req, res) => {
       include: [
         { model: User, as: 'customer', attributes: ['id', 'name', 'email', 'phone'] },
         { model: Pharmacy, as: 'pharmacy', attributes: ['id', 'name', 'address', 'phone'] },
-        { model: Medicine, as: 'medicine', attributes: ['id', 'name', 'brand', 'type'] },
+        { model: Medicine, as: 'medicine', attributes: ['id', 'name', 'brand', 'category'] },
         { model: Delivery, as: 'delivery' }
       ]
     });
