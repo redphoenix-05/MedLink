@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Import pages
@@ -11,6 +13,9 @@ import CustomerDashboard from './pages/CustomerDashboard';
 import PharmacyDashboard from './pages/PharmacyDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import UnauthorizedPage from './pages/UnauthorizedPage';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentFailed from './pages/PaymentFailed';
+import PaymentCancelled from './pages/PaymentCancelled';
 
 // Import components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -49,6 +54,18 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="App">
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
@@ -56,6 +73,11 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+            {/* Payment Result Pages */}
+            <Route path="/payment/success" element={<PaymentSuccess />} />
+            <Route path="/payment/failed" element={<PaymentFailed />} />
+            <Route path="/payment/cancelled" element={<PaymentCancelled />} />
 
             {/* Dashboard Route - redirects based on role */}
             <Route 

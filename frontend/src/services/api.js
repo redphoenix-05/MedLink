@@ -74,6 +74,17 @@ export const deliveryAPI = {
 };
 
 // ==========================================
+// PAYMENT API
+// ==========================================
+export const paymentAPI = {
+  // Initiate payment
+  initiatePayment: (reservationId) => API.post('/payments/initiate', { reservationId }),
+  
+  // Get payment status
+  getPaymentStatus: (reservationId) => API.get(`/payments/${reservationId}/status`)
+};
+
+// ==========================================
 // ADMIN API
 // ==========================================
 export const adminAPI = {

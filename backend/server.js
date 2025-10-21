@@ -11,6 +11,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const reservationRoutes = require('./routes/reservationRoutes');
 const deliveryRoutes = require('./routes/deliveryRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 // Initialize models and associations
 require('./models');
@@ -38,6 +39,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/deliveries', deliveryRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
