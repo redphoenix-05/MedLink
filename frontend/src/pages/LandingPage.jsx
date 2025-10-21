@@ -153,37 +153,37 @@ const MedLink = () => {
             </div>
             
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#" className="text-white hover:text-blue-100 transition">Home</a>
-              <a 
-                href="#features" 
-                onClick={(e) => handleSmoothScroll(e, '#features')}
-                className="text-white hover:text-blue-100 transition"
-              >
-                Features
-              </a>
-              <a 
-                href="#pharmacies" 
-                onClick={(e) => handleSmoothScroll(e, '#pharmacies')}
-                className="text-white hover:text-blue-100 transition"
-              >
-                Pharmacies
-              </a>
-              <a 
-                href="#contact" 
-                onClick={(e) => handleSmoothScroll(e, '#contact')}
-                className="text-white hover:text-blue-100 transition"
-              >
-                Contact
-              </a>
-              <div className="flex space-x-4">
-                <Link to="/login" className="px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition">Login</Link>
-                <Link to="/signup" className="px-4 py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-opacity-90 transition">Sign Up</Link>
-              </div>
-            </div>
-          </div>
-          
-          {/* Mobile Navigation */}
+                  <div className="hidden md:flex items-center space-x-8">
+                    <a href="#" className="text-white hover:text-black hover:bg-white transition px-3 py-2 rounded">Home</a>
+                    <a 
+                    href="#features" 
+                    onClick={(e) => handleSmoothScroll(e, '#features')}
+                    className="text-white hover:text-black hover:bg-white transition px-3 py-2 rounded"
+                    >
+                    Features
+                    </a>
+                    <a 
+                    href="#pharmacies" 
+                    onClick={(e) => handleSmoothScroll(e, '#pharmacies')}
+                    className="text-white hover:text-black hover:bg-white transition px-3 py-2 rounded"
+                    >
+                    Pharmacies
+                    </a>
+                    <a 
+                    href="#contact" 
+                    onClick={(e) => handleSmoothScroll(e, '#contact')}
+                    className="text-white hover:text-black hover:bg-white transition px-3 py-2 rounded"
+                    >
+                    Contact
+                    </a>
+                    <div className="flex space-x-4">
+                    <Link to="/login" className="px-4 py-2 rounded-lg hover:text-black hover:bg-white transition">Login</Link>
+                    <Link to="/signup" className="px-4 py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-opacity-90 transition">Sign Up</Link>
+                    </div>
+                  </div>
+                  </div>
+                  
+                  {/* Mobile Navigation */}
           <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden mt-4 pb-4`}>
             <a href="#" className="block py-2 text-white hover:bg-white hover:bg-opacity-20 px-4 rounded transition">Home</a>
             <a 
