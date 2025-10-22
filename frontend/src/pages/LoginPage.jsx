@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
+import { Pill, Eye, EyeOff, ArrowLeft, Lock, Mail } from 'lucide-react';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -56,21 +57,26 @@ const LoginPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex flex-col justify-center py-12 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+      <div className="absolute top-40 right-10 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-700"></div>
+      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center">
-            <div className="w-12 h-12 bg-green-500 rounded-lg mr-3 flex items-center justify-center">
-              <span className="text-white font-bold text-xl">M</span>
+          <Link to="/" className="inline-flex items-center group">
+            <div className="w-14 h-14 bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl mr-3 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+              <Pill className="w-8 h-8 text-white" />
             </div>
-            <span className="text-3xl font-bold text-gray-900">MedLink</span>
+            <span className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">MedLink</span>
           </Link>
-          <p className="mt-4 text-lg text-gray-600">Connect with your healthcare provider</p>
+          <p className="mt-4 text-xl text-gray-700 font-medium">Welcome back! Sign in to continue</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white py-8 px-6 shadow-lg rounded-lg sm:px-10">
+        <div className="bg-white/70 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-2xl sm:px-10 border border-white/30">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Error Alert */}
             {error && (
@@ -83,72 +89,68 @@ const LoginPage = () => {
 
             {/* Email or Username */}
             <div>
-              <input
-                id="email"
-                name="email"
-                type="text"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-4 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-lg"
-                placeholder="Email address or username"
-              />
+              <label className="block text-sm font-semibold text-gray-700 mb-2" htmlFor="email">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  id="email"
+                  name="email"
+                  type="text"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none text-base"
+                  placeholder="Enter your email"
+                />
+              </div>
             </div>
 
             {/* Password */}
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-4 pr-12 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-lg"
-                placeholder="Password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 hover:text-gray-800 focus:outline-none"
-              >
-                {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                )}
-              </button>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2" htmlFor="password">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none text-base"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
 
             {/* Login Button */}
-            <div>
+            <div className="pt-2">
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-lg font-semibold rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                className="w-full flex justify-center items-center py-3.5 px-4 bg-gradient-to-r from-purple-600 to-purple-800 text-white text-lg font-semibold rounded-xl hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {loading ? (
-                  <LoadingSpinner size="small" />
-                ) : (
-                  'Log In'
-                )}
+                {loading ? <LoadingSpinner size="small" /> : 'Sign In'}
               </button>
             </div>
 
             {/* Forgot Password */}
             <div className="text-center">
-              <a
-                href="#"
-                className="text-blue-600 hover:text-blue-500 text-sm"
-              >
-                Forgotten password?
+              <a href="#" className="text-purple-600 hover:text-purple-800 text-sm font-medium transition">
+                Forgot password?
               </a>
             </div>
           </form>
@@ -157,10 +159,10 @@ const LoginPage = () => {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t-2 border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">or</span>
+                <span className="px-4 bg-white/70 text-gray-600 font-medium">Don't have an account?</span>
               </div>
             </div>
           </div>
@@ -169,22 +171,21 @@ const LoginPage = () => {
           <div className="mt-6">
             <Link
               to="/signup"
-              className="w-full flex justify-center py-3 px-4 border border-transparent text-lg font-semibold rounded-md text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-200"
+              className="w-full flex justify-center py-3.5 px-4 border-2 border-purple-600 text-lg font-semibold rounded-xl text-purple-600 hover:bg-purple-50 transition-all"
             >
               Create New Account
             </Link>
           </div>
         </div>
 
-
-
         {/* Footer */}
         <div className="mt-8 text-center">
           <Link
             to="/"
-            className="text-gray-600 hover:text-gray-800 text-sm"
+            className="inline-flex items-center text-gray-700 hover:text-purple-600 font-medium transition"
           >
-            ← Back to Home
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Home
           </Link>
         </div>
       </div>

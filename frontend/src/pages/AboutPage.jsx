@@ -1,55 +1,191 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { Pill, Target, Users, Award, ArrowRight, CheckCircle, Heart, Zap, Shield } from 'lucide-react';
 
 const AboutPage = () => {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-6">About MedLink</h1>
-            <p className="text-lg text-gray-600 leading-relaxed mb-4">
-              MedLink is a modern pharmacy platform focused on quality medicines, wellness products, and
-              professional pharmaceutical care. We aim to make healthcare simple, affordable, and reliable.
-            </p>
-            <p className="text-lg text-gray-600 leading-relaxed mb-4">
-              Our team of qualified pharmacists and experts is committed to providing guidance, ensuring
-              product authenticity, and delivering an exceptional customer experience both online and in-store.
-            </p>
-            <div className="grid sm:grid-cols-2 gap-6 mt-8">
-              <div className="p-6 rounded-lg bg-green-50">
-                <h3 className="text-xl font-semibold text-green-700 mb-2">Our Mission</h3>
-                <p className="text-gray-700">To provide accessible and trusted healthcare services for everyone.</p>
-              </div>
-              <div className="p-6 rounded-lg bg-blue-50">
-                <h3 className="text-xl font-semibold text-blue-700 mb-2">Our Vision</h3>
-                <p className="text-gray-700">A healthier future built on trust, care, and innovation.</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {/* Hero Section */}
+      <section className="relative py-20 overflow-hidden">
+        {/* Animated Background Blobs */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-700"></div>
+        <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="inline-block mb-6">
+              <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-110 transition-transform duration-300">
+                <Pill className="w-10 h-10 text-white" />
               </div>
             </div>
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+              About <span className="bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">MedLink</span>
+            </h1>
+            <p className="text-xl text-gray-600 leading-relaxed">
+              Revolutionizing healthcare accessibility by connecting you with trusted pharmacies and delivering quality medicines right to your doorstep.
+            </p>
           </div>
-          <div>
-            <div className="w-full h-80 rounded-2xl bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center shadow">
-              <div className="text-center text-gray-500">
-                <div className="w-24 h-24 bg-green-600 text-white rounded-full grid place-items-center text-3xl font-bold mx-auto mb-4">M</div>
-                <p className="text-gray-600">MedLink Pharmacies</p>
+        </div>
+      </section>
+
+      {/* Mission & Vision Section */}
+      <section className="py-20 relative">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {/* Mission Card */}
+            <div className="group bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Target className="w-8 h-8 text-white" />
               </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Mission</h2>
+              <p className="text-gray-600 leading-relaxed">
+                To make healthcare accessible to everyone by providing a seamless platform that connects patients with verified pharmacies, ensuring quick delivery of authentic medicines at competitive prices.
+              </p>
             </div>
-            <div className="mt-6 grid sm:grid-cols-3 gap-4 text-center">
-              <div className="p-4 rounded-lg bg-gray-50">
-                <div className="text-2xl font-bold text-gray-900">100%</div>
-                <div className="text-gray-600 text-sm">Quality Assured</div>
+
+            {/* Vision Card */}
+            <div className="group bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Zap className="w-8 h-8 text-white" />
               </div>
-              <div className="p-4 rounded-lg bg-gray-50">
-                <div className="text-2xl font-bold text-gray-900">24/7</div>
-                <div className="text-gray-600 text-sm">Customer Support</div>
-              </div>
-              <div className="p-4 rounded-lg bg-gray-50">
-                <div className="text-2xl font-bold text-gray-900">Fast</div>
-                <div className="text-gray-600 text-sm">Home Delivery</div>
-              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Vision</h2>
+              <p className="text-gray-600 leading-relaxed">
+                To become the most trusted healthcare platform, empowering communities with easy access to medicines and healthcare services while supporting local pharmacies to grow and thrive.
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Core Values Section */}
+      <section className="py-20 bg-gradient-to-r from-purple-600/10 via-pink-600/10 to-blue-600/10">
+        <div className="container mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Our <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Core Values</span>
+            </h2>
+            <p className="text-lg text-gray-600">
+              The principles that guide everything we do
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Trust */}
+            <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="w-14 h-14 bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl flex items-center justify-center mb-4">
+                <Shield className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Trust</h3>
+              <p className="text-gray-600">
+                We verify every pharmacy and ensure all medicines are authentic and properly licensed.
+              </p>
+            </div>
+
+            {/* Care */}
+            <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="w-14 h-14 bg-gradient-to-r from-pink-600 to-pink-800 rounded-xl flex items-center justify-center mb-4">
+                <Heart className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Care</h3>
+              <p className="text-gray-600">
+                Your health is our priority. We're committed to providing exceptional service and support.
+              </p>
+            </div>
+
+            {/* Excellence */}
+            <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="w-14 h-14 bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl flex items-center justify-center mb-4">
+                <Award className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Excellence</h3>
+              <p className="text-gray-600">
+                We continuously improve our platform to deliver the best healthcare experience.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What We Offer Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              What We <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Offer</span>
+            </h2>
+            <p className="text-lg text-gray-600">
+              Comprehensive healthcare solutions at your fingertips
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {/* Offering Cards */}
+            {[
+              {
+                icon: Users,
+                title: "Verified Pharmacies",
+                desc: "Access to 500+ licensed and verified pharmacies across the country"
+              },
+              {
+                icon: Pill,
+                title: "50,000+ Medicines",
+                desc: "Extensive catalog of authentic medicines from trusted manufacturers"
+              },
+              {
+                icon: CheckCircle,
+                title: "Quality Assurance",
+                desc: "Every medicine is quality checked and properly stored"
+              },
+              {
+                icon: Target,
+                title: "Quick Delivery",
+                desc: "Fast and reliable delivery to your doorstep"
+              },
+              {
+                icon: Shield,
+                title: "Secure Payments",
+                desc: "Multiple secure payment options with SSL encryption"
+              },
+              {
+                icon: Heart,
+                title: "24/7 Support",
+                desc: "Round-the-clock customer support for all your queries"
+              }
+            ].map((item, index) => (
+              <div key={index} className="bg-white/70 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center mb-4">
+                  <item.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-gray-600 text-sm">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-10"></div>
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Ready to Experience Better Healthcare?
+            </h2>
+            <p className="text-xl text-gray-600 mb-8">
+              Join thousands of satisfied customers who trust MedLink for their healthcare needs
+            </p>
+            <Link
+              to="/signup"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white px-8 py-4 rounded-full font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300"
+            >
+              Get Started Now
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

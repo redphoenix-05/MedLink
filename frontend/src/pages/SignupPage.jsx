@@ -3,21 +3,19 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
+import { Pill, Eye, EyeOff, ArrowLeft, Mail, Lock, User, Building2, MapPin, Phone, FileText } from 'lucide-react';
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const { signup, loading, error, clearError, isAuthenticated } = useAuth();
   
   const [formData, setFormData] = useState({
-    // Common fields
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'customer', // Default to customer
-    // Customer fields
+    role: 'customer',
     firstName: '',
     lastName: '',
-    // Pharmacy fields
     pharmacyName: '',
     ownerName: '',
     address: '',
@@ -29,14 +27,9 @@ const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-
-
-  // Only redirect if authenticated and not loading, but don't redirect during signup process
   useEffect(() => {
     if (isAuthenticated && !loading) {
-      // Don't redirect if we're in the middle of a signup process
-      // The handleSubmit will handle navigation after successful signup
-      navigate('/dashboard'); // Let DashboardRouter handle role-based routing
+      navigate('/dashboard');
     }
   }, [isAuthenticated, navigate, loading]);
 
@@ -96,9 +89,8 @@ const SignupPage = () => {
         const { firstName, lastName, pharmacyName, ownerName, address, licenseNumber, phone, ...pharmacyData } = signupData;
         dataToSend = {
           ...pharmacyData,
-          name: ownerName.trim(), // Owner name becomes the user name
+          name: ownerName.trim(),
           role: 'pharmacy',
-          // Store pharmacy details for pharmacy registration
           pharmacyName: pharmacyName.trim(),
           address: address.trim(),
           licenseNumber: licenseNumber.trim(),
@@ -108,7 +100,6 @@ const SignupPage = () => {
       
       const response = await signup(dataToSend);
       
-      // Navigate based on role after successful signup
       if (response && response.success) {
         if (formData.role === 'pharmacy') {
           navigate('/pharmacy/dashboard');
@@ -123,26 +114,28 @@ const SignupPage = () => {
 
   const currentError = validationError || error;
 
-
-
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex flex-col justify-center py-12 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+      <div className="absolute top-40 right-10 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-700"></div>
+      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center">
-            <div className="w-12 h-12 bg-green-500 rounded-lg mr-3 flex items-center justify-center">
-              <span className="text-white font-bold text-xl">M</span>
+          <Link to="/" className="inline-flex items-center group">
+            <div className="w-14 h-14 bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl mr-3 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+              <Pill className="w-8 h-8 text-white" />
             </div>
-            <span className="text-3xl font-bold text-gray-900">MedLink</span>
+            <span className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">MedLink</span>
           </Link>
-          <h2 className="mt-4 text-2xl font-bold text-gray-900">Sign Up</h2>
-          <p className="mt-2 text-gray-600">It's quick and easy.</p>
+          <p className="mt-4 text-xl text-gray-700 font-medium">Create your account</p>
         </div>
 
         {/* Signup Form */}
-        <div className="bg-white py-8 px-6 shadow-lg rounded-lg sm:px-10">
-          <form className="space-y-4" onSubmit={handleSubmit}>
+        <div className="bg-white/70 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-2xl sm:px-10 border border-white/30">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Error Alert */}
             {currentError && (
               <Alert 
@@ -155,207 +148,199 @@ const SignupPage = () => {
               />
             )}
 
-            {/* Role Selection - Moved to Top */}
+            {/* Role Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Account Type
               </label>
               <select
-                id="role"
                 name="role"
-                required
                 value={formData.role}
                 onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none"
               >
-                <option value="customer">Customer</option>
-                <option value="pharmacy">Pharmacy</option>
+                <option value="customer">Customer Account</option>
+                <option value="pharmacy">Pharmacy Account</option>
               </select>
-              <div className="text-xs text-gray-500 mt-1">
-                Choose your account type
-              </div>
             </div>
 
             {/* Dynamic Fields Based on Role */}
             {formData.role === 'customer' ? (
-              // Customer Fields
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    autoComplete="given-name"
-                    required
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="First name"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      name="firstName"
+                      type="text"
+                      required
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none"
+                      placeholder="John"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    autoComplete="family-name"
-                    required
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Last name"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      name="lastName"
+                      type="text"
+                      required
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none"
+                      placeholder="Doe"
+                    />
+                  </div>
                 </div>
               </div>
             ) : (
-              // Pharmacy Fields
               <>
                 <div>
-                  <input
-                    id="pharmacyName"
-                    name="pharmacyName"
-                    type="text"
-                    required
-                    value={formData.pharmacyName}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Pharmacy Name"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Pharmacy Name</label>
+                  <div className="relative">
+                    <Building2 className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      name="pharmacyName"
+                      type="text"
+                      required
+                      value={formData.pharmacyName}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none"
+                      placeholder="HealthCare Pharmacy"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <input
-                    id="ownerName"
-                    name="ownerName"
-                    type="text"
-                    required
-                    value={formData.ownerName}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Owner Name"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Owner Name</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      name="ownerName"
+                      type="text"
+                      required
+                      value={formData.ownerName}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none"
+                      placeholder="Owner's full name"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <textarea
-                    id="address"
-                    name="address"
-                    rows="3"
-                    required
-                    value={formData.address}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                    placeholder="Pharmacy Address"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Address</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
+                    <textarea
+                      name="address"
+                      rows="3"
+                      required
+                      value={formData.address}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none resize-none"
+                      placeholder="Full pharmacy address"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    required
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Phone Number"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">License Number</label>
+                  <div className="relative">
+                    <FileText className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      name="licenseNumber"
+                      type="text"
+                      required
+                      value={formData.licenseNumber}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none"
+                      placeholder="License #"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <input
-                    id="licenseNumber"
-                    name="licenseNumber"
-                    type="text"
-                    required
-                    value={formData.licenseNumber}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="License Number"
-                  />
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      name="phone"
+                      type="tel"
+                      required
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none"
+                      placeholder="+880 1234567890"
+                    />
+                  </div>
                 </div>
               </>
             )}
 
             {/* Email */}
             <div>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Email address"
-              />
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none"
+                  placeholder="your@email.com"
+                />
+              </div>
             </div>
-            
+
             {/* Password */}
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="new-password"
-                required
-                minLength="6"
-                value={formData.password}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-3 pr-12 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="New password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 hover:text-gray-800 focus:outline-none"
-              >
-                {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                )}
-              </button>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none"
+                  placeholder="Create a password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
 
             {/* Confirm Password */}
-            <div className="relative">
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                autoComplete="new-password"
-                required
-                minLength="6"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-3 pr-12 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Confirm password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 hover:text-gray-800 focus:outline-none"
-              >
-                {showConfirmPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                )}
-              </button>
-            </div>
-
-            {/* Terms and Privacy */}
-            <div className="text-xs text-gray-500 leading-relaxed">
-              By clicking Sign Up, you agree to our Terms, Data Policy and Cookie Policy. 
-              You may receive SMS notifications from us and can opt out at any time.
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none"
+                  placeholder="Confirm your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
 
             {/* Sign Up Button */}
@@ -363,37 +348,44 @@ const SignupPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-lg font-semibold rounded-md text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                className="w-full flex justify-center items-center py-3.5 px-4 bg-gradient-to-r from-purple-600 to-purple-800 text-white text-lg font-semibold rounded-xl hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {loading ? (
-                  <LoadingSpinner size="small" />
-                ) : (
-                  'Sign Up'
-                )}
+                {loading ? <LoadingSpinner size="small" /> : 'Create Account'}
               </button>
             </div>
           </form>
+
+          {/* Divider */}
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t-2 border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white/70 text-gray-600 font-medium">Already have an account?</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Login Link */}
+          <div className="mt-6">
+            <Link
+              to="/login"
+              className="w-full flex justify-center py-3.5 px-4 border-2 border-purple-600 text-lg font-semibold rounded-xl text-purple-600 hover:bg-purple-50 transition-all"
+            >
+              Sign In
+            </Link>
+          </div>
         </div>
-
-        {/* Login Link */}
-        <div className="mt-6 text-center">
-          <Link
-            to="/login"
-            className="text-blue-600 hover:text-blue-500 font-medium"
-          >
-            Already have an account?
-          </Link>
-        </div>
-
-
 
         {/* Footer */}
         <div className="mt-8 text-center">
           <Link
             to="/"
-            className="text-gray-600 hover:text-gray-800 text-sm"
+            className="inline-flex items-center text-gray-700 hover:text-purple-600 font-medium transition"
           >
-            ← Back to Home
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Home
           </Link>
         </div>
       </div>
