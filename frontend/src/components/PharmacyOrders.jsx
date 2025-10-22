@@ -15,20 +15,27 @@ const PharmacyOrders = ({ pharmacyId }) => {
       setLoading(true);
       const response = await api.get('/pharmacies/orders');
       
-      // Backend returns { orders, stats } where stats has: total, pending, confirmed, delivered, completed, totalRevenue
+      // Backend returns { orders, stats } with detailed financial breakdown
       const backendStats = response.data.data.stats || {};
       const ordersData = response.data.data.orders || [];
       
-      // Transform to match frontend expectations
+      // Use backend stats directly (already formatted)
       setStats({
-        totalEarnings: (backendStats.totalRevenue || 0).toFixed(2),
-        totalOrders: backendStats.completed || 0,
-        pickupOrders: ordersData.filter(o => o.deliveryType === 'pickup' && o.status === 'completed').length,
-        deliveryOrders: ordersData.filter(o => o.deliveryType === 'delivery' && o.status === 'completed').length,
+        // Order counts
+        total: backendStats.total || 0,
         pending: backendStats.pending || 0,
         confirmed: backendStats.confirmed || 0,
         delivered: backendStats.delivered || 0,
-        total: backendStats.total || 0
+        totalOrders: backendStats.completed || 0,
+        
+        // Financial breakdown
+        totalMedicineSales: backendStats.totalMedicineSales || '0.00',
+        totalDeliveryEarnings: backendStats.totalDeliveryEarnings || '0.00',
+        grossRevenue: backendStats.grossRevenue || '0.00',
+        platformFeeRate: backendStats.platformFeeRate || '3',
+        totalPlatformFee: backendStats.totalPlatformFee || '0.00',
+        netRevenue: backendStats.netRevenue || '0.00',
+        totalEarnings: backendStats.grossRevenue || '0.00'
       });
       
       setOrders(ordersData);
@@ -103,14 +110,14 @@ const PharmacyOrders = ({ pharmacyId }) => {
       {error && <Alert type="error" message={error} />}
       {success && <Alert type="success" message={success} />}
 
-      {/* Statistics Cards */}
+      {/* Financial Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-green-100 text-sm font-medium">Total Earnings</p>
-                <p className="text-3xl font-bold mt-2">৳{stats?.totalEarnings || '0.00'}</p>
-                <p className="text-green-100 text-xs mt-1">Medicine + Delivery</p>
+                <p className="text-green-100 text-sm font-medium">Net Revenue</p>
+                <p className="text-3xl font-bold mt-2">৳{stats?.netRevenue || '0.00'}</p>
+                <p className="text-green-100 text-xs mt-1">After platform fee</p>
               </div>
               <svg className="w-12 h-12 text-green-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -157,6 +164,42 @@ const PharmacyOrders = ({ pharmacyId }) => {
             </div>
           </div>
         </div>
+
+      {/* Financial Breakdown */}
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">💰 Financial Breakdown</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+              <span className="text-gray-700 font-medium">Medicine Sales</span>
+              <span className="text-lg font-bold text-blue-600">৳{stats?.totalMedicineSales || '0.00'}</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+              <span className="text-gray-700 font-medium">Delivery Charges</span>
+              <span className="text-lg font-bold text-orange-600">৳{stats?.totalDeliveryEarnings || '0.00'}</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-gray-100 rounded-lg border-t-2 border-gray-300">
+              <span className="text-gray-900 font-semibold">Gross Revenue</span>
+              <span className="text-xl font-bold text-gray-900">৳{stats?.grossRevenue || '0.00'}</span>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+              <span className="text-gray-700 font-medium">Platform Fee ({stats?.platformFeeRate || 3}%)</span>
+              <span className="text-lg font-bold text-red-600">- ৳{stats?.totalPlatformFee || '0.00'}</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg border-2 border-green-300">
+              <span className="text-gray-900 font-semibold text-lg">💵 Net Revenue</span>
+              <span className="text-2xl font-bold text-green-600">৳{stats?.netRevenue || '0.00'}</span>
+            </div>
+            <div className="text-sm text-gray-600 p-3 bg-blue-50 rounded-lg">
+              <p className="font-medium mb-1">ℹ️ About Platform Fee:</p>
+              <p>A {stats?.platformFeeRate || 3}% fee is charged on your total gross revenue (medicine sales + delivery charges) to maintain and improve the platform services.</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Order Management Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">

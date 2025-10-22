@@ -325,16 +325,39 @@ const getPharmacyOrders = async (req, res) => {
       order: [['orderDate', 'DESC']]
     });
 
-    // Calculate stats
+    // Calculate detailed stats for completed orders
+    const completedOrders = orders.filter(o => o.status === 'completed');
+    
+    // Total medicine sales (excluding delivery and platform fee)
+    const totalMedicineSales = completedOrders.reduce((sum, o) => sum + parseFloat(o.totalPrice), 0);
+    
+    // Total delivery charges earned
+    const totalDeliveryEarnings = completedOrders.reduce((sum, o) => sum + parseFloat(o.deliveryCharge || 0), 0);
+    
+    // Gross revenue (medicine + delivery)
+    const grossRevenue = totalMedicineSales + totalDeliveryEarnings;
+    
+    // Platform fee (3% of gross revenue)
+    const PLATFORM_FEE_RATE = 0.03;
+    const totalPlatformFee = grossRevenue * PLATFORM_FEE_RATE;
+    
+    // Net revenue (after platform fee)
+    const netRevenue = grossRevenue - totalPlatformFee;
+    
     const stats = {
       total: orders.length,
       pending: orders.filter(o => o.status === 'pending').length,
       confirmed: orders.filter(o => o.status === 'confirmed').length,
       delivered: orders.filter(o => o.status === 'delivered').length,
-      completed: orders.filter(o => o.status === 'completed').length,
-      totalRevenue: orders
-        .filter(o => o.status === 'completed')
-        .reduce((sum, o) => sum + parseFloat(o.grandTotal), 0)
+      completed: completedOrders.length,
+      
+      // Financial breakdown
+      totalMedicineSales: totalMedicineSales.toFixed(2),
+      totalDeliveryEarnings: totalDeliveryEarnings.toFixed(2),
+      grossRevenue: grossRevenue.toFixed(2),
+      platformFeeRate: (PLATFORM_FEE_RATE * 100).toFixed(0), // 3%
+      totalPlatformFee: totalPlatformFee.toFixed(2),
+      netRevenue: netRevenue.toFixed(2)
     };
 
     res.json({
