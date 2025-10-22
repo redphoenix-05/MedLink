@@ -86,7 +86,8 @@ const AdminDashboard = () => {
       setLoading(true);
       const response = await adminAPI.getPendingPharmacies();
       if (response.data.success) {
-        setPendingPharmacies(response.data.data.pharmacies);
+        // Backend returns data directly, not nested in .pharmacies
+        setPendingPharmacies(response.data.data || []);
       }
     } catch (err) {
       setError('Failed to load pending pharmacies');
@@ -102,7 +103,8 @@ const AdminDashboard = () => {
       const response = await adminAPI.getApprovedPharmacies();
       console.log('✅ Approved pharmacies response:', response.data);
       if (response.data.success) {
-        setApprovedPharmacies(response.data.data.pharmacies || []);
+        // Backend returns data directly, not nested in .pharmacies
+        setApprovedPharmacies(response.data.data || []);
       }
     } catch (err) {
       console.error('❌ Failed to load approved pharmacies:', err);
@@ -117,7 +119,8 @@ const AdminDashboard = () => {
       setLoading(true);
       const response = await adminAPI.getAllUsers();
       if (response.data.success) {
-        setUsers(response.data.data.users);
+        // Backend returns data directly, not nested in .users
+        setUsers(response.data.data || []);
       }
     } catch (err) {
       setError('Failed to load users');
@@ -131,7 +134,8 @@ const AdminDashboard = () => {
       setLoading(true);
       const response = await adminAPI.getAllReservations();
       if (response.data.success) {
-        setReservations(response.data.data.reservations);
+        // Backend returns data directly, not nested in .reservations
+        setReservations(response.data.data || []);
       }
     } catch (err) {
       setError('Failed to load reservations');
@@ -145,7 +149,8 @@ const AdminDashboard = () => {
       setLoading(true);
       const response = await adminAPI.getAllDeliveries();
       if (response.data.success) {
-        setDeliveries(response.data.data.deliveries);
+        // Backend returns data directly, not nested in .deliveries
+        setDeliveries(response.data.data || []);
       }
     } catch (err) {
       setError('Failed to load deliveries');

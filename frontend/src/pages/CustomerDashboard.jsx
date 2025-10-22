@@ -7,7 +7,7 @@ import Alert from '../components/Alert';
 import PharmacyMap from '../components/PharmacyMap';
 import ReservationForm from '../components/ReservationForm';
 import MyReservationsList from '../components/MyReservationsList';
-import API from '../services/api';
+import API, { cartAPI } from '../services/api';
 
 const CustomerDashboard = () => {
   const { user } = useAuth();
@@ -23,6 +23,8 @@ const CustomerDashboard = () => {
   const [selectedMedicine, setSelectedMedicine] = useState(null);
   const [reservationRefresh, setReservationRefresh] = useState(0);
   const [cartItemCount, setCartItemCount] = useState(0);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   // Fetch all pharmacies for map view
   useEffect(() => {
@@ -30,17 +32,38 @@ const CustomerDashboard = () => {
     fetchCartCount();
   }, []);
 
+  // Fetch orders when orders tab is active
+  useEffect(() => {
+    if (activeTab === 'orders') {
+      fetchOrders();
+    }
+  }, [activeTab]);
+
   const fetchCartCount = async () => {
     try {
       const response = await API.get('/cart');
       if (response.data.success) {
-        const totalItems = response.data.data.cart.reduce((sum, pharmacy) => 
-          sum + pharmacy.items.reduce((s, item) => s + item.quantity, 0), 0
-        );
+        const cartItems = response.data.data.cartItems || [];
+        const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
         setCartItemCount(totalItems);
       }
     } catch (err) {
       console.error('Error fetching cart count:', err);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      setOrdersLoading(true);
+      const response = await cartAPI.getOrders();
+      if (response.data.success) {
+        setOrders(response.data.data.orders || []);
+      }
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+      setError('Failed to load orders');
+    } finally {
+      setOrdersLoading(false);
     }
   };
 
@@ -177,6 +200,16 @@ const CustomerDashboard = () => {
               }`}
             >
               📋 My Reservations
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'orders'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              🛍️ My Orders
             </button>
           </nav>
         </div>
@@ -401,6 +434,107 @@ const CustomerDashboard = () => {
           <div className="space-y-6">
             <div className="bg-white shadow rounded-lg p-6">
               <MyReservationsList key={reservationRefresh} />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'orders' && (
+          <div className="space-y-6">
+            <div className="bg-white shadow rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">My Orders</h2>
+              
+              {ordersLoading ? (
+                <LoadingSpinner />
+              ) : orders.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No orders yet</p>
+                  <button
+                    onClick={() => navigate('/customer/browse')}
+                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    Browse Pharmacies
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Order Date
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Medicine
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Quantity
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Total
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Delivery
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Address
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {orders.map((order) => (
+                        <tr key={order.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {new Date(order.orderDate).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{order.medicineName}</div>
+                            {order.genericName && (
+                              <div className="text-sm text-gray-500">{order.genericName}</div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {order.quantity}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600">
+                            ৳{parseFloat(order.grandTotal).toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              order.deliveryType === 'delivery'
+                                ? 'bg-orange-100 text-orange-800'
+                                : 'bg-purple-100 text-purple-800'
+                            }`}>
+                              {order.deliveryType === 'delivery' ? '🚚 Delivery' : '🏪 Pickup'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">
+                            {order.deliveryType === 'delivery' ? (
+                              <div className="truncate" title={order.deliveryAddress}>
+                                {order.deliveryAddress || 'N/A'}
+                              </div>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
+                              order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {order.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}

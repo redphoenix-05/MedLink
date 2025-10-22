@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
@@ -12,11 +12,24 @@ const CartPage = () => {
   const [success, setSuccess] = useState('');
   const [processingCheckout, setProcessingCheckout] = useState(false);
   const [deliveryType, setDeliveryType] = useState('pickup');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     fetchCart();
-  }, []);
+    
+    // Check for error or message from payment redirect
+    const errorMsg = searchParams.get('error');
+    const successMsg = searchParams.get('message');
+    
+    if (errorMsg) {
+      setError(decodeURIComponent(errorMsg));
+    }
+    if (successMsg) {
+      setSuccess(decodeURIComponent(successMsg));
+    }
+  }, [searchParams]);
 
   const fetchCart = async () => {
     try {
@@ -75,18 +88,29 @@ const CartPage = () => {
       setProcessingCheckout(true);
       setError('');
       
-      const response = await api.post('/cart/checkout', { deliveryType });
-      
-      setSuccess(`Successfully created ${response.data.data.orders.length} order(s)!`);
-      
-      // Wait 2 seconds then refresh cart
-      setTimeout(() => {
-        setSuccess('Your order has been placed successfully!');
-        fetchCart();
+      // Validate delivery address if delivery is selected
+      if (deliveryType === 'delivery' && !deliveryAddress.trim()) {
+        setError('Please enter a delivery address');
         setProcessingCheckout(false);
-      }, 2000);
+        return;
+      }
+      
+      // Initialize payment with SSLCommerz
+      const response = await api.post('/cart/payment-init', { 
+        deliveryType,
+        deliveryAddress: deliveryType === 'delivery' ? deliveryAddress : null
+      });
+      
+      if (response.data.success && response.data.data.gatewayPageURL) {
+        // Redirect to SSLCommerz payment gateway
+        window.location.href = response.data.data.gatewayPageURL;
+      } else {
+        setError('Failed to initialize payment gateway');
+        setProcessingCheckout(false);
+      }
+      
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to checkout');
+      setError(err.response?.data?.message || 'Failed to initialize payment');
       setProcessingCheckout(false);
     }
   };
@@ -104,10 +128,7 @@ const CartPage = () => {
   const medicineTotal = cart.reduce((sum, item) => 
     sum + (parseFloat(item.price) * item.quantity), 0
   );
-  const deliveryCharge = deliveryType === 'delivery' ? 60.00 : 0.00;
-  const platformFee = medicineTotal * 0.003; // 0.3%
-  const grandTotal = medicineTotal + deliveryCharge + platformFee;
-
+  
   // Group cart items by pharmacy
   const groupedCart = cart.reduce((acc, item) => {
     const pharmacyId = item.pharmacyId;
@@ -126,6 +147,13 @@ const CartPage = () => {
   }, {});
 
   const pharmacyGroups = Object.values(groupedCart);
+  const numberOfPharmacies = pharmacyGroups.length;
+  
+  // Delivery charge is ৳60 per pharmacy
+  const deliveryChargePerPharmacy = 60.00;
+  const deliveryCharge = deliveryType === 'delivery' ? deliveryChargePerPharmacy * numberOfPharmacies : 0.00;
+  const platformFee = medicineTotal * 0.003; // 0.3%
+  const grandTotal = medicineTotal + deliveryCharge + platformFee;
 
   return (
     <Layout>
@@ -205,7 +233,14 @@ const CartPage = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-semibold text-gray-900">🚚 Delivery</p>
-                      <p className="text-sm text-gray-600">+৳60 - Delivered to you</p>
+                      <p className="text-sm text-gray-600">
+                        +৳{(deliveryChargePerPharmacy * numberOfPharmacies).toFixed(2)} - Delivered to you
+                        {numberOfPharmacies > 1 && (
+                          <span className="block text-xs text-gray-500">
+                            (৳{deliveryChargePerPharmacy.toFixed(2)} × {numberOfPharmacies} pharmacies)
+                          </span>
+                        )}
+                      </p>
                     </div>
                     {deliveryType === 'delivery' && (
                       <span className="text-indigo-600">✓</span>
@@ -213,6 +248,27 @@ const CartPage = () => {
                   </div>
                 </button>
               </div>
+
+              {/* Delivery Address Input */}
+              {deliveryType === 'delivery' && (
+                <div className="mt-4">
+                  <label htmlFor="deliveryAddress" className="block text-sm font-medium text-gray-700 mb-2">
+                    Delivery Address *
+                  </label>
+                  <textarea
+                    id="deliveryAddress"
+                    rows="3"
+                    value={deliveryAddress}
+                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                    placeholder="Enter your full delivery address including area, street, house number, and any landmarks..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    required
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Please provide a complete address for accurate delivery
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Cart Summary with Fees */}
@@ -224,12 +280,23 @@ const CartPage = () => {
                   <span className="font-medium">{totalItems}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
+                  <span>Number of Pharmacies:</span>
+                  <span className="font-medium">{numberOfPharmacies}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
                   <span>Medicine Total:</span>
                   <span className="font-medium">৳{medicineTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Delivery Charge:</span>
-                  <span className="font-medium">৳{deliveryCharge.toFixed(2)}</span>
+                  <span className="font-medium">
+                    ৳{deliveryCharge.toFixed(2)}
+                    {deliveryType === 'delivery' && numberOfPharmacies > 1 && (
+                      <span className="text-xs text-gray-500 ml-1">
+                        (৳{deliveryChargePerPharmacy.toFixed(2)} × {numberOfPharmacies})
+                      </span>
+                    )}
+                  </span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Platform Fee (0.3%):</span>

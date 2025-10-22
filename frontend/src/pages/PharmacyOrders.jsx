@@ -18,7 +18,7 @@ const PharmacyOrders = () => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/pharmacy/stats');
+      const response = await api.get('/pharmacies/orders');
       setStats(response.data.data.stats);
       setOrders(response.data.data.orders);
       setError('');
@@ -31,7 +31,7 @@ const PharmacyOrders = () => {
 
   const updateOrderStatus = async (orderId, status, deliveryDate) => {
     try {
-      await api.put(`/pharmacy/orders/${orderId}`, { 
+      await api.put(`/pharmacies/orders/${orderId}`, { 
         status, 
         deliveryDate 
       });
@@ -174,6 +174,9 @@ const PharmacyOrders = () => {
                       Type
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Delivery Address
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -210,6 +213,15 @@ const PharmacyOrders = () => {
                         }`}>
                           {order.deliveryType === 'delivery' ? '🚚 Delivery' : '🏪 Pickup'}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">
+                        {order.deliveryType === 'delivery' ? (
+                          <div className="truncate" title={order.deliveryAddress}>
+                            {order.deliveryAddress || 'N/A'}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
