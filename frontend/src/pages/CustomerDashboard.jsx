@@ -146,7 +146,7 @@ const CustomerDashboard = () => {
               onClick={() => setActiveTab('search')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'search'
-                  ? 'border-blue-500 text-blue-600'
+                  ? 'border-green-600 text-green-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
@@ -156,7 +156,7 @@ const CustomerDashboard = () => {
               onClick={() => setActiveTab('map')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'map'
-                  ? 'border-blue-500 text-blue-600'
+                  ? 'border-green-600 text-green-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
@@ -166,7 +166,7 @@ const CustomerDashboard = () => {
               onClick={() => setActiveTab('orders')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'orders'
-                  ? 'border-blue-500 text-blue-600'
+                  ? 'border-green-600 text-green-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
@@ -192,13 +192,13 @@ const CustomerDashboard = () => {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Enter medicine name or brand (e.g., Paracetamol, Napa)"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
                   >
                     {loading ? <LoadingSpinner size="small" /> : 'Search'}
                   </button>
@@ -248,7 +248,7 @@ const CustomerDashboard = () => {
                             </p>
                             {result.medicine && (
                               <div className="mt-2 text-sm">
-                                <span className="text-blue-600 font-medium">
+                                <span className="text-green-600 font-medium">
                                   {result.medicine}
                                 </span>
                                 {result.genericName && (
@@ -280,7 +280,7 @@ const CustomerDashboard = () => {
                               e.stopPropagation();
                               window.open(`https://www.google.com/maps/dir/?api=1&destination=${result.latitude},${result.longitude}`, '_blank');
                             }}
-                            className="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                            className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-600"
                           >
                             Get Directions
                           </button>
@@ -348,7 +348,7 @@ const CustomerDashboard = () => {
                     <div className="mt-4">
                       <button
                         onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selectedPharmacy.latitude},${selectedPharmacy.longitude}`, '_blank')}
-                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2"
+                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-600 mr-2"
                       >
                         Get Directions
                       </button>
@@ -393,7 +393,7 @@ const CustomerDashboard = () => {
                   <p className="text-gray-500">No orders yet</p>
                   <button
                     onClick={() => navigate('/customer/browse')}
-                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700"
                   >
                     Browse Pharmacies
                   </button>
@@ -441,7 +441,7 @@ const CustomerDashboard = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {order.quantity}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
                             ৳{parseFloat(order.grandTotal).toFixed(2)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">

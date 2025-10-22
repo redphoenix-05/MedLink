@@ -4,23 +4,19 @@ import { Pill, Target, Users, Award, ArrowRight, CheckCircle, Heart, Zap, Shield
 
 const AboutPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
-        {/* Animated Background Blobs */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-        <div className="absolute top-40 right-10 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-700"></div>
-        <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
 
-        <div className="container mx-auto px-6 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-block mb-6">
-              <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-110 transition-transform duration-300">
+              <div className="w-20 h-20 bg-gradient-to-r from-green-600 to-green-700 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-110 transition-transform duration-300">
                 <Pill className="w-10 h-10 text-white" />
               </div>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              About <span className="bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">MedLink</span>
+              About <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">MedLink</span>
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed">
               Revolutionizing healthcare accessibility by connecting you with trusted pharmacies and delivering quality medicines right to your doorstep.
@@ -31,11 +27,11 @@ const AboutPage = () => {
 
       {/* Mission & Vision Section */}
       <section className="py-20 relative">
-        <div className="container mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {/* Mission Card */}
             <div className="group bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-600 to-green-700 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Target className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Mission</h2>
@@ -46,7 +42,7 @@ const AboutPage = () => {
 
             {/* Vision Card */}
             <div className="group bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Zap className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Vision</h2>
@@ -59,11 +55,11 @@ const AboutPage = () => {
       </section>
 
       {/* Core Values Section */}
-      <section className="py-20 bg-gradient-to-r from-purple-600/10 via-pink-600/10 to-blue-600/10">
-        <div className="container mx-auto px-6">
+      <section className="py-20 bg-gradient-to-r from-green-600/10 via-emerald-600/10 to-green-700/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Our <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Core Values</span>
+              Our <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">Core Values</span>
             </h2>
             <p className="text-lg text-gray-600">
               The principles that guide everything we do
@@ -73,7 +69,7 @@ const AboutPage = () => {
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Trust */}
             <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-              <div className="w-14 h-14 bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl flex items-center justify-center mb-4">
+              <div className="w-14 h-14 bg-gradient-to-r from-green-600 to-green-700 rounded-xl flex items-center justify-center mb-4">
                 <Shield className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Trust</h3>
@@ -84,7 +80,7 @@ const AboutPage = () => {
 
             {/* Care */}
             <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-              <div className="w-14 h-14 bg-gradient-to-r from-pink-600 to-pink-800 rounded-xl flex items-center justify-center mb-4">
+              <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-4">
                 <Heart className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Care</h3>
@@ -95,7 +91,7 @@ const AboutPage = () => {
 
             {/* Excellence */}
             <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-              <div className="w-14 h-14 bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl flex items-center justify-center mb-4">
+              <div className="w-14 h-14 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center mb-4">
                 <Award className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Excellence</h3>
@@ -109,10 +105,10 @@ const AboutPage = () => {
 
       {/* What We Offer Section */}
       <section className="py-20">
-        <div className="container mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              What We <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Offer</span>
+              What We <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">Offer</span>
             </h2>
             <p className="text-lg text-gray-600">
               Comprehensive healthcare solutions at your fingertips
@@ -154,7 +150,7 @@ const AboutPage = () => {
               }
             ].map((item, index) => (
               <div key={index} className="bg-white/70 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-green-700 rounded-xl flex items-center justify-center mb-4">
                   <item.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
@@ -166,19 +162,18 @@ const AboutPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-10"></div>
-        <div className="container mx-auto px-6 relative z-10">
+      <section className="py-20 relative overflow-hidden bg-gradient-to-br from-green-800 via-green-900 to-emerald-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
               Ready to Experience Better Healthcare?
             </h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-white mb-8 opacity-90">
               Join thousands of satisfied customers who trust MedLink for their healthcare needs
             </p>
             <Link
               to="/signup"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white px-8 py-4 rounded-full font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300"
+              className="inline-flex items-center gap-2 bg-white text-green-700 px-8 py-4 rounded-full font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300"
             >
               Get Started Now
               <ArrowRight className="w-5 h-5" />
@@ -191,3 +186,4 @@ const AboutPage = () => {
 };
 
 export default AboutPage;
+

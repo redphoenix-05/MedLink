@@ -42,7 +42,7 @@ const Layout = ({ children }) => {
             <div className="flex items-center">
               <button
                 onClick={() => navigate(user?.role === 'customer' ? '/customer/dashboard' : user?.role === 'pharmacy' ? '/pharmacy/dashboard' : user?.role === 'admin' ? '/admin/dashboard' : '/')}
-                className="text-xl font-bold text-indigo-600 hover:text-indigo-700"
+                className="text-xl font-bold text-green-600 hover:text-green-700"
               >
                 MedLink
               </button>
@@ -55,7 +55,7 @@ const Layout = ({ children }) => {
                   onClick={() => navigate('/customer/dashboard')}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive('/customer/dashboard')
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -65,7 +65,7 @@ const Layout = ({ children }) => {
                   onClick={() => navigate('/customer/browse')}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive('/customer/browse')
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -75,7 +75,7 @@ const Layout = ({ children }) => {
                   onClick={() => navigate('/customer/cart')}
                   className={`relative px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive('/customer/cart')
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -94,7 +94,7 @@ const Layout = ({ children }) => {
                 <span className="hidden sm:inline text-sm text-gray-600">
                   {user.name}
                 </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 capitalize">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 capitalize">
                   {user.role}
                 </span>
                 
@@ -104,7 +104,7 @@ const Layout = ({ children }) => {
                     onClick={() => navigate('/customer/profile')}
                     className={`p-2 rounded-md transition-colors ${
                       isActive('/customer/profile')
-                        ? 'bg-indigo-600 text-white'
+                        ? 'bg-green-600 text-white'
                         : 'text-gray-500 hover:bg-gray-100'
                     }`}
                     title="Profile"
@@ -133,7 +133,7 @@ const Layout = ({ children }) => {
                   onClick={() => navigate('/customer/dashboard')}
                   className={`flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                     isActive('/customer/dashboard')
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -143,7 +143,7 @@ const Layout = ({ children }) => {
                   onClick={() => navigate('/customer/browse')}
                   className={`flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                     isActive('/customer/browse')
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -153,7 +153,7 @@ const Layout = ({ children }) => {
                   onClick={() => navigate('/customer/cart')}
                   className={`relative flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                     isActive('/customer/cart')
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -168,7 +168,7 @@ const Layout = ({ children }) => {
                   onClick={() => navigate('/customer/profile')}
                   className={`flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                     isActive('/customer/profile')
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >

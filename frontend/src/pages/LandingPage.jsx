@@ -36,7 +36,7 @@ const MedLink = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
@@ -45,26 +45,26 @@ const MedLink = () => {
         }
         
         .gradient-text {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
         
         .gradient-bg-primary {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
         }
         
         .gradient-bg-secondary {
-          background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+          background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
         }
         
         .gradient-bg-tertiary {
-          background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+          background: linear-gradient(135deg, #4ade80 0%, #86efac 100%);
         }
         
         .gradient-bg-hero {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+          background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%);
         }
         
         .glass-card {
@@ -135,19 +135,17 @@ const MedLink = () => {
 
       {/* Header/Navbar */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'glass-card shadow-lg' : 'bg-transparent'
+        scrolled ? 'glass-card shadow-lg' : 'bg-white/80 backdrop-blur-sm'
       }`}>
-        <nav className="container mx-auto px-6 py-4">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2 group">
-              <div className="w-10 h-10 gradient-bg-primary rounded-lg flex items-center justify-center transform group-hover:rotate-12 transition-transform">
-                <Pill className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold gradient-text">MedLink</span>
-            </Link>
-            
-            {/* Mobile menu button */}
+                  <Link to="/" className="flex items-center space-x-2 group">
+                    <img src="/logo.png" alt="MedLink Logo" className="w-10 h-10 rounded-lg object-contain" />
+                    <span className="text-2xl font-bold gradient-text">MedLink</span>
+                  </Link>
+                  
+                  {/* Mobile menu button */}
             <div className="md:hidden">
               <button 
                 onClick={toggleMobileMenu}
@@ -162,12 +160,12 @@ const MedLink = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" onClick={(e) => handleSmoothScroll(e, '#features')} 
-                 className="text-gray-700 hover:text-purple-600 font-medium transition">Features</a>
+                 className="text-gray-700 hover:text-green-600 font-medium transition">Features</a>
               <a href="#how-it-works" onClick={(e) => handleSmoothScroll(e, '#how-it-works')} 
-                 className="text-gray-700 hover:text-purple-600 font-medium transition">How it Works</a>
+                 className="text-gray-700 hover:text-green-600 font-medium transition">How it Works</a>
               <a href="#stats" onClick={(e) => handleSmoothScroll(e, '#stats')} 
-                 className="text-gray-700 hover:text-purple-600 font-medium transition">About</a>
-              <Link to="/login" className="text-gray-700 hover:text-purple-600 font-medium transition">Login</Link>
+                 className="text-gray-700 hover:text-green-600 font-medium transition">About</a>
+              <Link to="/login" className="text-gray-700 hover:text-green-600 font-medium transition">Login</Link>
               <Link to="/signup" className="px-6 py-2.5 gradient-bg-primary text-white rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition">
                 Get Started
               </Link>
@@ -190,13 +188,8 @@ const MedLink = () => {
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
-        {/* Animated Background */}
-        <div className="absolute inset-0 gradient-bg-hero opacity-10"></div>
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-        <div className="absolute top-40 right-10 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-700"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
         
-        <div className="container mx-auto px-6 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="fade-in-up">
               <div className="inline-block mb-4 px-4 py-2 glass-card rounded-full">
@@ -270,7 +263,7 @@ const MedLink = () => {
 
       {/* Features Section */}
       <section id="features" className="py-24 bg-white relative">
-        <div className="container mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Why Choose <span className="gradient-text">MedLink</span>?
@@ -321,8 +314,8 @@ const MedLink = () => {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 relative overflow-hidden">
-        <div className="container mx-auto px-6 relative z-10">
+      <section id="how-it-works" className="py-24 bg-gray-50 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               How It <span className="gradient-text">Works</span>
@@ -350,7 +343,7 @@ const MedLink = () => {
                 </p>
               </div>
               {/* Connector Line */}
-              <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-1 bg-gradient-to-r from-purple-400 to-pink-400 transform -translate-y-1/2"></div>
+              <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-1 bg-gradient-to-r from-green-400 to-emerald-400 transform -translate-y-1/2"></div>
             </div>
             
             {/* Step 2 */}
@@ -370,7 +363,7 @@ const MedLink = () => {
                 </p>
               </div>
               {/* Connector Line */}
-              <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-1 bg-gradient-to-r from-pink-400 to-blue-400 transform -translate-y-1/2"></div>
+              <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-1 bg-gradient-to-r from-emerald-400 to-lime-400 transform -translate-y-1/2"></div>
             </div>
             
             {/* Step 3 */}
@@ -403,20 +396,20 @@ const MedLink = () => {
       
       {/* Stats Section */}
       <section id="stats" className="py-24 bg-white">
-        <div className="container mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center stats-card glass-card p-8 rounded-2xl">
-              <Users className="w-12 h-12 mx-auto mb-4 text-purple-600" />
+              <Users className="w-12 h-12 mx-auto mb-4 text-green-600" />
               <div className="text-4xl font-bold gradient-text mb-2">10k+</div>
               <div className="text-gray-600 font-medium">Happy Users</div>
             </div>
             <div className="text-center stats-card glass-card p-8 rounded-2xl">
-              <MapPin className="w-12 h-12 mx-auto mb-4 text-pink-600" />
+              <MapPin className="w-12 h-12 mx-auto mb-4 text-green-600" />
               <div className="text-4xl font-bold gradient-text mb-2">500+</div>
               <div className="text-gray-600 font-medium">Pharmacies</div>
             </div>
             <div className="text-center stats-card glass-card p-8 rounded-2xl">
-              <Package className="w-12 h-12 mx-auto mb-4 text-blue-600" />
+              <Package className="w-12 h-12 mx-auto mb-4 text-green-600" />
               <div className="text-4xl font-bold gradient-text mb-2">50k+</div>
               <div className="text-gray-600 font-medium">Orders Delivered</div>
             </div>
@@ -430,11 +423,9 @@ const MedLink = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 gradient-bg-hero"></div>
-        <div className="absolute inset-0 bg-black opacity-10"></div>
+      <section className="py-24 relative overflow-hidden bg-gradient-to-br from-green-800 via-green-900 to-emerald-900">
         
-        <div className="container mx-auto px-6 text-center relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
               Ready to Transform Your Healthcare Experience?
@@ -443,7 +434,7 @@ const MedLink = () => {
               Join thousands of users who trust MedLink for their medicine needs. Start your journey today.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link to="/signup" className="px-10 py-4 bg-white text-purple-600 rounded-xl font-bold text-lg hover:bg-gray-100 transform hover:scale-105 transition shadow-2xl">
+              <Link to="/signup" className="px-10 py-4 bg-white text-green-700 rounded-xl font-bold text-lg hover:bg-gray-100 transform hover:scale-105 transition shadow-2xl">
                 Create Free Account
               </Link>
               <Link to="/login" className="px-10 py-4 glass-card text-white rounded-xl font-bold text-lg hover:bg-white hover:bg-opacity-20 transition border-2 border-white border-opacity-50">
@@ -456,7 +447,7 @@ const MedLink = () => {
 
       {/* Footer */}
       <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-16">
-        <div className="container mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <Link to="/" className="flex items-center space-x-2 mb-4">
@@ -470,7 +461,7 @@ const MedLink = () => {
               </p>
               <div className="flex space-x-4">
                 {['facebook', 'twitter', 'instagram', 'linkedin'].map((social) => (
-                  <a key={social} href="#" className="w-10 h-10 rounded-full bg-gray-800 hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 flex items-center justify-center transition">
+                  <a key={social} href="#" className="w-10 h-10 rounded-full bg-gray-800 hover:bg-gradient-to-r hover:from-green-600 hover:to-emerald-600 flex items-center justify-center transition">
                     <span className="sr-only">{social}</span>
                     <div className="w-5 h-5 bg-gray-400 rounded"></div>
                   </a>

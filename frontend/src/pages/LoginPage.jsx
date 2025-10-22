@@ -57,20 +57,16 @@ const LoginPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex flex-col justify-center py-12 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-      <div className="absolute top-40 right-10 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-700"></div>
-      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 relative overflow-hidden">
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center group">
-            <div className="w-14 h-14 bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl mr-3 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+            <div className="w-14 h-14 bg-gradient-to-r from-green-600 to-green-700 rounded-xl mr-3 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
               <Pill className="w-8 h-8 text-white" />
             </div>
-            <span className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">MedLink</span>
+            <span className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">MedLink</span>
           </Link>
           <p className="mt-4 text-xl text-gray-700 font-medium">Welcome back! Sign in to continue</p>
         </div>
@@ -102,7 +98,7 @@ const LoginPage = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none text-base"
+                  className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none text-base"
                   placeholder="Enter your email"
                 />
               </div>
@@ -123,7 +119,7 @@ const LoginPage = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none text-base"
+                  className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none text-base"
                   placeholder="Enter your password"
                 />
                 <button
@@ -141,7 +137,7 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center py-3.5 px-4 bg-gradient-to-r from-purple-600 to-purple-800 text-white text-lg font-semibold rounded-xl hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full flex justify-center items-center py-3.5 px-4 bg-gradient-to-r from-green-600 to-green-700 text-white text-lg font-semibold rounded-xl hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {loading ? <LoadingSpinner size="small" /> : 'Sign In'}
               </button>
@@ -149,7 +145,7 @@ const LoginPage = () => {
 
             {/* Forgot Password */}
             <div className="text-center">
-              <a href="#" className="text-purple-600 hover:text-purple-800 text-sm font-medium transition">
+              <a href="#" className="text-green-600 hover:text-green-700 text-sm font-medium transition">
                 Forgot password?
               </a>
             </div>
@@ -171,7 +167,7 @@ const LoginPage = () => {
           <div className="mt-6">
             <Link
               to="/signup"
-              className="w-full flex justify-center py-3.5 px-4 border-2 border-purple-600 text-lg font-semibold rounded-xl text-purple-600 hover:bg-purple-50 transition-all"
+              className="w-full flex justify-center py-3.5 px-4 border-2 border-green-600 text-lg font-semibold rounded-xl text-green-600 hover:bg-green-50 transition-all"
             >
               Create New Account
             </Link>
@@ -182,7 +178,7 @@ const LoginPage = () => {
         <div className="mt-8 text-center">
           <Link
             to="/"
-            className="inline-flex items-center text-gray-700 hover:text-purple-600 font-medium transition"
+            className="inline-flex items-center text-gray-700 hover:text-green-600 font-medium transition"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
