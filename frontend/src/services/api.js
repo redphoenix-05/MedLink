@@ -37,6 +37,29 @@ API.interceptors.response.use(
 );
 
 // ==========================================
+// CART API
+// ==========================================
+export const cartAPI = {
+  // Add item to cart
+  addToCart: (data) => API.post('/cart/add', data),
+  
+  // Get cart items
+  getCart: () => API.get('/cart'),
+  
+  // Update cart item quantity
+  updateQuantity: (itemId, quantity) => API.put(`/cart/${itemId}`, { quantity }),
+  
+  // Remove item from cart
+  removeItem: (itemId) => API.delete(`/cart/${itemId}`),
+  
+  // Clear cart
+  clearCart: () => API.delete('/cart/clear'),
+  
+  // Checkout
+  checkout: (data) => API.post('/cart/checkout', data)
+};
+
+// ==========================================
 // RESERVATION API
 // ==========================================
 export const reservationAPI = {

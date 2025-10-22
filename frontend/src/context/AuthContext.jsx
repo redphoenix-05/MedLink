@@ -17,7 +17,8 @@ const AUTH_ACTIONS = {
   LOGIN_FAILURE: 'LOGIN_FAILURE',
   LOGOUT: 'LOGOUT',
   SET_LOADING: 'SET_LOADING',
-  CLEAR_ERROR: 'CLEAR_ERROR'
+  CLEAR_ERROR: 'CLEAR_ERROR',
+  UPDATE_USER: 'UPDATE_USER'
 };
 
 // Reducer function
@@ -65,6 +66,11 @@ const authReducer = (state, action) => {
       return {
         ...state,
         error: null
+      };
+    case AUTH_ACTIONS.UPDATE_USER:
+      return {
+        ...state,
+        user: action.payload
       };
     default:
       return state;
@@ -163,12 +169,24 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
   };
 
+  // Update user function (for profile updates)
+  const updateUser = (updatedUser) => {
+    // Update localStorage
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    // Update context
+    dispatch({
+      type: AUTH_ACTIONS.UPDATE_USER,
+      payload: updatedUser
+    });
+  };
+
   const value = {
     ...state,
     login,
     signup,
     logout,
-    clearError
+    clearError,
+    updateUser
   };
 
   return (

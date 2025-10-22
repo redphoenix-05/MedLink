@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
@@ -10,6 +11,7 @@ import API from '../services/api';
 
 const CustomerDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [allPharmacies, setAllPharmacies] = useState([]);
@@ -20,11 +22,27 @@ const CustomerDashboard = () => {
   const [showReservationForm, setShowReservationForm] = useState(false);
   const [selectedMedicine, setSelectedMedicine] = useState(null);
   const [reservationRefresh, setReservationRefresh] = useState(0);
+  const [cartItemCount, setCartItemCount] = useState(0);
 
   // Fetch all pharmacies for map view
   useEffect(() => {
     fetchAllPharmacies();
+    fetchCartCount();
   }, []);
+
+  const fetchCartCount = async () => {
+    try {
+      const response = await API.get('/cart');
+      if (response.data.success) {
+        const totalItems = response.data.data.cart.reduce((sum, pharmacy) => 
+          sum + pharmacy.items.reduce((s, item) => s + item.quantity, 0), 0
+        );
+        setCartItemCount(totalItems);
+      }
+    } catch (err) {
+      console.error('Error fetching cart count:', err);
+    }
+  };
 
   const fetchAllPharmacies = async () => {
     try {
@@ -82,12 +100,12 @@ const CustomerDashboard = () => {
     setSelectedMedicine({
       id: result.medicineId,
       name: result.medicine,
-      brand: result.genericName || result.medicine,
-      type: result.type || 'Medicine'
+      brand: result.brand || result.genericName || result.medicine,
+      type: 'Medicine'
     });
     
     setSelectedPharmacy({
-      pharmacyId: result.pharmacyId,
+      pharmacyId: result.id, // The pharmacy ID is in result.id
       pharmacyName: result.name,
       pharmacyAddress: result.address,
       pharmacyPhone: result.phone,
@@ -297,6 +315,7 @@ const CustomerDashboard = () => {
                     pharmacies={searchResults}
                     onPharmacyClick={handlePharmacyClick}
                     searchedMedicine={searchQuery}
+                    selectedPharmacy={selectedPharmacy}
                     height="500px"
                   />
                 </div>
@@ -315,6 +334,7 @@ const CustomerDashboard = () => {
               <PharmacyMap
                 pharmacies={allPharmacies}
                 onPharmacyClick={handlePharmacyClick}
+                selectedPharmacy={selectedPharmacy}
                 height="600px"
               />
             </div>

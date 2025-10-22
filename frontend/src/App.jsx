@@ -1,8 +1,37 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
+
+// Error Boundary Component
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('React Error Boundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '20px', color: 'red' }}>
+          <h1>Something went wrong</h1>
+          <pre>{this.state.error?.toString()}</pre>
+          <button onClick={() => window.location.reload()}>Reload Page</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // Import pages
 import LandingPage from './pages/LandingPage';
@@ -16,6 +45,10 @@ import UnauthorizedPage from './pages/UnauthorizedPage';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentFailed from './pages/PaymentFailed';
 import PaymentCancelled from './pages/PaymentCancelled';
+import CartPage from './pages/CartPage';
+import PharmacyBrowsePage from './pages/PharmacyBrowsePage';
+import ProfilePage from './pages/ProfilePage';
+import PharmacyOrders from './pages/PharmacyOrders';
 
 // Import components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -51,10 +84,11 @@ const DashboardRouter = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="App">
-          <ToastContainer
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <div className="App">
+            <ToastContainer
             position="top-right"
             autoClose={5000}
             hideProgressBar={false}
@@ -98,12 +132,48 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+
+            <Route 
+              path="/customer/cart" 
+              element={
+                <ProtectedRoute allowedRoles={['customer']}>
+                  <CartPage />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/customer/browse" 
+              element={
+                <ProtectedRoute allowedRoles={['customer']}>
+                  <PharmacyBrowsePage />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/customer/profile" 
+              element={
+                <ProtectedRoute allowedRoles={['customer']}>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } 
+            />
             
             <Route 
               path="/pharmacy/dashboard" 
               element={
                 <ProtectedRoute allowedRoles={['pharmacy']}>
                   <PharmacyDashboard />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/pharmacy/orders" 
+              element={
+                <ProtectedRoute allowedRoles={['pharmacy']}>
+                  <PharmacyOrders />
                 </ProtectedRoute>
               } 
             />
@@ -123,6 +193,7 @@ function App() {
         </div>
       </Router>
     </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

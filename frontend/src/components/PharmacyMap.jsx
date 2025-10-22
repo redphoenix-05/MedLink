@@ -28,9 +28,12 @@ const PharmacyMap = ({
   zoom = 12,
   onPharmacyClick = null,
   searchedMedicine = null,
-  height = "400px"
+  height = "400px",
+  selectedPharmacy = null
 }) => {
   const [userLocation, setUserLocation] = useState(null);
+  const [mapCenter, setMapCenter] = useState(center);
+  const [mapZoom, setMapZoom] = useState(zoom);
 
   // Get user's current location
   useEffect(() => {
@@ -49,26 +52,45 @@ const PharmacyMap = ({
     }
   }, []);
 
-  // Component to update map center when userLocation changes
+  // Update map center when a pharmacy is selected
+  useEffect(() => {
+    if (selectedPharmacy && selectedPharmacy.latitude && selectedPharmacy.longitude) {
+      setMapCenter([
+        parseFloat(selectedPharmacy.latitude),
+        parseFloat(selectedPharmacy.longitude)
+      ]);
+      setMapZoom(15); // Zoom in closer when selecting a pharmacy
+    } else if (userLocation) {
+      setMapCenter(userLocation);
+      setMapZoom(zoom);
+    } else if (pharmacies.length > 0) {
+      // Center on first pharmacy if available
+      const firstPharmacy = pharmacies.find(p => p.latitude && p.longitude);
+      if (firstPharmacy) {
+        setMapCenter([
+          parseFloat(firstPharmacy.latitude),
+          parseFloat(firstPharmacy.longitude)
+        ]);
+      }
+    }
+  }, [selectedPharmacy, userLocation, pharmacies, zoom]);
+
+  // Component to update map center dynamically
   const MapUpdater = () => {
     const map = useMap();
     
     useEffect(() => {
-      if (userLocation) {
-        map.setView(userLocation, zoom);
-      }
-    }, [userLocation, map]);
+      map.setView(mapCenter, mapZoom);
+    }, [mapCenter, mapZoom, map]);
     
     return null;
   };
-
-  const mapCenter = userLocation || center;
 
   return (
     <div style={{ height, width: '100%' }}>
       <MapContainer
         center={mapCenter}
-        zoom={zoom}
+        zoom={mapZoom}
         style={{ height: '100%', width: '100%' }}
         className="rounded-lg"
       >
@@ -104,11 +126,24 @@ const PharmacyMap = ({
           // Only show pharmacies with valid coordinates
           if (!pharmacy.latitude || !pharmacy.longitude) return null;
           
+          // Use different icon for selected pharmacy
+          const isSelected = selectedPharmacy && selectedPharmacy.id === pharmacy.id;
+          const markerIcon = isSelected 
+            ? L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+              })
+            : pharmacyIcon;
+          
           return (
             <Marker
               key={pharmacy.id}
               position={[pharmacy.latitude, pharmacy.longitude]}
-              icon={pharmacyIcon}
+              icon={markerIcon}
               eventHandlers={{
                 click: () => {
                   if (onPharmacyClick) {

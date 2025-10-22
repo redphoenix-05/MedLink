@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import { reservationAPI } from '../services/api';
+import { cartAPI } from '../services/api';
 import Alert from './Alert';
 import LoadingSpinner from './LoadingSpinner';
 
 const ReservationForm = ({ medicine, pharmacy, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
-    quantity: 1,
-    deliveryOption: 'pickup',
-    address: ''
+    quantity: 1
   });
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
@@ -28,13 +26,6 @@ const ReservationForm = ({ medicine, pharmacy, onClose, onSuccess }) => {
     setAlert(null);
 
     try {
-      // Validate delivery address
-      if (formData.deliveryOption === 'delivery' && !formData.address.trim()) {
-        setAlert({ type: 'error', message: 'Please provide a delivery address' });
-        setLoading(false);
-        return;
-      }
-
       // Check quantity
       if (formData.quantity < 1 || formData.quantity > pharmacy.stock) {
         setAlert({ 
@@ -45,42 +36,40 @@ const ReservationForm = ({ medicine, pharmacy, onClose, onSuccess }) => {
         return;
       }
 
-      const reservationData = {
-        customerId: user.id,
+      const cartData = {
         pharmacyId: pharmacy.pharmacyId,
         medicineId: medicine.id,
-        quantity: parseInt(formData.quantity),
-        deliveryOption: formData.deliveryOption,
-        address: formData.deliveryOption === 'delivery' ? formData.address : undefined
+        quantity: parseInt(formData.quantity)
       };
 
-      const response = await reservationAPI.create(reservationData);
+      await cartAPI.addToCart(cartData);
 
       setAlert({ 
         type: 'success', 
-        message: 'Reservation created successfully!' 
+        message: 'Medicine added to cart successfully!' 
       });
 
       setTimeout(() => {
-        if (onSuccess) onSuccess(response.data.reservation);
+        if (onSuccess) onSuccess();
         if (onClose) onClose();
       }, 1500);
 
     } catch (error) {
-      console.error('Reservation error:', error);
+      console.error('Add to cart error:', error);
       setAlert({
         type: 'error',
-        message: error.response?.data?.message || 'Failed to create reservation'
+        message: error.response?.data?.message || 'Failed to add to cart'
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const totalPrice = (pharmacy.price * formData.quantity).toFixed(2);
+  const medicineTotal = (pharmacy.price * formData.quantity);
+  const platformFee = medicineTotal * 0.003; // 0.3%
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
@@ -107,8 +96,8 @@ const ReservationForm = ({ medicine, pharmacy, onClose, onSuccess }) => {
             <h4 className="font-semibold text-gray-800">{pharmacy.pharmacyName}</h4>
             <p className="text-gray-600 text-sm">{pharmacy.pharmacyAddress}</p>
             <div className="flex justify-between mt-2">
-              <span className="text-sm text-gray-600">Price: ₱{pharmacy.price}</span>
-              <span className="text-sm text-gray-600">Stock: {pharmacy.stock}</span>
+              <span className="text-sm text-gray-600">Price: ৳{parseFloat(pharmacy.price || 0).toFixed(2)}</span>
+              <span className="text-sm text-gray-600">Stock: {pharmacy.stock || 'N/A'}</span>
             </div>
           </div>
 
@@ -131,45 +120,23 @@ const ReservationForm = ({ medicine, pharmacy, onClose, onSuccess }) => {
               />
             </div>
 
-            {/* Delivery Option */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Delivery Option
-              </label>
-              <select
-                name="deliveryOption"
-                value={formData.deliveryOption}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="pickup">Pickup</option>
-                <option value="delivery">Delivery</option>
-              </select>
-            </div>
-
-            {/* Delivery Address */}
-            {formData.deliveryOption === 'delivery' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Delivery Address
-                </label>
-                <textarea
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  rows="3"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your complete delivery address"
-                  required={formData.deliveryOption === 'delivery'}
-                />
+            {/* Price Breakdown */}
+            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Medicine Total:</span>
+                <span className="font-medium">৳{medicineTotal.toFixed(2)}</span>
               </div>
-            )}
-
-            {/* Total Price */}
-            <div className="bg-gray-100 p-4 rounded-lg">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-gray-700">Total Price:</span>
-                <span className="text-2xl font-bold text-blue-600">₱{totalPrice}</span>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Platform Fee (0.3%):</span>
+                <span className="font-medium">৳{platformFee.toFixed(2)}</span>
+              </div>
+              <div className="border-t pt-2 mt-2">
+                <p className="text-xs text-gray-500 mb-2">
+                  💡 Delivery charge: +৳60 (if delivery option selected at checkout)
+                </p>
+                <p className="text-xs text-gray-500">
+                  💡 Pickup: Free (select at checkout)
+                </p>
               </div>
             </div>
 
@@ -188,7 +155,7 @@ const ReservationForm = ({ medicine, pharmacy, onClose, onSuccess }) => {
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-blue-300"
                 disabled={loading}
               >
-                {loading ? <LoadingSpinner size="small" /> : 'Reserve'}
+                {loading ? <LoadingSpinner size="small" /> : 'Add to Cart'}
               </button>
             </div>
           </form>
