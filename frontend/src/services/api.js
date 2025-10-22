@@ -56,7 +56,10 @@ export const cartAPI = {
   clearCart: () => API.delete('/cart'),
   
   // Checkout
-  checkout: (data) => API.post('/cart/checkout', data)
+  checkout: (data) => API.post('/cart/checkout', data),
+  
+  // Get customer orders
+  getOrders: () => API.get('/cart/orders')
 };
 
 // ==========================================
