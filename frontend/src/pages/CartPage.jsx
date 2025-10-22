@@ -22,7 +22,7 @@ const CartPage = () => {
     try {
       setLoading(true);
       const response = await api.get('/cart');
-      setCart(response.data.data.cart || []);
+      setCart(response.data.data.cartItems || []);
       setError('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load cart');
