@@ -25,11 +25,11 @@ const createAdminUser = async () => {
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('admin123', salt);
+    const hashedPassword = await bcrypt.hash('medlinkadmin2025', salt);
 
     // Create admin user
     const admin = await User.create({
-      name: 'Admin User',
+      name: 'medlinkadmin',
       email: 'admin@medlink.com',
       password: hashedPassword,
       phone: '+8801234567890',
@@ -39,8 +39,8 @@ const createAdminUser = async () => {
 
     console.log('✅ Admin user created successfully!');
     console.log('\n📧 Login Credentials:');
-    console.log('   Email: admin@medlink.com');
-    console.log('   Password: admin123');
+    console.log('   Username/Email: medlinkadmin');
+    console.log('   Password: medlinkadmin2025');
     console.log('\n⚠️  Please change the password after first login!');
 
     process.exit(0);
