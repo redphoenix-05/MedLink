@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import CustomerLayout from '../components/CustomerLayout';
 
 const PaymentCancelled = () => {
   const navigate = useNavigate();
@@ -14,8 +15,9 @@ const PaymentCancelled = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 text-center">
+    <CustomerLayout>
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 text-center">
         {/* Warning Icon */}
         <div className="mb-6">
           <div className="mx-auto w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -91,7 +93,8 @@ const PaymentCancelled = () => {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </CustomerLayout>
   );
 };
 

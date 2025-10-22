@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import Layout from '../components/Layout';
+import CustomerLayout from '../components/CustomerLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
 import api from '../services/api';
@@ -106,8 +106,8 @@ const ProfilePage = () => {
   };
 
   return (
-    <Layout>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <CustomerLayout>
+      <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Profile Settings</h1>
 
         {error && <Alert type="error" message={error} />}
@@ -341,7 +341,7 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </CustomerLayout>
   );
 };
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import Layout from '../components/Layout';
+import CustomerLayout from '../components/CustomerLayout';
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
@@ -26,8 +26,8 @@ const PaymentSuccess = () => {
   }, [navigate]);
 
   return (
-    <Layout>
-      <div className="min-h-[80vh] flex items-center justify-center px-4 py-8">
+    <CustomerLayout>
+      <div className="min-h-[80vh] flex items-center justify-center">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
           {/* Success Icon */}
           <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -84,7 +84,7 @@ const PaymentSuccess = () => {
           </p>
         </div>
       </div>
-    </Layout>
+    </CustomerLayout>
   );
 };
 

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../components/Layout';
+import CustomerLayout from '../components/CustomerLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
 import PharmacyMap from '../components/PharmacyMap';
 import API, { cartAPI } from '../services/api';
+import { Search, MapPin, ShoppingBag, Phone, FileText, Navigation, Package, Store, CheckCircle, XCircle, Clock, Truck } from 'lucide-react';
 
 const CustomerDashboard = () => {
   const { user } = useAuth();
@@ -117,16 +118,25 @@ const CustomerDashboard = () => {
 
 
   return (
-    <Layout>
-      <div className="px-4 py-6 sm:px-0">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome, {user?.name}!
-          </h1>
-          <p className="text-lg text-gray-600 mt-2">
-            Find medicines and pharmacies in your neighborhood
-          </p>
+    <CustomerLayout>
+      <div className="space-y-6">
+        {/* Welcome Card */}
+        <div className="bg-gradient-to-br from-green-600 via-green-700 to-emerald-800 rounded-2xl shadow-xl p-8 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                Welcome back, {user?.name}! 👋
+              </h1>
+              <p className="text-green-100 text-lg">
+                Find medicines and pharmacies in your neighborhood
+              </p>
+            </div>
+            <div className="hidden lg:block">
+              <div className="w-24 h-24 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                <ShoppingBag className="w-12 h-12 text-white" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Alerts */}
@@ -135,42 +145,47 @@ const CustomerDashboard = () => {
             type="error"
             message={error}
             onClose={() => setError('')}
-            className="mb-6"
           />
         )}
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex space-x-8">
+        {/* Tabs - Modern Card Style */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1.5">
+          <nav className="flex gap-2">
             <button
               onClick={() => setActiveTab('search')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
                 activeTab === 'search'
-                  ? 'border-green-600 text-green-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg shadow-green-200'
+                  : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              🔍 Medicine Search
+              <Search className="w-4 h-4" />
+              <span className="hidden sm:inline">Medicine Search</span>
+              <span className="sm:hidden">Search</span>
             </button>
             <button
               onClick={() => setActiveTab('map')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
                 activeTab === 'map'
-                  ? 'border-green-600 text-green-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg shadow-green-200'
+                  : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              📍 Pharmacy Map
+              <MapPin className="w-4 h-4" />
+              <span className="hidden sm:inline">Pharmacy Map</span>
+              <span className="sm:hidden">Map</span>
             </button>
             <button
               onClick={() => setActiveTab('orders')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
                 activeTab === 'orders'
-                  ? 'border-green-600 text-green-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg shadow-green-200'
+                  : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              🛍️ My Orders
+              <ShoppingBag className="w-4 h-4" />
+              <span className="hidden sm:inline">My Orders</span>
+              <span className="sm:hidden">Orders</span>
             </button>
           </nav>
         </div>
@@ -186,19 +201,20 @@ const CustomerDashboard = () => {
               
               <form onSubmit={handleSearch} className="space-y-4">
                 <div className="flex space-x-4">
-                  <div className="flex-1">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Enter medicine name or brand (e.g., Paracetamol, Napa)"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+                    className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:transform-none font-medium"
                   >
                     {loading ? <LoadingSpinner size="small" /> : 'Search'}
                   </button>
@@ -206,7 +222,7 @@ const CustomerDashboard = () => {
                     <button
                       type="button"
                       onClick={clearSearch}
-                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 focus:outline-none"
+                      className="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
                     >
                       Clear
                     </button>
@@ -228,27 +244,31 @@ const CustomerDashboard = () => {
                     {searchResults.map((result, index) => (
                       <div
                         key={index}
-                        className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                        className={`p-5 border-2 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-lg ${
                           selectedPharmacy?.id === result.id
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                            ? 'border-green-500 bg-green-50 shadow-md'
+                            : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
                         }`}
                         onClick={() => handlePharmacyClick(result)}
                       >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900">
+                            <h4 className="font-semibold text-gray-900 text-lg mb-2">
                               {result.name}
                             </h4>
-                            <p className="text-sm text-gray-600 mt-1">
-                              📍 {result.address}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              📞 {result.phone}
-                            </p>
+                            <div className="space-y-1.5">
+                              <p className="text-sm text-gray-600 flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-green-600" />
+                                {result.address}
+                              </p>
+                              <p className="text-sm text-gray-600 flex items-center gap-2">
+                                <Phone className="w-4 h-4 text-green-600" />
+                                {result.phone}
+                              </p>
+                            </div>
                             {result.medicine && (
-                              <div className="mt-2 text-sm">
-                                <span className="text-green-600 font-medium">
+                              <div className="mt-3 text-sm">
+                                <span className="text-green-700 font-semibold">
                                   {result.medicine}
                                 </span>
                                 {result.genericName && (
@@ -260,28 +280,41 @@ const CustomerDashboard = () => {
                             )}
                           </div>
                           <div className="text-right ml-4">
-                            <div className="text-lg font-bold text-green-600">
+                            <div className="text-xl font-bold text-green-600 mb-1">
                               ৳{parseFloat(result.price || 0).toFixed(2)}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-gray-500 mb-2">
                               Stock: {result.stock || 'N/A'}
                             </div>
-                            <div className={`text-xs font-medium ${
-                              result.availability ? 'text-green-600' : 'text-red-600'
+                            <div className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
+                              result.availability 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-red-100 text-red-700'
                             }`}>
-                              {result.availability ? '✓ Available' : '✗ Out of Stock'}
+                              {result.availability ? (
+                                <>
+                                  <CheckCircle className="w-3 h-3" />
+                                  Available
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="w-3 h-3" />
+                                  Out of Stock
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
                         
-                        <div className="mt-3 flex space-x-2">
+                        <div className="mt-4 flex space-x-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               window.open(`https://www.google.com/maps/dir/?api=1&destination=${result.latitude},${result.longitude}`, '_blank');
                             }}
-                            className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-600"
+                            className="inline-flex items-center gap-2 text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-medium"
                           >
+                            <Navigation className="w-4 h-4" />
                             Get Directions
                           </button>
                         </div>
@@ -325,44 +358,52 @@ const CustomerDashboard = () => {
 
             {/* Pharmacy Details */}
             {selectedPharmacy && (
-              <div className="bg-white shadow rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+                <h3 className="text-xl font-semibold text-gray-900 mb-6">
                   Pharmacy Details
                 </h3>
                 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-semibold text-gray-900 text-lg">
+                    <h4 className="font-bold text-gray-900 text-xl mb-4">
                       {selectedPharmacy.name}
                     </h4>
-                    <p className="text-gray-600 mt-2">
-                      📍 {selectedPharmacy.address}
-                    </p>
-                    <p className="text-gray-600">
-                      📞 {selectedPharmacy.phone}
-                    </p>
-                    <p className="text-gray-600">
-                      📄 License: {selectedPharmacy.licenseNumber}
-                    </p>
+                    <div className="space-y-3">
+                      <p className="text-gray-700 flex items-center gap-2">
+                        <MapPin className="w-5 h-5 text-green-600" />
+                        {selectedPharmacy.address}
+                      </p>
+                      <p className="text-gray-700 flex items-center gap-2">
+                        <Phone className="w-5 h-5 text-green-600" />
+                        {selectedPharmacy.phone}
+                      </p>
+                      <p className="text-gray-700 flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-green-600" />
+                        License: {selectedPharmacy.licenseNumber}
+                      </p>
+                    </div>
                     
-                    <div className="mt-4">
+                    <div className="mt-6 flex gap-3">
                       <button
                         onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selectedPharmacy.latitude},${selectedPharmacy.longitude}`, '_blank')}
-                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-600 mr-2"
+                        className="inline-flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 transition font-medium"
                       >
+                        <Navigation className="w-4 h-4" />
                         Get Directions
                       </button>
                       <button
                         onClick={() => alert('Pharmacy inventory view coming soon!')}
-                        className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                        className="inline-flex items-center gap-2 bg-gray-500 text-white px-5 py-2.5 rounded-lg hover:bg-gray-600 transition font-medium"
                       >
+                        <Package className="w-4 h-4" />
                         View Inventory
                       </button>
                     </div>
                   </div>
                   
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h5 className="font-medium text-gray-900 mb-2">
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-xl border border-green-100">
+                    <h5 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Store className="w-5 h-5 text-green-600" />
                       Quick Actions
                     </h5>
                     <p className="text-sm text-gray-600 mb-3">
@@ -445,30 +486,46 @@ const CustomerDashboard = () => {
                             ৳{parseFloat(order.grandTotal).toFixed(2)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            <span className={`px-3 py-1.5 inline-flex items-center gap-1.5 text-xs leading-5 font-semibold rounded-full ${
                               order.deliveryType === 'delivery'
                                 ? 'bg-orange-100 text-orange-800'
                                 : 'bg-purple-100 text-purple-800'
                             }`}>
-                              {order.deliveryType === 'delivery' ? '🚚 Delivery' : '🏪 Pickup'}
+                              {order.deliveryType === 'delivery' ? (
+                                <>
+                                  <Truck className="w-3.5 h-3.5" />
+                                  Delivery
+                                </>
+                              ) : (
+                                <>
+                                  <Store className="w-3.5 h-3.5" />
+                                  Pickup
+                                </>
+                              )}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">
                             {order.deliveryType === 'delivery' ? (
-                              <div className="truncate" title={order.deliveryAddress}>
-                                {order.deliveryAddress || 'N/A'}
+                              <div className="flex items-start gap-1.5">
+                                <MapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                <div className="truncate" title={order.deliveryAddress}>
+                                  {order.deliveryAddress || 'N/A'}
+                                </div>
                               </div>
                             ) : (
                               <span className="text-gray-400">-</span>
                             )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            <span className={`px-3 py-1.5 inline-flex items-center gap-1.5 text-xs leading-5 font-semibold rounded-full ${
                               order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                               order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
                               order.status === 'delivered' ? 'bg-green-100 text-green-800' :
                               'bg-gray-100 text-gray-800'
                             }`}>
+                              {order.status === 'pending' && <Clock className="w-3.5 h-3.5" />}
+                              {order.status === 'confirmed' && <CheckCircle className="w-3.5 h-3.5" />}
+                              {order.status === 'delivered' && <Package className="w-3.5 h-3.5" />}
                               {order.status}
                             </span>
                           </td>
@@ -483,7 +540,7 @@ const CustomerDashboard = () => {
         )}
 
       </div>
-    </Layout>
+    </CustomerLayout>
   );
 };
 

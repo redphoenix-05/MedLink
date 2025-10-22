@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
+import { Search, Store, ShoppingCart, User } from 'lucide-react';
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
@@ -53,33 +54,36 @@ const Layout = ({ children }) => {
               <nav className="hidden md:flex items-center space-x-1">
                 <button
                   onClick={() => navigate('/customer/dashboard')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center gap-2 ${
                     isActive('/customer/dashboard')
                       ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  🔍 Search Medicines
+                  <Search className="w-4 h-4" />
+                  Search Medicines
                 </button>
                 <button
                   onClick={() => navigate('/customer/browse')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center gap-2 ${
                     isActive('/customer/browse')
                       ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  🏪 Browse Pharmacies
+                  <Store className="w-4 h-4" />
+                  Browse Pharmacies
                 </button>
                 <button
                   onClick={() => navigate('/customer/cart')}
-                  className={`relative px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`relative px-4 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center gap-2 ${
                     isActive('/customer/cart')
                       ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  🛒 Cart
+                  <ShoppingCart className="w-4 h-4" />
+                  Cart
                   {cartItemCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                       {cartItemCount}
@@ -131,33 +135,36 @@ const Layout = ({ children }) => {
               <nav className="flex items-center space-x-1 overflow-x-auto">
                 <button
                   onClick={() => navigate('/customer/dashboard')}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors inline-flex items-center gap-1.5 ${
                     isActive('/customer/dashboard')
                       ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  🔍 Search
+                  <Search className="w-3.5 h-3.5" />
+                  Search
                 </button>
                 <button
                   onClick={() => navigate('/customer/browse')}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors inline-flex items-center gap-1.5 ${
                     isActive('/customer/browse')
                       ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  🏪 Browse
+                  <Store className="w-3.5 h-3.5" />
+                  Browse
                 </button>
                 <button
                   onClick={() => navigate('/customer/cart')}
-                  className={`relative flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  className={`relative flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors inline-flex items-center gap-1.5 ${
                     isActive('/customer/cart')
                       ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  🛒 Cart
+                  <ShoppingCart className="w-3.5 h-3.5" />
+                  Cart
                   {cartItemCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
                       {cartItemCount > 9 ? '9+' : cartItemCount}
@@ -166,13 +173,14 @@ const Layout = ({ children }) => {
                 </button>
                 <button
                   onClick={() => navigate('/customer/profile')}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center gap-2 ${
                     isActive('/customer/profile')
                       ? 'bg-green-600 text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  👤 Profile
+                  <User className="w-4 h-4" />
+                  Profile
                 </button>
               </nav>
             </div>
