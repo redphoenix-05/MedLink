@@ -135,7 +135,7 @@ Order.belongsTo(User, {
   as: 'customer'
 });
 
-Order.belongsTo(User, {
+Order.belongsTo(Pharmacy, {
   foreignKey: 'pharmacyId',
   as: 'pharmacy'
 });
@@ -145,9 +145,9 @@ User.hasMany(Order, {
   as: 'orders'
 });
 
-User.hasMany(Order, {
+Pharmacy.hasMany(Order, {
   foreignKey: 'pharmacyId',
-  as: 'pharmacyOrders'
+  as: 'orders'
 });
 
 module.exports = {

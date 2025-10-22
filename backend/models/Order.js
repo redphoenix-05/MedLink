@@ -18,7 +18,7 @@ const Order = sequelize.define('Order', {
   pharmacyId: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'users',
+      model: 'pharmacies',
       key: 'id',
     },
     allowNull: false,
@@ -59,6 +59,10 @@ const Order = sequelize.define('Order', {
     type: DataTypes.ENUM('pickup', 'delivery'),
     allowNull: false,
     defaultValue: 'pickup',
+  },
+  deliveryAddress: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   },
   status: {
     type: DataTypes.ENUM('pending', 'confirmed', 'delivered', 'completed'),
