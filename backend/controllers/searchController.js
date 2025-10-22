@@ -45,7 +45,7 @@ const searchMedicines = async (req, res) => {
               include: [
                 {
                   model: User,
-                  as: 'user',
+                  as: 'owner',
                   attributes: ['name', 'email']
                 }
               ]
@@ -145,7 +145,7 @@ const getPharmacyLocations = async (req, res) => {
       include: [
         {
           model: User,
-          as: 'user',
+          as: 'owner',
           attributes: ['name', 'email']
         },
         {
@@ -225,7 +225,7 @@ const getPharmacyDetails = async (req, res) => {
       include: [
         {
           model: User,
-          as: 'user',
+          as: 'owner',
           attributes: ['name', 'email']
         },
         {

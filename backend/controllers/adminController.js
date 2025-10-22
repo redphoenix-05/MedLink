@@ -1,0 +1,197 @@
+const { User, Pharmacy, Reservation, Medicine } = require('../models');
+
+const getDashboardStats = async (req, res) => {
+  try {
+    const totalUsers = await User.count();
+    const totalPharmacies = await Pharmacy.count();
+    const totalMedicines = await Medicine.count();
+    const totalReservations = await Reservation.count();
+    const pendingPharmacies = await Pharmacy.count({ where: { status: 'pending' } });
+    const approvedPharmacies = await Pharmacy.count({ where: { status: 'approved' } });
+
+    res.json({
+      success: true,
+      data: { totalUsers, totalPharmacies, totalMedicines, totalReservations, pendingPharmacies, approvedPharmacies }
+    });
+  } catch (error) {
+    console.error('Dashboard stats error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching stats', error: error.message });
+  }
+};
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll({ attributes: ['id', 'name', 'email', 'phone', 'role', 'createdAt'], order: [['createdAt', 'DESC']] });
+    res.json({ success: true, data: users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error fetching users', error: error.message });
+  }
+};
+
+const getPendingPharmacies = async (req, res) => {
+  try {
+    const pharmacies = await Pharmacy.findAll({
+      where: { status: 'pending' },
+      include: [{ model: User, as: 'owner', attributes: ['id', 'name', 'email', 'phone'] }],
+      order: [['createdAt', 'ASC']]
+    });
+    res.json({ success: true, data: pharmacies });
+  } catch (error) {
+    console.error('Get pending pharmacies error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching pending pharmacies', error: error.message });
+  }
+};
+
+const getApprovedPharmacies = async (req, res) => {
+  try {
+    const pharmacies = await Pharmacy.findAll({
+      where: { status: 'approved' },
+      include: [{ model: User, as: 'owner', attributes: ['id', 'name', 'email', 'phone'] }],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json({ success: true, data: pharmacies });
+  } catch (error) {
+    console.error('Get approved pharmacies error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching approved pharmacies', error: error.message });
+  }
+};
+
+const approvePharmacy = async (req, res) => {
+  try {
+    const pharmacy = await Pharmacy.findByPk(req.params.pharmacyId);
+    if (!pharmacy) return res.status(404).json({ success: false, message: 'Pharmacy not found' });
+    pharmacy.status = 'approved';
+    await pharmacy.save();
+    res.json({ success: true, message: 'Pharmacy approved successfully', data: pharmacy });
+  } catch (error) {
+    console.error('Approve pharmacy error:', error);
+    res.status(500).json({ success: false, message: 'Error approving pharmacy', error: error.message });
+  }
+};
+
+const rejectPharmacy = async (req, res) => {
+  try {
+    const pharmacy = await Pharmacy.findByPk(req.params.pharmacyId);
+    if (!pharmacy) return res.status(404).json({ success: false, message: 'Pharmacy not found' });
+    pharmacy.status = 'rejected';
+    pharmacy.rejectionReason = req.body.reason || 'Not specified';
+    await pharmacy.save();
+    res.json({ success: true, message: 'Pharmacy rejected successfully', data: pharmacy });
+  } catch (error) {
+    console.error('Reject pharmacy error:', error);
+    res.status(500).json({ success: false, message: 'Error rejecting pharmacy', error: error.message });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    if (req.params.userId === req.user.id) return res.status(400).json({ success: false, message: 'Cannot delete own account' });
+    const user = await User.findByPk(req.params.userId);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    await user.destroy();
+    res.json({ success: true, message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error deleting user', error: error.message });
+  }
+};
+
+const deletePharmacy = async (req, res) => {
+  try {
+    const pharmacy = await Pharmacy.findByPk(req.params.pharmacyId);
+    if (!pharmacy) return res.status(404).json({ success: false, message: 'Pharmacy not found' });
+    await pharmacy.destroy();
+    res.json({ success: true, message: 'Pharmacy deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error deleting pharmacy', error: error.message });
+  }
+};
+
+const getActivityLogs = async (req, res) => {
+  try {
+    // For now, return empty array - can be implemented later with a logging system
+    res.json({ success: true, data: [] });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error fetching activity logs', error: error.message });
+  }
+};
+
+const updateUserStatus = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    user.isActive = req.body.isActive;
+    await user.save();
+    res.json({ success: true, message: 'User status updated successfully', data: user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error updating user status', error: error.message });
+  }
+};
+
+const getAllReservations = async (req, res) => {
+  try {
+    const reservations = await Reservation.findAll({
+      include: [
+        { model: User, as: 'customer', attributes: ['id', 'name', 'email', 'phone'] },
+        { model: Medicine, as: 'medicine', attributes: ['id', 'name', 'category'] },
+        { model: Pharmacy, as: 'pharmacy', attributes: ['id', 'name', 'address'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json({ success: true, data: reservations });
+  } catch (error) {
+    console.error('Get all reservations error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching reservations', error: error.message });
+  }
+};
+
+const getAllDeliveries = async (req, res) => {
+  try {
+    const deliveries = await Reservation.findAll({
+      where: { deliveryOption: 'delivery' },
+      include: [
+        { model: User, as: 'customer', attributes: ['id', 'name', 'email', 'phone'] },
+        { model: Medicine, as: 'medicine', attributes: ['id', 'name', 'category'] },
+        { model: Pharmacy, as: 'pharmacy', attributes: ['id', 'name', 'address'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json({ success: true, data: deliveries });
+  } catch (error) {
+    console.error('Get all deliveries error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching deliveries', error: error.message });
+  }
+};
+
+const getAllMedicines = async (req, res) => {
+  try {
+    const medicines = await Medicine.findAll({
+      include: [{ 
+        model: Pharmacy, 
+        as: 'pharmacies',
+        attributes: ['id', 'name', 'address'],
+        through: { attributes: ['price', 'stock'] }
+      }],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json({ success: true, data: medicines });
+  } catch (error) {
+    console.error('Get all medicines error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching medicines', error: error.message });
+  }
+};
+
+module.exports = { 
+  getDashboardStats, 
+  getAllUsers, 
+  getPendingPharmacies, 
+  getApprovedPharmacies, 
+  approvePharmacy, 
+  rejectPharmacy, 
+  deleteUser, 
+  deletePharmacy,
+  getActivityLogs,
+  updateUserStatus,
+  getAllReservations,
+  getAllDeliveries,
+  getAllMedicines
+};
