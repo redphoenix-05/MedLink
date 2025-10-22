@@ -266,18 +266,46 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 p-6 rounded-lg shadow-lg">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">✅</span>
+              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                <span className="text-yellow-600 text-sm font-bold">💰</span>
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Reservations Delivered</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.reservations.delivered}</p>
+              <p className="text-sm font-medium text-yellow-100">Platform Earnings</p>
+              <p className="text-2xl font-bold text-white">৳{stats.platformEarnings?.total || '0.00'}</p>
+              <p className="text-xs text-yellow-100 mt-1">{stats.platformEarnings?.feeRate || 3}% fee on transactions</p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Platform Revenue Details */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">💰 Platform Revenue Breakdown</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm text-gray-600">Completed Orders</p>
+            <p className="text-2xl font-bold text-blue-600">{stats.orders?.completed || 0}</p>
+            <p className="text-xs text-gray-500 mt-1">Total orders processed</p>
+          </div>
+          <div className="p-4 bg-yellow-50 rounded-lg">
+            <p className="text-sm text-gray-600">Platform Fee Rate</p>
+            <p className="text-2xl font-bold text-yellow-600">{stats.platformEarnings?.feeRate || 3}%</p>
+            <p className="text-xs text-gray-500 mt-1">On gross revenue</p>
+          </div>
+          <div className="p-4 bg-green-50 rounded-lg border-2 border-green-300">
+            <p className="text-sm text-gray-600">Total Earnings</p>
+            <p className="text-2xl font-bold text-green-600">৳{stats.platformEarnings?.total || '0.00'}</p>
+            <p className="text-xs text-gray-500 mt-1">From {stats.orders?.completed || 0} completed orders</p>
+          </div>
+        </div>
+        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+          <p className="text-sm text-gray-700">
+            <strong>ℹ️ Note:</strong> Platform earns {stats.platformEarnings?.feeRate || 3}% on gross revenue (medicine sales + delivery charges) from completed orders.
+          </p>
         </div>
       </div>
 

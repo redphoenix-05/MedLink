@@ -1,4 +1,4 @@
-const { User, Pharmacy, Reservation, Medicine } = require('../models');
+const { User, Pharmacy, Reservation, Medicine, Order } = require('../models');
 
 const getDashboardStats = async (req, res) => {
   try {
@@ -30,8 +30,24 @@ const getDashboardStats = async (req, res) => {
     // Total medicines count
     const totalMedicines = await Medicine.count();
     
-    // Revenue (this can be calculated from orders if you have payment tracking)
-    const revenue = 0; // Placeholder - implement actual revenue calculation if needed
+    // Calculate platform earnings from completed orders
+    const completedOrders = await Order.findAll({
+      where: { status: 'completed' }
+    });
+    
+    // Platform collects 3% fee on gross revenue (medicine + delivery)
+    const PLATFORM_FEE_RATE = 0.03;
+    const totalPlatformEarnings = completedOrders.reduce((sum, order) => {
+      const medicineSales = parseFloat(order.totalPrice);
+      const deliveryCharge = parseFloat(order.deliveryCharge || 0);
+      const grossRevenue = medicineSales + deliveryCharge;
+      const platformFee = grossRevenue * PLATFORM_FEE_RATE;
+      return sum + platformFee;
+    }, 0);
+    
+    // Total orders count
+    const totalOrders = await Order.count();
+    const completedOrdersCount = completedOrders.length;
     
     // Recent activity (last 7 days)
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -67,7 +83,14 @@ const getDashboardStats = async (req, res) => {
           delivered: completedDeliveries
         },
         totalMedicines,
-        revenue,
+        orders: {
+          total: totalOrders,
+          completed: completedOrdersCount
+        },
+        platformEarnings: {
+          total: totalPlatformEarnings.toFixed(2),
+          feeRate: (PLATFORM_FEE_RATE * 100).toFixed(0) // 3%
+        },
         medicineTrends: [], // Placeholder for future implementation
         recentActivity: {
           users: recentUsers,
