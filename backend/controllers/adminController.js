@@ -2,16 +2,78 @@ const { User, Pharmacy, Reservation, Medicine } = require('../models');
 
 const getDashboardStats = async (req, res) => {
   try {
+    // User statistics by role
     const totalUsers = await User.count();
+    const customerCount = await User.count({ where: { role: 'customer' } });
+    const pharmacyUserCount = await User.count({ where: { role: 'pharmacy' } });
+    const adminCount = await User.count({ where: { role: 'admin' } });
+    
+    // Pharmacy statistics by status
     const totalPharmacies = await Pharmacy.count();
-    const totalMedicines = await Medicine.count();
-    const totalReservations = await Reservation.count();
     const pendingPharmacies = await Pharmacy.count({ where: { status: 'pending' } });
     const approvedPharmacies = await Pharmacy.count({ where: { status: 'approved' } });
+    const rejectedPharmacies = await Pharmacy.count({ where: { status: 'rejected' } });
+    
+    // Reservation statistics by status
+    const totalReservations = await Reservation.count();
+    const pendingReservations = await Reservation.count({ where: { status: 'pending' } });
+    const acceptedReservations = await Reservation.count({ where: { status: 'accepted' } });
+    const deliveredReservations = await Reservation.count({ where: { status: 'delivered' } });
+    const rejectedReservations = await Reservation.count({ where: { status: 'rejected' } });
+    
+    // Delivery statistics
+    const totalDeliveries = await Reservation.count({ where: { deliveryOption: 'delivery' } });
+    const pendingDeliveries = await Reservation.count({ where: { deliveryOption: 'delivery', status: 'pending' } });
+    const outForDelivery = await Reservation.count({ where: { deliveryOption: 'delivery', status: 'accepted' } });
+    const completedDeliveries = await Reservation.count({ where: { deliveryOption: 'delivery', status: 'delivered' } });
+    
+    // Total medicines count
+    const totalMedicines = await Medicine.count();
+    
+    // Revenue (this can be calculated from orders if you have payment tracking)
+    const revenue = 0; // Placeholder - implement actual revenue calculation if needed
+    
+    // Recent activity (last 7 days)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const recentUsers = await User.count({ where: { createdAt: { [require('sequelize').Op.gte]: sevenDaysAgo } } });
+    const recentPharmacies = await Pharmacy.count({ where: { createdAt: { [require('sequelize').Op.gte]: sevenDaysAgo } } });
 
     res.json({
       success: true,
-      data: { totalUsers, totalPharmacies, totalMedicines, totalReservations, pendingPharmacies, approvedPharmacies }
+      data: {
+        users: {
+          total: totalUsers,
+          customer: customerCount,
+          pharmacy: pharmacyUserCount,
+          admin: adminCount
+        },
+        pharmacies: {
+          total: totalPharmacies,
+          pending: pendingPharmacies,
+          approved: approvedPharmacies,
+          rejected: rejectedPharmacies
+        },
+        reservations: {
+          total: totalReservations,
+          pending: pendingReservations,
+          accepted: acceptedReservations,
+          delivered: deliveredReservations,
+          rejected: rejectedReservations
+        },
+        deliveries: {
+          total: totalDeliveries,
+          pending: pendingDeliveries,
+          out_for_delivery: outForDelivery,
+          delivered: completedDeliveries
+        },
+        totalMedicines,
+        revenue,
+        medicineTrends: [], // Placeholder for future implementation
+        recentActivity: {
+          users: recentUsers,
+          pharmacies: recentPharmacies
+        }
+      }
     });
   } catch (error) {
     console.error('Dashboard stats error:', error);

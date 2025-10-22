@@ -1,4 +1,5 @@
 const { Pharmacy, User, PharmacyInventory, Medicine } = require('../models');
+const Order = require('../models/Order');
 const { Op } = require('sequelize');
 
 // @desc    Register pharmacy information
@@ -294,10 +295,130 @@ const getMyPharmacy = async (req, res) => {
   }
 };
 
+// @desc    Get pharmacy orders
+// @route   GET /api/pharmacies/orders
+// @access  Private (Pharmacy users only)
+const getPharmacyOrders = async (req, res) => {
+  try {
+    // First get the pharmacy for this user
+    const pharmacy = await Pharmacy.findOne({
+      where: { userId: req.user.id }
+    });
+
+    if (!pharmacy) {
+      return res.status(404).json({
+        success: false,
+        message: 'No pharmacy found for this user'
+      });
+    }
+
+    // Get all orders for this pharmacy
+    const orders = await Order.findAll({
+      where: { pharmacyId: pharmacy.id },
+      include: [
+        {
+          model: User,
+          as: 'customer',
+          attributes: ['id', 'name', 'email', 'phone']
+        }
+      ],
+      order: [['orderDate', 'DESC']]
+    });
+
+    // Calculate stats
+    const stats = {
+      total: orders.length,
+      pending: orders.filter(o => o.status === 'pending').length,
+      confirmed: orders.filter(o => o.status === 'confirmed').length,
+      delivered: orders.filter(o => o.status === 'delivered').length,
+      completed: orders.filter(o => o.status === 'completed').length,
+      totalRevenue: orders
+        .filter(o => o.status === 'completed')
+        .reduce((sum, o) => sum + parseFloat(o.grandTotal), 0)
+    };
+
+    res.json({
+      success: true,
+      data: { 
+        orders,
+        stats 
+      }
+    });
+
+  } catch (error) {
+    console.error('Get pharmacy orders error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get pharmacy orders',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Update order status
+// @route   PUT /api/pharmacies/orders/:orderId
+// @access  Private (Pharmacy users only)
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status, deliveryDate } = req.body;
+
+    // First get the pharmacy for this user
+    const pharmacy = await Pharmacy.findOne({
+      where: { userId: req.user.id }
+    });
+
+    if (!pharmacy) {
+      return res.status(404).json({
+        success: false,
+        message: 'No pharmacy found for this user'
+      });
+    }
+
+    // Get the order
+    const order = await Order.findOne({
+      where: { 
+        id: orderId,
+        pharmacyId: pharmacy.id 
+      }
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    // Update order
+    order.status = status;
+    if (deliveryDate) {
+      order.deliveryDate = deliveryDate;
+    }
+    await order.save();
+
+    res.json({
+      success: true,
+      message: 'Order status updated successfully',
+      data: { order }
+    });
+
+  } catch (error) {
+    console.error('Update order status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update order status',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   registerPharmacy,
   getPharmacy,
   updatePharmacy,
   getAllPharmacies,
   getMyPharmacy,
+  getPharmacyOrders,
+  updateOrderStatus
 };
