@@ -20,9 +20,8 @@ const Layout = ({ children }) => {
     try {
       const response = await api.get('/cart');
       if (response.data.success) {
-        const totalItems = response.data.data.cart.reduce((sum, pharmacy) => 
-          sum + pharmacy.items.reduce((s, item) => s + item.quantity, 0), 0
-        );
+        const cartItems = response.data.data.cartItems || [];
+        const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
         setCartItemCount(totalItems);
       }
     } catch (err) {

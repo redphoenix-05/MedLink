@@ -99,14 +99,33 @@ const CartPage = () => {
     );
   }
 
-  const totalItems = cart.reduce((sum, pharmacy) => 
-    sum + pharmacy.items.reduce((s, item) => s + item.quantity, 0), 0
+  // Calculate totals from flat cart array
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const medicineTotal = cart.reduce((sum, item) => 
+    sum + (parseFloat(item.price) * item.quantity), 0
   );
-
-  const medicineTotal = cart.reduce((sum, pharmacy) => sum + parseFloat(pharmacy.totalPrice), 0);
   const deliveryCharge = deliveryType === 'delivery' ? 60.00 : 0.00;
   const platformFee = medicineTotal * 0.003; // 0.3%
   const grandTotal = medicineTotal + deliveryCharge + platformFee;
+
+  // Group cart items by pharmacy
+  const groupedCart = cart.reduce((acc, item) => {
+    const pharmacyId = item.pharmacyId;
+    if (!acc[pharmacyId]) {
+      acc[pharmacyId] = {
+        pharmacyId: item.pharmacy.id,
+        pharmacyName: item.pharmacy.name,
+        pharmacyAddress: item.pharmacy.address,
+        items: [],
+        totalPrice: 0
+      };
+    }
+    acc[pharmacyId].items.push(item);
+    acc[pharmacyId].totalPrice += parseFloat(item.price) * item.quantity;
+    return acc;
+  }, {});
+
+  const pharmacyGroups = Object.values(groupedCart);
 
   return (
     <Layout>
@@ -226,7 +245,7 @@ const CartPage = () => {
             </div>
 
             {/* Cart Items grouped by Pharmacy */}
-            {cart.map((pharmacy) => (
+            {pharmacyGroups.map((pharmacy) => (
               <div key={pharmacy.pharmacyId} className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
                   <div className="flex justify-between items-center">
@@ -239,7 +258,7 @@ const CartPage = () => {
                     <div className="text-right">
                       <p className="text-sm text-gray-600">Subtotal</p>
                       <p className="text-xl font-bold text-gray-900">
-                        ৳{parseFloat(pharmacy.totalPrice).toFixed(2)}
+                        ৳{pharmacy.totalPrice.toFixed(2)}
                       </p>
                     </div>
                   </div>
