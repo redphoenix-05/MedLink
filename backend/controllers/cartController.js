@@ -693,6 +693,7 @@ const paymentSuccess = async (req, res) => {
       paymentMeta = JSON.parse(value_d || '{}');
     } catch (parseError) {
       console.error('❌ Error parsing payment metadata:', parseError);
+      // Set defaults but we'll recalculate delivery charge later
       paymentMeta = { numberOfPharmacies: 1, deliveryCharge: 0, platformFee: 0 };
     }
 
@@ -720,10 +721,26 @@ const paymentSuccess = async (req, res) => {
       return res.redirect(`http://localhost:5173/payment/failed?reason=${encodeURIComponent('Cart is empty')}`);
     }
 
+    // Recalculate delivery charge based on actual cart data
+    const uniquePharmacyIds = [...new Set(cartItems.map(item => item.pharmacyId))];
+    const DELIVERY_CHARGE_PER_PHARMACY = 60.00;
+    const actualTotalDeliveryCharge = deliveryType === 'delivery' 
+      ? DELIVERY_CHARGE_PER_PHARMACY * uniquePharmacyIds.length 
+      : 0.00;
+    
+    // Use actual calculated delivery charge instead of potentially corrupted metadata
+    const TOTAL_DELIVERY_CHARGE = actualTotalDeliveryCharge;
+    const DELIVERY_CHARGE_PER_PHARMACY_SPLIT = TOTAL_DELIVERY_CHARGE / uniquePharmacyIds.length;
+    
+    console.log('💰 Delivery Calculation:', {
+      deliveryType,
+      uniquePharmacies: uniquePharmacyIds.length,
+      chargePerPharmacy: DELIVERY_CHARGE_PER_PHARMACY,
+      totalDeliveryCharge: TOTAL_DELIVERY_CHARGE
+    });
+
     // Create orders (same logic as checkout)
     const orders = [];
-    const uniquePharmacyIds = [...new Set(cartItems.map(item => item.pharmacyId))];
-    const DELIVERY_CHARGE_PER_PHARMACY = parseFloat(paymentMeta.deliveryCharge) / uniquePharmacyIds.length;
 
     for (const item of cartItems) {
       const inventory = await PharmacyInventory.findOne({
@@ -750,7 +767,7 @@ const paymentSuccess = async (req, res) => {
       
       const isFirstItemFromPharmacy = !orders.some(o => o.pharmacyId === item.pharmacyId);
       const itemDeliveryCharge = (isFirstItemFromPharmacy && deliveryType === 'delivery')
-        ? DELIVERY_CHARGE_PER_PHARMACY 
+        ? DELIVERY_CHARGE_PER_PHARMACY_SPLIT 
         : 0.00;
       
       const grandTotal = parseFloat((totalPrice + itemDeliveryCharge + itemPlatformFee).toFixed(2));
