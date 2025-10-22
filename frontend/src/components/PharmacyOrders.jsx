@@ -13,20 +13,29 @@ const PharmacyOrders = ({ pharmacyId }) => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/pharmacy/stats');
-      setStats(response.data.data.stats || {
-        totalEarnings: '0.00',
-        totalOrders: 0,
-        pickupOrders: 0,
-        deliveryOrders: 0,
-        totalMedicinesSold: '0.00',
-        totalQuantity: 0
+      const response = await api.get('/pharmacies/orders');
+      
+      // Backend returns { orders, stats } where stats has: total, pending, confirmed, delivered, completed, totalRevenue
+      const backendStats = response.data.data.stats || {};
+      const ordersData = response.data.data.orders || [];
+      
+      // Transform to match frontend expectations
+      setStats({
+        totalEarnings: (backendStats.totalRevenue || 0).toFixed(2),
+        totalOrders: backendStats.completed || 0,
+        pickupOrders: ordersData.filter(o => o.deliveryType === 'pickup' && o.status === 'completed').length,
+        deliveryOrders: ordersData.filter(o => o.deliveryType === 'delivery' && o.status === 'completed').length,
+        pending: backendStats.pending || 0,
+        confirmed: backendStats.confirmed || 0,
+        delivered: backendStats.delivered || 0,
+        total: backendStats.total || 0
       });
-      setOrders(response.data.data.orders || []);
+      
+      setOrders(ordersData);
       setError('');
     } catch (err) {
-      console.error('Error fetching pharmacy stats:', err);
-      setError(err.response?.data?.message || 'Failed to load statistics');
+      console.error('Error fetching pharmacy orders:', err);
+      setError(err.response?.data?.message || 'Failed to load orders');
     } finally {
       setLoading(false);
     }
@@ -39,7 +48,7 @@ const PharmacyOrders = ({ pharmacyId }) => {
 
   const updateOrderStatus = async (orderId, status, deliveryDate) => {
     try {
-      await api.put(`/pharmacy/orders/${orderId}`, { 
+      await api.put(`/pharmacies/orders/${orderId}`, { 
         status, 
         deliveryDate 
       });
@@ -114,7 +123,7 @@ const PharmacyOrders = ({ pharmacyId }) => {
               <div>
                 <p className="text-blue-100 text-sm font-medium">Total Orders</p>
                 <p className="text-3xl font-bold mt-2">{stats?.totalOrders || 0}</p>
-                <p className="text-blue-100 text-xs mt-1">All completed orders</p>
+                <p className="text-blue-100 text-xs mt-1">Completed orders</p>
               </div>
               <svg className="w-12 h-12 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -125,12 +134,12 @@ const PharmacyOrders = ({ pharmacyId }) => {
           <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-purple-100 text-sm font-medium">Pickup Orders</p>
-                <p className="text-3xl font-bold mt-2">{stats?.pickupOrders || 0}</p>
-                <p className="text-purple-100 text-xs mt-1">Customer pickup</p>
+                <p className="text-purple-100 text-sm font-medium">Pending Orders</p>
+                <p className="text-3xl font-bold mt-2">{stats?.pending || 0}</p>
+                <p className="text-purple-100 text-xs mt-1">Awaiting confirmation</p>
               </div>
               <svg className="w-12 h-12 text-purple-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
@@ -138,9 +147,9 @@ const PharmacyOrders = ({ pharmacyId }) => {
           <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-orange-100 text-sm font-medium">Delivery Orders</p>
-                <p className="text-3xl font-bold mt-2">{stats?.deliveryOrders || 0}</p>
-                <p className="text-orange-100 text-xs mt-1">Home delivery</p>
+                <p className="text-orange-100 text-sm font-medium">Active Orders</p>
+                <p className="text-3xl font-bold mt-2">{(stats?.confirmed || 0) + (stats?.delivered || 0)}</p>
+                <p className="text-orange-100 text-xs mt-1">In progress</p>
               </div>
               <svg className="w-12 h-12 text-orange-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -149,24 +158,23 @@ const PharmacyOrders = ({ pharmacyId }) => {
           </div>
         </div>
 
-      {/* Additional Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Medicines Sold</h3>
-          <p className="text-3xl font-bold text-indigo-600">৳{stats?.totalMedicinesSold || '0.00'}</p>
-          <p className="text-sm text-gray-600 mt-1">{stats?.totalQuantity || 0} units sold</p>
-        </div>
-      </div>
-
-      {/* Medicines Sold List */}
+      {/* Order Management Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Medicines Sold</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Order Management</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Total: {stats?.total || 0} orders | 
+            Pending: {stats?.pending || 0} | 
+            Confirmed: {stats?.confirmed || 0} | 
+            Delivered: {stats?.delivered || 0}
+          </p>
         </div>
 
         {orders.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
-            No orders yet
+            <div className="text-4xl mb-4">📦</div>
+            <p className="text-lg font-medium">No orders yet</p>
+            <p className="text-sm">Orders will appear here when customers place them</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -177,22 +185,16 @@ const PharmacyOrders = ({ pharmacyId }) => {
                     Order Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Medicine Name
+                    Customer
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Generic Name
+                    Medicine
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Unit Price
+                    Price Details
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Quantity
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total Price
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
+                    Delivery
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -209,19 +211,22 @@ const PharmacyOrders = ({ pharmacyId }) => {
                       {new Date(order.orderDate).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{order.customer?.name || 'N/A'}</div>
+                      <div className="text-sm text-gray-500">{order.customer?.phone || 'N/A'}</div>
+                    </td>
+                    <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">{order.medicineName}</div>
+                      {order.genericName && (
+                        <div className="text-sm text-gray-500">Generic: {order.genericName}</div>
+                      )}
+                      <div className="text-xs text-gray-500">Qty: {order.quantity}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {order.genericName || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ৳{parseFloat(order.unitPrice).toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {order.quantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600">
-                      ৳{parseFloat(order.totalPrice).toFixed(2)}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">৳{parseFloat(order.unitPrice).toFixed(2)} × {order.quantity}</div>
+                      <div className="text-sm font-semibold text-indigo-600">Total: ৳{parseFloat(order.totalPrice).toFixed(2)}</div>
+                      {order.deliveryCharge > 0 && (
+                        <div className="text-xs text-gray-500">Delivery: ৳{parseFloat(order.deliveryCharge).toFixed(2)}</div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -231,16 +236,25 @@ const PharmacyOrders = ({ pharmacyId }) => {
                       }`}>
                         {order.deliveryType === 'delivery' ? '🚚 Delivery' : '🏪 Pickup'}
                       </span>
+                      {order.deliveryType === 'delivery' && order.deliveryAddress && (
+                        <div className="text-xs text-gray-500 mt-1 max-w-xs">{order.deliveryAddress}</div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                         order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
                         order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                        order.status === 'completed' ? 'bg-gray-100 text-gray-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
-                        {order.status}
+                        {order.status.toUpperCase()}
                       </span>
+                      {order.deliveryDate && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {new Date(order.deliveryDate).toLocaleDateString()}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {order.status === 'pending' && (
