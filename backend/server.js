@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -12,6 +12,8 @@ const searchRoutes = require('./routes/searchRoutes');
 const reservationRoutes = require('./routes/reservationRoutes');
 const deliveryRoutes = require('./routes/deliveryRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const pharmacyOrdersRoutes = require('./routes/pharmacyOrdersRoutes');
 
 // Initialize models and associations
 require('./models');
@@ -40,6 +42,8 @@ app.use('/api/search', searchRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/deliveries', deliveryRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/pharmacy', pharmacyOrdersRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

@@ -266,8 +266,8 @@ const getPharmacyDetails = async (req, res) => {
       operatingHours: pharmacy.operatingHours,
       licenseNumber: pharmacy.licenseNumber,
       owner: {
-        name: pharmacy.user.name,
-        email: pharmacy.user.email,
+        name: pharmacy.owner.name,
+        email: pharmacy.owner.email,
       },
       medicines: pharmacy.inventory.map(inv => ({
         inventoryId: inv.id,

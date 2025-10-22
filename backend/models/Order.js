@@ -7,15 +7,10 @@ const Order = sequelize.define('Order', {
     primaryKey: true,
     autoIncrement: true,
   },
-  orderNumber: {
-    type: DataTypes.STRING,
-    unique: true,
-    allowNull: false,
-  },
-  customerId: {
+  userId: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'Users',
+      model: 'users',
       key: 'id',
     },
     allowNull: false,
@@ -23,31 +18,52 @@ const Order = sequelize.define('Order', {
   pharmacyId: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'Pharmacies',
+      model: 'users',
       key: 'id',
     },
     allowNull: false,
   },
-  status: {
-    type: DataTypes.ENUM('pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'),
-    defaultValue: 'pending',
-    allowNull: false,
-  },
-  totalAmount: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: false,
-  },
-  deliveryAddress: {
-    type: DataTypes.TEXT,
-    allowNull: false,
-  },
-  customerPhone: {
+  medicineName: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  notes: {
-    type: DataTypes.TEXT,
+  genericName: {
+    type: DataTypes.STRING,
     allowNull: true,
+  },
+  unitPrice: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+  },
+  quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  totalPrice: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+  },
+  deliveryCharge: {
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0.00,
+  },
+  platformFee: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+  },
+  grandTotal: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+  },
+  deliveryType: {
+    type: DataTypes.ENUM('pickup', 'delivery'),
+    allowNull: false,
+    defaultValue: 'pickup',
+  },
+  status: {
+    type: DataTypes.ENUM('pending', 'confirmed', 'delivered', 'completed'),
+    defaultValue: 'pending',
+    allowNull: false,
   },
   orderDate: {
     type: DataTypes.DATE,

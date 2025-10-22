@@ -21,6 +21,12 @@ const createReservation = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Delivery address is required for delivery option' });
     }
 
+    // Validate deliveryOption value
+    if (deliveryOption !== 'delivery' && deliveryOption !== 'pickup') {
+      await transaction.rollback();
+      return res.status(400).json({ success: false, message: 'Invalid delivery option. Must be "delivery" or "pickup"' });
+    }
+
     // Get pharmacy inventory to check stock and price
     const inventory = await PharmacyInventory.findOne({
       where: { pharmacyId, medicineId },

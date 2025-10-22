@@ -41,7 +41,7 @@ API.interceptors.response.use(
 // ==========================================
 export const cartAPI = {
   // Add item to cart
-  addToCart: (data) => API.post('/cart/add', data),
+  addToCart: (data) => API.post('/cart', data),
   
   // Get cart items
   getCart: () => API.get('/cart'),
@@ -53,7 +53,7 @@ export const cartAPI = {
   removeItem: (itemId) => API.delete(`/cart/${itemId}`),
   
   // Clear cart
-  clearCart: () => API.delete('/cart/clear'),
+  clearCart: () => API.delete('/cart'),
   
   // Checkout
   checkout: (data) => API.post('/cart/checkout', data)

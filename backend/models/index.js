@@ -4,6 +4,8 @@ const Medicine = require('./Medicine');
 const PharmacyInventory = require('./PharmacyInventory');
 const Reservation = require('./Reservation');
 const Delivery = require('./Delivery');
+const Cart = require('./Cart');
+const Order = require('./Order');
 
 // Define associations
 // User -> Pharmacy (One to One)
@@ -14,7 +16,7 @@ User.hasOne(Pharmacy, {
 });
 Pharmacy.belongsTo(User, {
   foreignKey: 'userId',
-  as: 'user',
+  as: 'owner',
 });
 
 // Pharmacy -> PharmacyInventory (One to Many)
@@ -102,6 +104,52 @@ Reservation.hasOne(Delivery, {
 // Order relationships will be added later
 // Commented out for now to fix database sync issues
 
+// ==========================================
+// CART ASSOCIATIONS
+// ==========================================
+Cart.belongsTo(User, {
+  foreignKey: 'customerId',
+  as: 'customer'
+});
+
+Cart.belongsTo(Pharmacy, {
+  foreignKey: 'pharmacyId',
+  as: 'pharmacy'
+});
+
+Cart.belongsTo(Medicine, {
+  foreignKey: 'medicineId',
+  as: 'medicine'
+});
+
+User.hasMany(Cart, {
+  foreignKey: 'customerId',
+  as: 'cartItems'
+});
+
+// ==========================================
+// ORDER ASSOCIATIONS
+// ==========================================
+Order.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'customer'
+});
+
+Order.belongsTo(User, {
+  foreignKey: 'pharmacyId',
+  as: 'pharmacy'
+});
+
+User.hasMany(Order, {
+  foreignKey: 'userId',
+  as: 'orders'
+});
+
+User.hasMany(Order, {
+  foreignKey: 'pharmacyId',
+  as: 'pharmacyOrders'
+});
+
 module.exports = {
   User,
   Pharmacy,
@@ -109,4 +157,6 @@ module.exports = {
   PharmacyInventory,
   Reservation,
   Delivery,
+  Cart,
+  Order,
 };
