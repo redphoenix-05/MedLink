@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../components/Layout';
+import CustomerLayout from '../components/CustomerLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
 import ReservationForm from '../components/ReservationForm';
@@ -86,15 +86,15 @@ const PharmacyBrowsePage = () => {
 
   if (loading) {
     return (
-      <Layout>
+      <CustomerLayout>
         <LoadingSpinner />
-      </Layout>
+      </CustomerLayout>
     );
   }
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <CustomerLayout>
+      <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Browse Pharmacies</h1>
           
@@ -307,7 +307,7 @@ const PharmacyBrowsePage = () => {
           onSuccess={handleReservationSuccess}
         />
       )}
-    </Layout>
+    </CustomerLayout>
   );
 };
 

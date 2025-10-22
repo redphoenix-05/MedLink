@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import Layout from '../components/Layout';
+import CustomerLayout from '../components/CustomerLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
 import api from '../services/api';
@@ -117,9 +117,9 @@ const CartPage = () => {
 
   if (loading) {
     return (
-      <Layout>
+      <CustomerLayout>
         <LoadingSpinner />
-      </Layout>
+      </CustomerLayout>
     );
   }
 
@@ -156,8 +156,8 @@ const CartPage = () => {
   const grandTotal = medicineTotal + deliveryCharge + platformFee;
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <CustomerLayout>
+      <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
           {cart.length > 0 && (
@@ -423,7 +423,7 @@ const CartPage = () => {
           </div>
         )}
       </div>
-    </Layout>
+    </CustomerLayout>
   );
 };
 

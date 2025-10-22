@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import Layout from '../components/Layout';
+import AdminLayout from '../components/AdminLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
 import API, { adminAPI } from '../services/api';
@@ -624,8 +624,8 @@ const AdminDashboard = () => {
   );
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <AdminLayout>
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
@@ -689,7 +689,7 @@ const AdminDashboard = () => {
         {/* Pharmacy Details Modal */}
         <PharmacyDetailsModal />
       </div>
-    </Layout>
+    </AdminLayout>
   );
 };
 

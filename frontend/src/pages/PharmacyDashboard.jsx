@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import Layout from '../components/Layout';
+import PharmacyLayout from '../components/PharmacyLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
 import ComboBox from '../components/ComboBox';
 import PharmacyOrders from '../components/PharmacyOrders';
 import API from '../services/api';
+import { Store, User, Pill, Package, ClipboardList } from 'lucide-react';
 
 const PharmacyDashboard = () => {
   const { user } = useAuth();
@@ -299,25 +300,34 @@ const PharmacyDashboard = () => {
 
   if (loading && !pharmacy && !inventory.length) {
     return (
-      <Layout>
+      <PharmacyLayout>
         <div className="flex justify-center items-center h-64">
           <LoadingSpinner size="large" text="Loading pharmacy dashboard..." />
         </div>
-      </Layout>
+      </PharmacyLayout>
     );
   }
 
   return (
-    <Layout>
-      <div className="px-4 py-6 sm:px-0">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome, {user?.name}!
-          </h1>
-          <p className="text-lg text-gray-600 mt-2">
-            Manage your pharmacy profile and inventory
-          </p>
+    <PharmacyLayout>
+      <div className="space-y-6">
+        {/* Welcome Card */}
+        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-2xl shadow-xl p-8 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                Welcome back, {user?.name}! 👋
+              </h1>
+              <p className="text-blue-100 text-lg">
+                Manage your pharmacy inventory and orders
+              </p>
+            </div>
+            <div className="hidden lg:block">
+              <div className="w-24 h-24 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                <Store className="w-12 h-12 text-white" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Alerts */}
@@ -326,7 +336,6 @@ const PharmacyDashboard = () => {
             type="error"
             message={error}
             onClose={() => setError('')}
-            className="mb-6"
           />
         )}
         {success && (
@@ -334,7 +343,6 @@ const PharmacyDashboard = () => {
             type="success"
             message={success}
             onClose={() => setSuccess('')}
-            className="mb-6"
           />
         )}
 
@@ -368,48 +376,56 @@ const PharmacyDashboard = () => {
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex space-x-8">
+        {/* Tabs - Modern Card Style */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1.5">
+          <nav className="flex gap-2">
             <button
               onClick={() => setActiveTab('profile')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
                 activeTab === 'profile'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200'
+                  : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              Profile Info
+              <User className="w-4 h-4" />
+              <span className="hidden sm:inline">Profile Info</span>
+              <span className="sm:hidden">Profile</span>
             </button>
             <button
               onClick={() => setActiveTab('medicines')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
                 activeTab === 'medicines'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200'
+                  : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              Medicine Management
+              <Pill className="w-4 h-4" />
+              <span className="hidden sm:inline">Medicine Management</span>
+              <span className="sm:hidden">Medicines</span>
             </button>
             <button
               onClick={() => setActiveTab('inventory')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
                 activeTab === 'inventory'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200'
+                  : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              Inventory Management
+              <Package className="w-4 h-4" />
+              <span className="hidden sm:inline">Inventory Management</span>
+              <span className="sm:hidden">Inventory</span>
             </button>
             <button
               onClick={() => setActiveTab('orders')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
                 activeTab === 'orders'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200'
+                  : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              📦 Orders & Delivery
+              <ClipboardList className="w-4 h-4" />
+              <span className="hidden sm:inline">Orders & Delivery</span>
+              <span className="sm:hidden">Orders</span>
             </button>
           </nav>
         </div>
@@ -1053,7 +1069,7 @@ const PharmacyDashboard = () => {
           </div>
         )}
       </div>
-    </Layout>
+    </PharmacyLayout>
   );
 };
 
