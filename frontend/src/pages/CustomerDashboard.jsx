@@ -5,8 +5,6 @@ import Layout from '../components/Layout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
 import PharmacyMap from '../components/PharmacyMap';
-import ReservationForm from '../components/ReservationForm';
-import MyReservationsList from '../components/MyReservationsList';
 import API, { cartAPI } from '../services/api';
 
 const CustomerDashboard = () => {
@@ -19,9 +17,7 @@ const CustomerDashboard = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('search');
   const [selectedPharmacy, setSelectedPharmacy] = useState(null);
-  const [showReservationForm, setShowReservationForm] = useState(false);
   const [selectedMedicine, setSelectedMedicine] = useState(null);
-  const [reservationRefresh, setReservationRefresh] = useState(0);
   const [cartItemCount, setCartItemCount] = useState(0);
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
@@ -118,32 +114,7 @@ const CustomerDashboard = () => {
     setSelectedPharmacy(null);
   };
 
-  const handleReserveClick = (result) => {
-    // Prepare medicine and pharmacy data for reservation
-    setSelectedMedicine({
-      id: result.medicineId,
-      name: result.medicine,
-      brand: result.brand || result.genericName || result.medicine,
-      type: 'Medicine'
-    });
-    
-    setSelectedPharmacy({
-      pharmacyId: result.id, // The pharmacy ID is in result.id
-      pharmacyName: result.name,
-      pharmacyAddress: result.address,
-      pharmacyPhone: result.phone,
-      price: result.price,
-      stock: result.stock
-    });
-    
-    setShowReservationForm(true);
-  };
 
-  const handleReservationSuccess = () => {
-    setShowReservationForm(false);
-    setReservationRefresh(prev => prev + 1);
-    setActiveTab('reservations');
-  };
 
   return (
     <Layout>
@@ -190,16 +161,6 @@ const CustomerDashboard = () => {
               }`}
             >
               📍 Pharmacy Map
-            </button>
-            <button
-              onClick={() => setActiveTab('reservations')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'reservations'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              📋 My Reservations
             </button>
             <button
               onClick={() => setActiveTab('orders')}
@@ -323,16 +284,6 @@ const CustomerDashboard = () => {
                           >
                             Get Directions
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleReserveClick(result);
-                            }}
-                            className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                            disabled={!result.availability || result.stock === 0}
-                          >
-                            Reserve Medicine
-                          </button>
                         </div>
                       </div>
                     ))}
@@ -427,14 +378,6 @@ const CustomerDashboard = () => {
                 </div>
               </div>
             )}
-          </div>
-        )}
-
-        {activeTab === 'reservations' && (
-          <div className="space-y-6">
-            <div className="bg-white shadow rounded-lg p-6">
-              <MyReservationsList key={reservationRefresh} />
-            </div>
           </div>
         )}
 
@@ -539,15 +482,6 @@ const CustomerDashboard = () => {
           </div>
         )}
 
-        {/* Reservation Form Modal */}
-        {showReservationForm && selectedMedicine && selectedPharmacy && (
-          <ReservationForm
-            medicine={selectedMedicine}
-            pharmacy={selectedPharmacy}
-            onClose={() => setShowReservationForm(false)}
-            onSuccess={handleReservationSuccess}
-          />
-        )}
       </div>
     </Layout>
   );
