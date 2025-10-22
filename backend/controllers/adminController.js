@@ -35,15 +35,27 @@ const getDashboardStats = async (req, res) => {
       where: { status: 'completed' }
     });
     
-    // Platform collects 3% fee on gross revenue (medicine + delivery)
-    const PLATFORM_FEE_RATE = 0.03;
-    const totalPlatformEarnings = completedOrders.reduce((sum, order) => {
+    // Platform earns from two sources:
+    // 1. Customer platform fee (stored in order.platformFee)
+    // 2. 3% commission on pharmacy's gross revenue (medicine + delivery)
+    const PLATFORM_COMMISSION_RATE = 0.03;
+    
+    let totalCustomerPlatformFees = 0;
+    let totalPharmacyCommission = 0;
+    
+    completedOrders.forEach(order => {
+      // Customer platform fee (0.3% of medicine total)
+      totalCustomerPlatformFees += parseFloat(order.platformFee || 0);
+      
+      // Pharmacy commission (3% of medicine + delivery)
       const medicineSales = parseFloat(order.totalPrice);
       const deliveryCharge = parseFloat(order.deliveryCharge || 0);
-      const grossRevenue = medicineSales + deliveryCharge;
-      const platformFee = grossRevenue * PLATFORM_FEE_RATE;
-      return sum + platformFee;
-    }, 0);
+      const pharmacyGrossRevenue = medicineSales + deliveryCharge;
+      const pharmacyCommission = pharmacyGrossRevenue * PLATFORM_COMMISSION_RATE;
+      totalPharmacyCommission += pharmacyCommission;
+    });
+    
+    const totalPlatformEarnings = totalCustomerPlatformFees + totalPharmacyCommission;
     
     // Total orders count
     const totalOrders = await Order.count();
@@ -89,7 +101,9 @@ const getDashboardStats = async (req, res) => {
         },
         platformEarnings: {
           total: totalPlatformEarnings.toFixed(2),
-          feeRate: (PLATFORM_FEE_RATE * 100).toFixed(0) // 3%
+          customerFees: totalCustomerPlatformFees.toFixed(2),
+          pharmacyCommission: totalPharmacyCommission.toFixed(2),
+          commissionRate: (PLATFORM_COMMISSION_RATE * 100).toFixed(0) // 3%
         },
         medicineTrends: [], // Placeholder for future implementation
         recentActivity: {

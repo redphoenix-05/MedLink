@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
-import { adminAPI } from '../services/api';
+import API, { adminAPI } from '../services/api';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const AdminDashboard = () => {
@@ -276,7 +276,7 @@ const AdminDashboard = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-yellow-100">Platform Earnings</p>
               <p className="text-2xl font-bold text-white">৳{stats.platformEarnings?.total || '0.00'}</p>
-              <p className="text-xs text-yellow-100 mt-1">{stats.platformEarnings?.feeRate || 3}% fee on transactions</p>
+              <p className="text-xs text-yellow-100 mt-1">Customer fees + Pharmacy commission</p>
             </div>
           </div>
         </div>
@@ -285,27 +285,36 @@ const AdminDashboard = () => {
       {/* Platform Revenue Details */}
       <div className="bg-white p-6 rounded-lg shadow-sm border">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">💰 Platform Revenue Breakdown</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-4 bg-blue-50 rounded-lg">
             <p className="text-sm text-gray-600">Completed Orders</p>
             <p className="text-2xl font-bold text-blue-600">{stats.orders?.completed || 0}</p>
             <p className="text-xs text-gray-500 mt-1">Total orders processed</p>
           </div>
+          <div className="p-4 bg-purple-50 rounded-lg">
+            <p className="text-sm text-gray-600">Customer Fees</p>
+            <p className="text-2xl font-bold text-purple-600">৳{stats.platformEarnings?.customerFees || '0.00'}</p>
+            <p className="text-xs text-gray-500 mt-1">0.3% from customers</p>
+          </div>
           <div className="p-4 bg-yellow-50 rounded-lg">
-            <p className="text-sm text-gray-600">Platform Fee Rate</p>
-            <p className="text-2xl font-bold text-yellow-600">{stats.platformEarnings?.feeRate || 3}%</p>
-            <p className="text-xs text-gray-500 mt-1">On gross revenue</p>
+            <p className="text-sm text-gray-600">Pharmacy Commission</p>
+            <p className="text-2xl font-bold text-yellow-600">৳{stats.platformEarnings?.pharmacyCommission || '0.00'}</p>
+            <p className="text-xs text-gray-500 mt-1">{stats.platformEarnings?.commissionRate || 3}% from pharmacies</p>
           </div>
           <div className="p-4 bg-green-50 rounded-lg border-2 border-green-300">
             <p className="text-sm text-gray-600">Total Earnings</p>
             <p className="text-2xl font-bold text-green-600">৳{stats.platformEarnings?.total || '0.00'}</p>
-            <p className="text-xs text-gray-500 mt-1">From {stats.orders?.completed || 0} completed orders</p>
+            <p className="text-xs text-gray-500 mt-1">Combined revenue</p>
           </div>
         </div>
         <div className="mt-4 p-3 bg-blue-50 rounded-lg">
           <p className="text-sm text-gray-700">
-            <strong>ℹ️ Note:</strong> Platform earns {stats.platformEarnings?.feeRate || 3}% on gross revenue (medicine sales + delivery charges) from completed orders.
+            <strong>ℹ️ Revenue Sources:</strong>
           </p>
+          <ul className="text-sm text-gray-700 mt-2 space-y-1 ml-4">
+            <li>• Customer Fee: 0.3% of medicine total (paid by customer)</li>
+            <li>• Pharmacy Commission: {stats.platformEarnings?.commissionRate || 3}% of gross revenue (medicine + delivery)</li>
+          </ul>
         </div>
       </div>
 
