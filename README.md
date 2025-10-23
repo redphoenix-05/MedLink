@@ -1,7 +1,7 @@
 # MedLink - Modern Medicine Delivery & Pharmacy Platform
 
 <div align="center">
-  <img src="./frontend/public/logo.png" alt="MedLink Logo" width="120" height="120">
+  <img src="./frontend/src/assets/logo.png" alt="MedLink Logo" width="120" height="120">
   
   **Find medicines fast. Get them delivered faster.**
   
