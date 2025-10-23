@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { sequelize } = require('../config/database');
 const User = require('../models/User');
+const Pharmacy = require('../models/Pharmacy');
 
 const khulnaPharmacies = [
   {
@@ -336,25 +337,62 @@ const seedData = async () => {
     const customerPassword = await bcrypt.hash('customer123', 10);
 
     // Create pharmacies
-    console.log('📍 Creating 15 pharmacies');
+    console.log('📍 Creating 15 pharmacies in Khulna...');
     let pharmacyCount = 0;
+    let fixedCount = 0;
     
     for (const pharmacy of khulnaPharmacies) {
-      const existingPharmacy = await User.findOne({ where: { email: pharmacy.email } });
+      const existingUser = await User.findOne({ where: { email: pharmacy.email } });
       
-      if (!existingPharmacy) {
-        await User.create({
-          ...pharmacy,
+      if (!existingUser) {
+        // Create User account for pharmacy
+        const pharmacyUser = await User.create({
+          email: pharmacy.email,
           password: hashedPassword,
+          name: pharmacy.name,
+          role: 'pharmacy',
+          phone: pharmacy.phone,
         });
+
+        // Create corresponding Pharmacy record in pharmacies table
+        await Pharmacy.create({
+          userId: pharmacyUser.id,
+          name: pharmacy.pharmacyName,
+          address: pharmacy.address,
+          phone: pharmacy.phone,
+          licenseNumber: pharmacy.licenseNumber,
+          status: 'approved', // Pre-approve all seeded pharmacies
+          latitude: pharmacy.latitude,
+          longitude: pharmacy.longitude,
+        });
+
         pharmacyCount++;
         console.log(`   ✓ Created: ${pharmacy.pharmacyName} at ${pharmacy.address}`);
       } else {
-        console.log(`   ⊘ Skipped: ${pharmacy.pharmacyName} (already exists)`);
+        // User exists, check if Pharmacy record exists
+        const existingPharmacy = await Pharmacy.findOne({ where: { userId: existingUser.id } });
+        
+        if (!existingPharmacy) {
+          // Create missing Pharmacy record
+          await Pharmacy.create({
+            userId: existingUser.id,
+            name: pharmacy.pharmacyName,
+            address: pharmacy.address,
+            phone: pharmacy.phone,
+            licenseNumber: pharmacy.licenseNumber,
+            status: 'approved',
+            latitude: pharmacy.latitude,
+            longitude: pharmacy.longitude,
+          });
+          fixedCount++;
+          console.log(`   🔧 Fixed: ${pharmacy.pharmacyName} (added Pharmacy record)`);
+        } else {
+          console.log(`   ⊘ Skipped: ${pharmacy.pharmacyName} (already exists)`);
+        }
       }
     }
 
-    console.log(`\n✅ ${pharmacyCount} pharmacies created successfully!\n`);
+    console.log(`\n✅ ${pharmacyCount} pharmacies created, ${fixedCount} fixed!\n`);
 
     // Create customers
     console.log('👥 Creating 20 customer accounts...');
@@ -381,7 +419,7 @@ const seedData = async () => {
     console.log('═══════════════════════════════════════════');
     console.log('🎉 SEED DATA GENERATION COMPLETE!');
     console.log('═══════════════════════════════════════════');
-    console.log(`📍 Pharmacies in Khulna: ${pharmacyCount} new`);
+    console.log(`📍 Pharmacies in Khulna: ${pharmacyCount} new, ${fixedCount} fixed`);
     console.log(`👥 Customer Accounts: ${customerCount} new`);
     console.log('═══════════════════════════════════════════\n');
 
