@@ -734,27 +734,6 @@ npm run build
 - Update DATABASE_URL in backend environment
 - Run database migrations
 
-#### 4. SSL Certificate
-
-- Use Let's Encrypt for free SSL
-- Configure HTTPS for both frontend and backend
-- Update all URLs to use HTTPS
-
-### Production Checklist
-
-- [ ] Change JWT_SECRET to strong random string
-- [ ] Use production SSLCommerz credentials
-- [ ] Set up production database with backups
-- [ ] Configure CORS for production domains only
-- [ ] Enable rate limiting on API endpoints
-- [ ] Set up error logging (e.g., Sentry)
-- [ ] Configure database connection pooling
-- [ ] Add monitoring and analytics
-- [ ] Set up automated database backups
-- [ ] Test payment flow in production
-- [ ] Set up SSL certificates
-- [ ] Configure CDN for static assets
-
 ## � Features Roadmap
 
 ### ✅ Completed (Phase 1)
@@ -879,37 +858,15 @@ SOFTWARE.
 ## 👥 Team & Support
 
 ### Developers
-- **Red Phoenix** - [@redphoenix-05](https://github.com/redphoenix-05)
+- **Ariyan Aftab Spandan 2107045** - [@redphoenix-05](https://github.com/redphoenix-05)
 
 ### Support
 
 For questions, issues, or feature requests:
 
-- 📧 **Email**: support@medlink.com
+- 📧 **Email**: ariyanspandan@gmail.com
 - 🐛 **Issues**: [GitHub Issues](https://github.com/redphoenix-05/MedLink/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/redphoenix-05/MedLink/discussions)
-
-### Acknowledgments
-
-Special thanks to:
-- React team for the amazing framework
-- Tailwind CSS for the utility-first styling
-- PostgreSQL community
-- SSLCommerz for payment gateway
-- Lucide for beautiful icons
-- All contributors and testers
-
-## 🌟 Show Your Support
-
-If you find this project helpful, please consider:
-
-- ⭐ **Star this repository**
-- 🐛 **Report bugs**
-- 💡 **Suggest new features**
-- 🤝 **Contribute to the code**
-- 📢 **Share with others**
-
----
 
 <div align="center">
   
@@ -922,3 +879,7 @@ If you find this project helpful, please consider:
   **© 2025 MedLink. All rights reserved.**
 
 </div>
+
+--
+Created By : Ariyan Aftab Spandan
+Roll : 2107045
