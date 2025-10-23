@@ -340,6 +340,25 @@ const ProfilePage = () => {
             </div>
           </div>
         </div>
+
+        {/* Danger Zone - Delete Account */}
+        <div className="mt-6 bg-white rounded-lg shadow border-2 border-red-200">
+          <div className="p-6">
+            <h2 className="text-xl font-semibold text-red-600 mb-2">
+              Danger Zone
+            </h2>
+            <p className="text-gray-600 text-sm mb-4">
+              Once you delete your account, there is no going back. This action cannot be undone.
+              All your data including orders, reservations, and cart items will be permanently deleted.
+            </p>
+            <button
+              onClick={handleDeleteAccount}
+              className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium"
+            >
+              Delete Account
+            </button>
+          </div>
+        </div>
       </div>
     </CustomerLayout>
   );
