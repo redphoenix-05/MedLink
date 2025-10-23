@@ -81,4 +81,14 @@ router.get('/deliveries', getAllDeliveries);
 // @access  Private (Admin only)
 router.get('/medicines', getAllMedicines);
 
+// @route   GET /api/admin/users/incomplete
+// @desc    Get incomplete/unregistered users
+// @access  Private (Admin only)
+router.get('/users/incomplete', getIncompleteUsers);
+
+// @route   POST /api/admin/users/cleanup
+// @desc    Cleanup incomplete/unregistered users
+// @access  Private (Admin only)
+router.post('/users/cleanup', cleanupIncompleteUsers);
+
 module.exports = router;
