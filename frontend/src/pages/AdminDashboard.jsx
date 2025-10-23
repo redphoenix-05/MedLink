@@ -5,6 +5,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
 import API, { adminAPI } from '../services/api';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LayoutDashboard, Store, CheckCircle, Users } from 'lucide-react';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -648,27 +649,36 @@ const AdminDashboard = () => {
           />
         )}
 
-        {/* Navigation Tabs */}
-        <div className="mb-8">
-          <nav className="flex space-x-8">
+        {/* Navigation Tabs - Modern Card Style */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1.5 mb-8">
+          <nav className="flex gap-2">
             {[
-              { id: 'overview', label: 'Overview' },
-              { id: 'pending', label: 'Pending Pharmacies' },
-              { id: 'approved', label: 'Approved Pharmacies' },
-              { id: 'users', label: 'Users List' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+              { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+              { id: 'pending', label: 'Pending Pharmacies', icon: Store },
+              { id: 'approved', label: 'Approved Pharmacies', icon: CheckCircle },
+              { id: 'users', label: 'Users List', icon: Users },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? 'bg-gradient-to-r from-gray-900 to-black text-white shadow-lg shadow-gray-300'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">
+                    {tab.id === 'overview' ? 'Overview' : 
+                     tab.id === 'pending' ? 'Pending' : 
+                     tab.id === 'approved' ? 'Approved' : 'Users'}
+                  </span>
+                </button>
+              );
+            })}
           </nav>
         </div>
 
