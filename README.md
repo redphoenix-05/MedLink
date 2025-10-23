@@ -1,134 +1,183 @@
-# MedLink - Neighborhood Medicine Availability & Pharmacy Locator
+# MedLink - Modern Medicine Delivery & Pharmacy Platform
 
-**Find medicines fast. Find pharmacies nearby.**
+<div align="center">
+  <img src="./frontend/public/logo.png" alt="MedLink Logo" width="120" height="120">
+  
+  **Find medicines fast. Get them delivered faster.**
+  
+  [![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react)](https://reactjs.org/)
+  [![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=node.js)](https://nodejs.org/)
+  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?logo=postgresql)](https://www.postgresql.org/)
+  [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
+</div>
 
-MedLink is a full-stack MERN + PostgreSQL application that helps users locate nearby pharmacies and check medicine availability in real-time. The platform serves three types of users: Customers, Pharmacies, and Administrators.
+---
 
-## 🚀 Project Status: Stage 1 Complete
+## 📖 Overview
 
-**Stage 1** focuses on authentication and basic role-based access control.
+MedLink is a comprehensive **full-stack medicine delivery platform** built with the MERN stack (MongoDB alternative: PostgreSQL) that revolutionizes healthcare access by connecting customers with nearby pharmacies. The platform features real-time medicine search, inventory management, secure payment processing, and location-based pharmacy discovery.
 
-### ✅ Completed Features
-- JWT-based authentication system
-- Role-based access control (Customer, Pharmacy, Admin)
-- Secure user registration and login
-- Responsive UI with TailwindCSS
-- Protected routes and middleware
-- PostgreSQL database with Sequelize ORM
+### 🎯 Key Highlights
+- 🔐 **Secure Authentication** - JWT-based auth with role-based access control
+- 💊 **Smart Medicine Search** - Real-time availability across multiple pharmacies
+- 📍 **Location-Based Discovery** - Find pharmacies near you with interactive maps
+- � **Seamless Shopping Cart** - Multi-pharmacy cart with intelligent delivery fee calculation
+- 💳 **Secure Payments** - SSLCommerz integration for safe transactions
+- 📊 **Dashboard Analytics** - Role-specific dashboards with modern UI
+- 📱 **Fully Responsive** - Beautiful design across all devices
 
-### 🔮 Coming in Stage 2
-- Pharmacy inventory management
-- Medicine search functionality
-- Location-based pharmacy finder
-- Admin verification system
-- Real-time notifications
+## ✨ Features
+
+### 🛍️ Customer Features
+- **Medicine Search**: Search across all pharmacies with real-time availability
+- **Pharmacy Browser**: View nearby pharmacies with distance and ratings
+- **Interactive Map**: Google Maps integration for pharmacy locations
+- **Shopping Cart**: Add medicines from multiple pharmacies
+- **Delivery Options**: Choose between pickup and home delivery
+- **Order Tracking**: Track order status (Pending → Confirmed → Delivered)
+- **Payment Processing**: Secure online payment via SSLCommerz
+- **Profile Management**: Update personal information and view order history
+
+### 🏪 Pharmacy Features
+- **Inventory Management**: Add, update, and manage medicine stock
+- **Order Management**: View and process customer orders
+- **Earnings Dashboard**: Track revenue with delivery charge breakdown
+- **Stock Alerts**: Monitor low-stock medicines
+- **Profile Management**: Update pharmacy details and location
+- **Order Statistics**: View pickup vs delivery orders
+- **Medicine Sales Tracking**: Monitor total medicines sold
+
+### �‍💼 Admin Features
+- **Pharmacy Verification**: Approve or reject pharmacy registrations
+- **User Management**: View and manage all users
+- **System Overview**: Monitor platform statistics
+- **Role Management**: Oversee customer and pharmacy activities
 
 ## 🛠️ Tech Stack
 
-### Backend
-- **Node.js** with **Express.js**
-- **PostgreSQL** database
-- **Sequelize** ORM
-- **JWT** for authentication
-- **bcrypt** for password hashing
-- **CORS** for cross-origin requests
-
 ### Frontend
-- **React 19** with **Vite**
-- **React Router DOM** for routing
-- **TailwindCSS** for styling
-- **Axios** for API calls
-- **Context API** for state management
+- **React 19.1.1** - Modern UI library
+- **Vite 7.1.9** - Lightning-fast build tool
+- **React Router 7.9.3** - Client-side routing
+- **TailwindCSS v4** - Utility-first styling
+- **Lucide React** - Beautiful icon library
+- **Axios** - HTTP client for API calls
+- **React Context API** - Global state management
+
+### Backend
+- **Node.js** - Runtime environment
+- **Express.js** - Web application framework
+- **PostgreSQL** - Relational database
+- **Sequelize ORM** - Database object modeling
+- **JWT** - JSON Web Token authentication
+- **bcrypt** - Password hashing
+- **Nodemailer** - Email notifications
+- **SSLCommerz** - Payment gateway integration
+
+### Development Tools
+- **ESLint** - Code linting
+- **PostCSS** - CSS transformation
+- **CORS** - Cross-Origin Resource Sharing
+
+### Development Tools
+- **ESLint** - Code linting
+- **PostCSS** - CSS transformation
+- **CORS** - Cross-Origin Resource Sharing
 
 ## 📁 Project Structure
 
 ```
 MedLink/
-├── backend/               # Backend API
-│   ├── controllers/       # Route controllers
-│   │   └── authController.js
-│   ├── db/               # Database configuration
-│   │   └── database.js
-│   ├── lib/              # Utility libraries
-│   │   └── utils.js
-│   ├── middleware/       # Express middleware
-│   │   └── auth.js
-│   ├── models/           # Database models
-│   │   └── User.js
-│   ├── routes/           # API routes
-│   │   └── authRoutes.js
-│   ├── scripts/          # Database and utility scripts
-│   │   └── initDb.js
-│   ├── .env             # Environment variables
+├── backend/                      # Backend API Server
+│   ├── config/
+│   │   └── database.js          # PostgreSQL configuration
+│   ├── controllers/
+│   │   ├── authController.js    # Authentication logic
+│   │   ├── cartController.js    # Shopping cart & payment
+│   │   ├── customerController.js # Customer operations
+│   │   ├── pharmacyController.js # Pharmacy management
+│   │   ├── pharmacyOrdersController.js # Order processing
+│   │   └── adminController.js   # Admin operations
+│   ├── middleware/
+│   │   └── auth.js              # JWT authentication middleware
+│   ├── models/
+│   │   ├── User.js              # User model (Customer/Pharmacy/Admin)
+│   │   ├── Medicine.js          # Medicine inventory model
+│   │   ├── Cart.js              # Shopping cart model
+│   │   └── Order.js             # Order model
+│   ├── routes/
+│   │   ├── authRoutes.js        # Authentication routes
+│   │   ├── customerRoutes.js    # Customer routes
+│   │   ├── pharmacyRoutes.js    # Pharmacy routes
+│   │   └── adminRoutes.js       # Admin routes
+│   ├── .env                     # Environment variables
 │   ├── package.json
-│   └── server.js        # Server entry point
+│   └── server.js                # Server entry point
 │
-├── frontend/            # Frontend React app
+├── frontend/                     # React Frontend
+│   ├── public/
+│   │   ├── logo.png             # MedLink logo
+│   │   └── vite.svg
 │   ├── src/
-│   │   ├── components/  # Reusable components
-│   │   ├── context/     # React Context
-│   │   ├── pages/       # Page components
-│   │   ├── services/    # API services
-│   │   ├── App.jsx
-│   │   └── main.jsx
+│   │   ├── assets/              # Static assets
+│   │   ├── components/
+│   │   │   ├── Alert.jsx        # Alert notification component
+│   │   │   ├── LoadingSpinner.jsx # Loading state component
+│   │   │   ├── ProtectedRoute.jsx # Route protection
+│   │   │   ├── CustomerLayout.jsx # Customer sidebar layout
+│   │   │   ├── PharmacyLayout.jsx # Pharmacy sidebar layout
+│   │   │   └── AdminLayout.jsx  # Admin sidebar layout
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx  # Authentication context
+│   │   ├── pages/
+│   │   │   ├── LandingPage.jsx  # Home page
+│   │   │   ├── LoginPage.jsx    # Login page
+│   │   │   ├── SignupPage.jsx   # Registration page
+│   │   │   ├── CustomerDashboard.jsx # Customer home
+│   │   │   ├── PharmacyBrowsePage.jsx # Browse pharmacies
+│   │   │   ├── CartPage.jsx     # Shopping cart
+│   │   │   ├── ProfilePage.jsx  # User profile
+│   │   │   ├── PharmacyDashboard.jsx # Pharmacy home
+│   │   │   ├── PharmacyOrders.jsx # Pharmacy orders
+│   │   │   ├── AdminDashboard.jsx # Admin home
+│   │   │   ├── PaymentSuccess.jsx # Payment success page
+│   │   │   ├── PaymentFailed.jsx  # Payment failure page
+│   │   │   ├── PaymentCancelled.jsx # Payment cancelled page
+│   │   │   └── UnauthorizedPage.jsx # 403 error page
+│   │   ├── services/
+│   │   │   ├── api.js           # Axios configuration
+│   │   │   └── authService.js   # Auth service functions
+│   │   ├── App.jsx              # Main app component
+│   │   ├── App.css              # Global styles
+│   │   ├── index.css            # Tailwind directives
+│   │   └── main.jsx             # React entry point
+│   ├── eslint.config.js         # ESLint configuration
+│   ├── postcss.config.js        # PostCSS configuration
+│   ├── tailwind.config.js       # Tailwind configuration
+│   ├── vite.config.js           # Vite configuration
 │   ├── package.json
 │   └── index.html
 │
-├── demo_img/           # Demo images and screenshots
-└── README.md
+└── README.md                     # Project documentation
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- PostgreSQL (v14 or higher)
-- npm or yarn
+- **Node.js** v18+ ([Download](https://nodejs.org/))
+- **PostgreSQL** v14+ ([Download](https://www.postgresql.org/download/))
+- **npm** or **yarn** package manager
+- **Git** for version control
 
-### Quick Start Options
+### Installation
 
-Choose your preferred method:
-
-#### Option 1: Local Development (Recommended) ⚡
-
-**Simple 3-step setup:**
-
-1. **Run Database Setup**
-   ```powershell
-   .\setup-database.ps1
-   ```
-
-2. **Configure Environment Variables**
-   - Update `.env` file with your email and payment credentials
-
-3. **Start the Application**
-   ```powershell
-   .\start.ps1
-   ```
-
-**Done!** The application will start on:
-- Frontend: http://localhost:5173
-- Backend: http://localhost:5000
-
-📖 **For detailed instructions, see [LOCAL_SETUP.md](LOCAL_SETUP.md)**
-
-#### Option 2: Docker (Alternative) 🐳
-
-If you prefer Docker:
-
+#### 1️⃣ Clone the Repository
 ```bash
-# Build and start all services
-docker-compose up --build
-
-# Stop services
-docker-compose down
+git clone https://github.com/redphoenix-05/MedLink.git
+cd MedLink
 ```
 
-Access the application at http://localhost:5173
-
-### Manual Setup (If Scripts Don't Work)
-
-#### 1. Set up PostgreSQL Database
+#### 2️⃣ Set Up PostgreSQL Database
 ```powershell
 # Connect to PostgreSQL
 psql -U postgres
@@ -140,216 +189,736 @@ GRANT ALL PRIVILEGES ON DATABASE medlink_db TO medlink_user;
 \q
 ```
 
-#### 2. Configure Environment Variables
-   
-Update `.env` file:
+#### 3️⃣ Configure Backend Environment
+
+Create `.env` file in the `backend` folder:
+
 ```env
-# Database
-DATABASE_URL=postgresql://medlink_user:medlink_pass@localhost:5432/medlink_db
+# Server Configuration
+PORT=5000
+NODE_ENV=development
+CLIENT_URL=http://localhost:5173
 
-# Email (Update with your credentials)
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=medlink_db
+DB_USER=medlink_user
+DB_PASSWORD=medlink_pass
+
+# JWT Secret (Change this!)
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+
+# Email Configuration (Gmail)
 EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
+EMAIL_PASS=your-app-specific-password
 
-# Payment (Update with your SSLCommerz credentials)
-STORE_ID=your-store-id
-STORE_PASSWORD=your-store-password
+# SSLCommerz Payment Gateway
+STORE_ID=your-sslcommerz-store-id
+STORE_PASSWORD=your-sslcommerz-store-password
+PAYMENT_SUCCESS_URL=http://localhost:5000/api/customer/payment/success
+PAYMENT_FAIL_URL=http://localhost:5000/api/customer/payment/fail
+PAYMENT_CANCEL_URL=http://localhost:5000/api/customer/payment/cancel
 ```
 
-#### 3. Start Backend
-```powershell
+**Getting Gmail App Password:**
+1. Enable 2-Factor Authentication on your Google Account
+2. Go to [Google App Passwords](https://myaccount.google.com/apppasswords)
+3. Generate an app password for "Mail"
+4. Use that 16-character password in EMAIL_PASS
+
+**Getting SSLCommerz Credentials:**
+1. Register at [SSLCommerz](https://sslcommerz.com/)
+2. For testing, use sandbox credentials
+3. Get Store ID and Store Password from dashboard
+
+#### 4️⃣ Install Dependencies & Start Backend
+
+```bash
 cd backend
 npm install
 node server.js
 ```
 
-#### 4. Start Frontend (New Terminal)
-```powershell
+You should see:
+```
+✅ Connected to PostgreSQL Database!
+🚀 Server running on http://localhost:5000
+```
+
+#### 5️⃣ Start Frontend (New Terminal)
+
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-### Create Admin User
+Frontend will start on: **http://localhost:5173**
 
-After backend is running:
-```powershell
+#### 6️⃣ Create Admin Account (Optional)
+
+```bash
 cd backend
 node scripts/createAdmin.js
 ```
 
-## 🔐 Authentication System
+Default admin credentials:
+- **Email**: admin@medlink.com
+- **Password**: admin123
+
+## 🎨 User Interface
+
+### Design System
+
+#### Color Themes
+- **Customer Dashboard**: Green theme (#15803d, #16a34a, #22c55e)
+- **Pharmacy Dashboard**: Blue theme (#1e40af, #1e3a8a, #3b82f6)
+- **Admin Dashboard**: Black/White theme (Gray-900, Gray-800)
+
+#### Layout Features
+- **Sidebar Navigation**: Fixed 72px sidebar with logo and navigation
+- **Glassmorphism**: Modern glass effect on navbars
+- **Gradient Headers**: Role-specific gradient backgrounds
+- **Responsive Design**: Mobile-first approach with breakpoints
+- **Icon System**: Lucide React icons throughout
+
+## 🔐 Authentication & Authorization
 
 ### User Roles
-- **Customer**: Search for medicines and locate pharmacies
-- **Pharmacy**: Manage inventory and serve customers
-- **Admin**: Oversee system and verify pharmacies
 
-### API Endpoints
+| Role | Access Level | Features |
+|------|--------------|----------|
+| **Customer** | Standard User | Browse, Search, Order medicines |
+| **Pharmacy** | Business User | Manage inventory, Process orders |
+| **Admin** | Super User | Verify pharmacies, Manage system |
 
-#### Authentication Routes
-- `POST /api/auth/signup` - Register new user
-- `POST /api/auth/login` - User login
-- `GET /api/auth/me` - Get current user (protected)
+### Protected Routes
 
-#### Example API Usage
-
-**Register User:**
 ```javascript
-POST /api/auth/signup
+// Customer Routes (Requires authentication + customer role)
+/customer/dashboard
+/customer/browse-pharmacies
+/customer/cart
+/customer/profile
+
+// Pharmacy Routes (Requires authentication + pharmacy role)
+/pharmacy/dashboard
+/pharmacy/orders
+
+// Admin Routes (Requires authentication + admin role)
+/admin/dashboard
+```
+
+### JWT Token Flow
+1. User logs in with credentials
+2. Server validates and returns JWT token
+3. Token stored in localStorage
+4. Token included in all API requests (Authorization header)
+5. Server verifies token for protected routes
+6. Token expires after 7 days (configurable)
+
+## 📡 API Documentation
+
+### Base URL
+```
+http://localhost:5000/api
+```
+
+### Authentication Endpoints
+
+#### Register User
+```http
+POST /auth/signup
 Content-Type: application/json
 
 {
+  "email": "customer@example.com",
+  "password": "password123",
   "name": "John Doe",
-  "email": "john@example.com",
-  "password": "securepassword",
   "role": "customer"
 }
 ```
 
-**Login User:**
-```javascript
-POST /api/auth/login
+#### Login
+```http
+POST /auth/login
 Content-Type: application/json
 
 {
-  "email": "john@example.com",
-  "password": "securepassword",
-  "role": "customer"
+  "email": "customer@example.com",
+  "password": "password123"
 }
 ```
 
-## 🎨 Frontend Features
+Response:
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "token": "jwt-token-here",
+    "user": {
+      "id": 1,
+      "email": "customer@example.com",
+      "name": "John Doe",
+      "role": "customer"
+    }
+  }
+}
+```
 
-### Pages
-- **Landing Page**: Project introduction and navigation
-- **Login Page**: Role-based authentication
-- **Signup Page**: User registration with role selection
-- **Dashboard Pages**: Role-specific welcome screens
+### Customer Endpoints
 
-### Components
-- **Layout**: Common header and navigation
-- **ProtectedRoute**: Route protection with role checking
-- **LoadingSpinner**: Loading states
-- **Alert**: Error and success messages
+#### Search Medicines
+```http
+GET /customer/search-medicine?query=paracetamol
+Authorization: Bearer <token>
+```
 
-### State Management
-- **AuthContext**: Centralized authentication state
-- **LocalStorage**: Token persistence
-- **Axios Interceptors**: Automatic token handling
+#### Browse Pharmacies
+```http
+GET /customer/pharmacies?lat=23.8103&lon=90.4125
+Authorization: Bearer <token>
+```
 
-## 🔒 Security Features
+#### Add to Cart
+```http
+POST /customer/cart/add
+Authorization: Bearer <token>
+Content-Type: application/json
 
-- **JWT Authentication**: Secure token-based auth
-- **Password Hashing**: bcrypt with salt rounds
-- **Role-based Access Control**: Route and API protection
-- **Input Validation**: Frontend and backend validation
-- **CORS Configuration**: Secure cross-origin requests
+{
+  "inventoryId": 123,
+  "quantity": 2
+}
+```
 
-## 🧪 Testing the Application
+#### Checkout
+```http
+POST /customer/checkout
+Authorization: Bearer <token>
+Content-Type: application/json
 
-### Manual Testing Checklist
+{
+  "deliveryType": "delivery",
+  "deliveryAddress": "123 Main St, Dhaka"
+}
+```
 
-1. **Registration Flow**
-   - [ ] Register as Customer
-   - [ ] Register as Pharmacy
-   - [ ] Register as Admin
-   - [ ] Verify email validation
-   - [ ] Verify password requirements
+### Pharmacy Endpoints
 
-2. **Login Flow**
-   - [ ] Login with correct credentials
-   - [ ] Login with incorrect credentials
-   - [ ] Role-based redirects work
-   - [ ] Token persistence works
+#### Add Medicine to Inventory
+```http
+POST /pharmacy/inventory/add
+Authorization: Bearer <token>
+Content-Type: application/json
 
-3. **Protected Routes**
-   - [ ] Access dashboard without login (should redirect)
-   - [ ] Access wrong role dashboard (should show unauthorized)
-   - [ ] Logout functionality works
+{
+  "name": "Napa",
+  "genericName": "Paracetamol",
+  "dosage": "500mg",
+  "price": 2.50,
+  "stock": 100,
+  "expiryDate": "2026-12-31"
+}
+```
 
-4. **UI/UX**
-   - [ ] Responsive design on mobile/tablet
-   - [ ] Loading states display correctly
-   - [ ] Error messages are clear
-   - [ ] Navigation flows smoothly
+#### Get Orders
+```http
+GET /pharmacy/orders
+Authorization: Bearer <token>
+```
+
+#### Update Order Status
+```http
+PUT /pharmacy/orders/:orderId
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "status": "confirmed"
+}
+```
+
+### Admin Endpoints
+
+#### Get Pending Pharmacies
+```http
+GET /admin/pending-pharmacies
+Authorization: Bearer <token>
+```
+
+#### Approve Pharmacy
+```http
+PUT /admin/pharmacy/:id/approve
+Authorization: Bearer <token>
+```
+
+## 💳 Payment Integration
+
+### SSLCommerz Flow
+
+1. **Customer initiates checkout**
+2. **Backend creates payment session** with SSLCommerz
+3. **Customer redirected** to SSLCommerz payment page
+4. **Payment processed** by SSLCommerz
+5. **SSLCommerz redirects** back to app with status
+6. **Backend verifies** payment and creates orders
+7. **Customer sees** success/failure page
+
+### Payment Calculation
+
+```javascript
+// Per-order calculation
+Medicine Total = Unit Price × Quantity
+Platform Fee = 2% of Medicine Total
+Delivery Charge = ৳50 per pharmacy (first item only)
+Grand Total = Medicine Total + Platform Fee + Delivery Charge
+
+// Example: 2 medicines from same pharmacy
+Medicine 1: ৳100 × 2 = ৳200
+Medicine 2: ৳50 × 1 = ৳50
+Subtotal: ৳250
+Platform Fee: ৳250 × 2% = ৳5
+Delivery: ৳50 (one-time per pharmacy)
+Total: ৳305
+```
+
+### Revenue Distribution
+
+- **Pharmacy Earnings** = Medicine Total + Delivery Charge
+- **Platform Earnings** = Platform Fee (2%)
+
+## 🗄️ Database Schema
+
+### Key Tables
+
+## �️ Database Schema
+
+### Key Tables
+
+#### Users Table
+```sql
+- id (PK)
+- email (Unique)
+- password (Hashed)
+- name
+- role (customer/pharmacy/admin)
+- isApproved (boolean, for pharmacy)
+- pharmacyName (for pharmacy)
+- address (for pharmacy)
+- latitude, longitude (for pharmacy)
+- licenseNumber (for pharmacy)
+- phone (for pharmacy)
+- createdAt, updatedAt
+```
+
+#### Medicines Table
+```sql
+- id (PK)
+- pharmacyId (FK → Users)
+- name
+- genericName
+- dosage
+- price
+- stock
+- expiryDate
+- createdAt, updatedAt
+```
+
+#### Cart Table
+```sql
+- id (PK)
+- customerId (FK → Users)
+- inventoryId (FK → Medicines)
+- quantity
+- createdAt, updatedAt
+```
+
+#### Orders Table
+```sql
+- id (PK)
+- userId (FK → Users)
+- pharmacyId (FK → Users)
+- medicineName
+- genericName
+- unitPrice
+- quantity
+- totalPrice
+- deliveryCharge
+- platformFee
+- grandTotal
+- deliveryType (pickup/delivery)
+- deliveryAddress
+- status (pending/confirmed/delivered/completed)
+- orderDate
+- createdAt, updatedAt
+```
+
+## 🧪 Testing Guide
+
+### Manual Testing Scenarios
+
+#### 1. Customer Journey
+```bash
+1. Register as Customer
+2. Login with customer credentials
+3. Search for medicine (e.g., "Napa")
+4. Browse pharmacies near you
+5. Add medicines to cart from different pharmacies
+6. Proceed to checkout
+7. Select delivery type (pickup/delivery)
+8. Complete payment via SSLCommerz
+9. View order status in "My Orders"
+```
+
+#### 2. Pharmacy Journey
+```bash
+1. Register as Pharmacy
+2. Wait for admin approval
+3. Login after approval
+4. Add medicines to inventory
+5. Update medicine stock levels
+6. View incoming orders
+7. Update order status (confirm/delivered)
+8. Check earnings dashboard
+```
+
+#### 3. Admin Journey
+```bash
+1. Login as Admin
+2. View pending pharmacy applications
+3. Approve/Reject pharmacies
+4. View system statistics
+5. Monitor user activities
+```
+
+### Test Credentials
+
+After setting up, you can create test accounts:
+
+**Admin**
+```
+Email: admin@medlink.com
+Password: admin123
+```
+
+**Test Customer** (Register manually)
+```
+Email: customer@test.com
+Password: test123
+Role: Customer
+```
+
+**Test Pharmacy** (Register manually)
+```
+Email: pharmacy@test.com
+Password: test123
+Role: Pharmacy
+```
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+### Common Issues & Solutions
 
-**Database Connection Failed**
-- Verify PostgreSQL is running
-- Check DATABASE_URL in .env file
-- Ensure database exists
+#### Backend Not Starting
 
-**CORS Errors**
-- Verify CLIENT_URL in server/.env
-- Check if both servers are running
+**Error**: `Error: connect ECONNREFUSED ::1:5432`
+- **Solution**: PostgreSQL is not running
+```bash
+# Start PostgreSQL service (Windows)
+net start postgresql-x64-14
 
-**Token Errors**
-- Clear localStorage
-- Check JWT_SECRET configuration
-- Verify token format in requests
-
-## 📝 API Documentation
-
-### Response Format
-All API responses follow this structure:
-
-```javascript
-{
-  "success": boolean,
-  "message": string,
-  "data": object | null,
-  "error": string | null
-}
+# Or check if it's running
+services.msc  # Look for PostgreSQL service
 ```
 
-### Error Handling
-- **400**: Bad Request (validation errors)
-- **401**: Unauthorized (invalid credentials)
-- **403**: Forbidden (insufficient permissions)
-- **404**: Not Found
-- **500**: Internal Server Error
+**Error**: `JWT_SECRET is not defined`
+- **Solution**: Missing environment variable
+```bash
+# Add to backend/.env
+JWT_SECRET=your-secret-key-here
+```
 
-## 🚀 Deployment
+#### Frontend Not Loading
+
+**Error**: `Failed to fetch` or CORS errors
+- **Solution**: Backend not running or wrong URL
+```bash
+# Check backend is running on port 5000
+# Verify CLIENT_URL in backend/.env matches frontend URL
+CLIENT_URL=http://localhost:5173
+```
+
+#### Database Connection Failed
+
+**Error**: `password authentication failed for user "medlink_user"`
+- **Solution**: Wrong database credentials
+```bash
+# Reset PostgreSQL user password
+psql -U postgres
+ALTER USER medlink_user WITH PASSWORD 'medlink_pass';
+```
+
+#### Payment Not Working
+
+**Error**: Payment page doesn't load
+- **Solution**: Check SSLCommerz credentials
+```bash
+# Verify in backend/.env
+STORE_ID=your-store-id
+STORE_PASSWORD=your-store-password
+
+# For testing, use SSLCommerz sandbox credentials
+```
+
+#### Orders Not Showing
+
+**Error**: Orders created but not visible
+- **Solution**: Check order status filter
+```javascript
+// Backend only shows confirmed/delivered/completed orders
+// Verify order status in database is correct
+```
+
+## 🚀 Deployment Guide
+
+### Deploying to Production
+
+#### 1. Backend Deployment (Railway/Render/Heroku)
+
+**Environment Variables to Set:**
+```env
+NODE_ENV=production
+DATABASE_URL=postgresql://user:pass@host:5432/dbname
+JWT_SECRET=your-production-secret
+CLIENT_URL=https://your-frontend-domain.com
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+STORE_ID=production-store-id
+STORE_PASSWORD=production-store-password
+PAYMENT_SUCCESS_URL=https://your-backend/api/customer/payment/success
+PAYMENT_FAIL_URL=https://your-backend/api/customer/payment/fail
+PAYMENT_CANCEL_URL=https://your-backend/api/customer/payment/cancel
+```
+
+**Build Commands:**
+```bash
+npm install
+node server.js
+```
+
+#### 2. Frontend Deployment (Vercel/Netlify)
+
+**Update API URL:**
+```javascript
+// src/services/api.js
+const API_URL = process.env.VITE_API_URL || 'https://your-backend-domain.com/api';
+```
+
+**Environment Variables:**
+```env
+VITE_API_URL=https://your-backend-domain.com/api
+```
+
+**Build Commands:**
+```bash
+npm install
+npm run build
+```
+
+#### 3. Database (Railway/Supabase/AWS RDS)
+
+- Migrate to managed PostgreSQL service
+- Update DATABASE_URL in backend environment
+- Run database migrations
+
+#### 4. SSL Certificate
+
+- Use Let's Encrypt for free SSL
+- Configure HTTPS for both frontend and backend
+- Update all URLs to use HTTPS
 
 ### Production Checklist
-- [ ] Update environment variables for production
-- [ ] Configure production database
-- [ ] Set up HTTPS
-- [ ] Configure CORS for production domain
-- [ ] Optimize build settings
+
+- [ ] Change JWT_SECRET to strong random string
+- [ ] Use production SSLCommerz credentials
+- [ ] Set up production database with backups
+- [ ] Configure CORS for production domains only
+- [ ] Enable rate limiting on API endpoints
+- [ ] Set up error logging (e.g., Sentry)
+- [ ] Configure database connection pooling
+- [ ] Add monitoring and analytics
+- [ ] Set up automated database backups
+- [ ] Test payment flow in production
+- [ ] Set up SSL certificates
+- [ ] Configure CDN for static assets
+
+## � Features Roadmap
+
+### ✅ Completed (Phase 1)
+- [x] User authentication and authorization
+- [x] Role-based dashboards (Customer, Pharmacy, Admin)
+- [x] Medicine inventory management
+- [x] Shopping cart functionality
+- [x] Payment integration (SSLCommerz)
+- [x] Order management system
+- [x] Location-based pharmacy search
+- [x] Modern responsive UI with Tailwind CSS
+- [x] Email notifications
+- [x] Admin pharmacy approval system
+
+### 🚧 In Progress (Phase 2)
+- [ ] Advanced medicine search with filters
+- [ ] Real-time notifications (WebSocket)
+- [ ] Order tracking with status updates
+- [ ] Pharmacy ratings and reviews
+- [ ] Prescription upload feature
+- [ ] Multiple delivery address support
+- [ ] Order history and analytics
+
+### 🔮 Planned (Phase 3)
+- [ ] Mobile app (React Native)
+- [ ] Push notifications
+- [ ] In-app chat support
+- [ ] Medicine recommendation system
+- [ ] Loyalty points and rewards
+- [ ] Subscription model for regular orders
+- [ ] AI-powered medicine search
+- [ ] Advanced analytics dashboard
+- [ ] Multi-language support
+- [ ] Dark mode
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
+We welcome contributions! Here's how you can help:
 
-## 📋 Stage 2 Roadmap
+### How to Contribute
 
-### Upcoming Features
-- **Medicine Search**: Real-time medicine availability search
-- **Pharmacy Management**: Complete inventory management system
-- **Location Services**: GPS-based pharmacy finder
-- **Admin Panel**: Pharmacy verification and user management
-- **Notifications**: Real-time alerts and updates
-- **Analytics**: Usage statistics and reporting
+1. **Fork the repository**
+   ```bash
+   git clone https://github.com/redphoenix-05/MedLink.git
+   ```
 
-## 📄 License
+2. **Create a feature branch**
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
 
-This project is licensed under the MIT License.
+3. **Make your changes**
+   - Follow the existing code style
+   - Add comments for complex logic
+   - Update documentation if needed
 
-## 📞 Support
+4. **Test your changes**
+   - Test all affected features
+   - Ensure no breaking changes
+   - Check responsive design
 
-For support and questions:
-- Create an issue in the repository
-- Contact the development team
+5. **Commit your changes**
+   ```bash
+   git commit -m 'Add: Amazing new feature'
+   ```
+
+6. **Push to your fork**
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+
+7. **Open a Pull Request**
+   - Describe your changes
+   - Reference any related issues
+   - Wait for code review
+
+### Contribution Guidelines
+
+- **Code Style**: Follow existing patterns and use ESLint
+- **Commits**: Use clear, descriptive commit messages
+- **Documentation**: Update README for new features
+- **Testing**: Test thoroughly before submitting PR
+- **Issues**: Check existing issues before creating new ones
+
+### Areas We Need Help
+
+- 🐛 Bug fixes and testing
+- 📝 Documentation improvements
+- 🎨 UI/UX enhancements
+- ⚡ Performance optimizations
+- 🌐 Internationalization (i18n)
+- 🧪 Writing tests
+
+## 📝 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+```
+MIT License
+
+Copyright (c) 2025 MedLink
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## 👥 Team & Support
+
+### Developers
+- **Red Phoenix** - [@redphoenix-05](https://github.com/redphoenix-05)
+
+### Support
+
+For questions, issues, or feature requests:
+
+- 📧 **Email**: support@medlink.com
+- 🐛 **Issues**: [GitHub Issues](https://github.com/redphoenix-05/MedLink/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/redphoenix-05/MedLink/discussions)
+
+### Acknowledgments
+
+Special thanks to:
+- React team for the amazing framework
+- Tailwind CSS for the utility-first styling
+- PostgreSQL community
+- SSLCommerz for payment gateway
+- Lucide for beautiful icons
+- All contributors and testers
+
+## 🌟 Show Your Support
+
+If you find this project helpful, please consider:
+
+- ⭐ **Star this repository**
+- 🐛 **Report bugs**
+- 💡 **Suggest new features**
+- 🤝 **Contribute to the code**
+- 📢 **Share with others**
 
 ---
 
-**MedLink** - Making healthcare accessible, one neighborhood at a time. 🏥💊
+<div align="center">
+  
+  **MedLink** - Making healthcare accessible, one neighborhood at a time. 🏥💊
+  
+  Built with ❤️ using React, Node.js, PostgreSQL & TailwindCSS
+  
+  [Report Bug](https://github.com/redphoenix-05/MedLink/issues) · [Request Feature](https://github.com/redphoenix-05/MedLink/issues) · [Documentation](https://github.com/redphoenix-05/MedLink/wiki)
+
+  **© 2025 MedLink. All rights reserved.**
+
+</div>
