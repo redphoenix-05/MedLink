@@ -183,13 +183,107 @@ const rejectPharmacy = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
+  const transaction = await require('../config/database').sequelize.transaction();
+  
   try {
-    if (req.params.userId === req.user.id) return res.status(400).json({ success: false, message: 'Cannot delete own account' });
-    const user = await User.findByPk(req.params.userId);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    await user.destroy();
+    // Prevent admin from deleting their own account
+    if (req.params.userId === req.user.id) {
+      await transaction.rollback();
+      return res.status(400).json({ success: false, message: 'Cannot delete your own account' });
+    }
+    
+    const user = await User.findByPk(req.params.userId, { transaction });
+    if (!user) {
+      await transaction.rollback();
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    // Import additional models
+    const { PharmacyInventory, Cart, Delivery } = require('../models');
+    
+    // If user is a pharmacy owner, handle pharmacy deletion first
+    if (user.role === 'pharmacy') {
+      const pharmacy = await Pharmacy.findOne({ where: { userId: req.params.userId }, transaction });
+      
+      if (pharmacy) {
+        // Get all reservation IDs for this pharmacy to delete related deliveries
+        const pharmacyReservations = await Reservation.findAll({
+          where: { pharmacyId: pharmacy.id },
+          attributes: ['id'],
+          transaction
+        });
+        const reservationIds = pharmacyReservations.map(r => r.id);
+        
+        // Delete pharmacy-related records
+        if (reservationIds.length > 0) {
+          await Delivery.destroy({ 
+            where: { reservationId: reservationIds },
+            transaction 
+          });
+        }
+        
+        await Cart.destroy({ 
+          where: { pharmacyId: pharmacy.id },
+          transaction 
+        });
+        
+        await Reservation.destroy({ 
+          where: { pharmacyId: pharmacy.id },
+          transaction 
+        });
+        
+        await Order.destroy({ 
+          where: { pharmacyId: pharmacy.id },
+          transaction 
+        });
+        
+        await PharmacyInventory.destroy({ 
+          where: { pharmacyId: pharmacy.id },
+          transaction 
+        });
+        
+        await pharmacy.destroy({ transaction });
+      }
+    }
+    
+    // Delete user's customer-related records
+    const userReservations = await Reservation.findAll({
+      where: { customerId: req.params.userId },
+      attributes: ['id'],
+      transaction
+    });
+    const userReservationIds = userReservations.map(r => r.id);
+    
+    if (userReservationIds.length > 0) {
+      await Delivery.destroy({ 
+        where: { reservationId: userReservationIds },
+        transaction 
+      });
+    }
+    
+    await Cart.destroy({ 
+      where: { customerId: req.params.userId },
+      transaction 
+    });
+    
+    await Reservation.destroy({ 
+      where: { customerId: req.params.userId },
+      transaction 
+    });
+    
+    await Order.destroy({ 
+      where: { userId: req.params.userId },
+      transaction 
+    });
+    
+    // Finally delete the user
+    await user.destroy({ transaction });
+    
+    await transaction.commit();
     res.json({ success: true, message: 'User deleted successfully' });
   } catch (error) {
+    await transaction.rollback();
+    console.error('Delete user error:', error);
     res.status(500).json({ success: false, message: 'Error deleting user', error: error.message });
   }
 };

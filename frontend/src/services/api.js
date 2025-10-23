@@ -120,6 +120,7 @@ export const adminAPI = {
   // User management
   getAllUsers: (params) => API.get('/admin/users', { params }),
   updateUserStatus: (userId, status) => API.put(`/admin/users/${userId}/status`, { status }),
+  deleteUser: (userId) => API.delete(`/admin/users/${userId}`),
   
   // Pharmacy management
   getPendingPharmacies: (params) => API.get('/admin/pharmacies/pending', { params }),

@@ -56,6 +56,11 @@ router.delete('/pharmacies/:id', require('../controllers/adminController').delet
 // @access  Private (Admin only)
 router.get('/users', getAllUsers);
 
+// @route   DELETE /api/admin/users/:userId
+// @desc    Delete a user
+// @access  Private (Admin only)
+router.delete('/users/:userId', require('../controllers/adminController').deleteUser);
+
 // @route   GET /api/admin/activity-logs
 // @desc    Get system activity logs
 // @access  Private (Admin only)

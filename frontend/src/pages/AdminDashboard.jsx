@@ -207,6 +207,21 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm('Are you sure you want to delete this user? This will also delete all their associated data (reservations, orders, pharmacy if applicable). This action cannot be undone.')) {
+      try {
+        const response = await adminAPI.deleteUser(userId);
+        if (response.data.success) {
+          setSuccess('User deleted successfully!');
+          fetchUsers();
+          fetchStats();
+        }
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to delete user');
+      }
+    }
+  };
+
   const handleViewPharmacyDetails = async (pharmacy) => {
     try {
       const response = await API.get(`/pharmacies/${pharmacy.id}`);
@@ -523,9 +538,10 @@ const AdminDashboard = () => {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pharmacy</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -536,6 +552,9 @@ const AdminDashboard = () => {
                     <div className="text-sm font-medium text-gray-900">{user.name}</div>
                     <div className="text-sm text-gray-500">{user.email}</div>
                   </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {user.phone || '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -548,11 +567,22 @@ const AdminDashboard = () => {
                     {user.role}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {user.pharmacy ? user.pharmacy.name : '-'}
-                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(user.createdAt).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  {user.role !== 'admin' && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteUser(user.id)}
+                      className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
+                    >
+                      Delete
+                    </button>
+                  )}
+                  {user.role === 'admin' && (
+                    <span className="text-xs text-gray-400 italic">Protected</span>
+                  )}
                 </td>
               </tr>
             ))}
