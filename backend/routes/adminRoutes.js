@@ -29,6 +29,11 @@ router.put('/pharmacies/:id/approve', approvePharmacy);
 // @access  Private (Admin only)
 router.put('/pharmacies/:id/reject', rejectPharmacy);
 
+// @route   DELETE /api/admin/pharmacies/:id
+// @desc    Delete pharmacy
+// @access  Private (Admin only)
+router.delete('/pharmacies/:id', require('../controllers/adminController').deletePharmacy);
+
 // @route   GET /api/admin/dashboard-stats
 // @desc    Get admin dashboard statistics
 // @access  Private (Admin only)

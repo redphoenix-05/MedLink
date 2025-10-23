@@ -28,8 +28,16 @@ const User = sequelize.define('User', {
   phone: {
     type: DataTypes.STRING,
     allowNull: true,
-    validates: {
-      len: [0, 20],
+    validate: {
+      isValidPhoneNumber(value) {
+        if (value && value.trim() !== '') {
+          // Bangladesh phone number: must be exactly 11 digits starting with 01[3-9]
+          const phoneRegex = /^01[3-9]\d{8}$/;
+          if (!phoneRegex.test(value)) {
+            throw new Error('The provided number is wrong. Phone number must be 11 digits starting with 01[3-9]');
+          }
+        }
+      }
     },
   },
   password: {

@@ -191,7 +191,7 @@ const AdminDashboard = () => {
   const handleDeletePharmacy = async (pharmacyId) => {
     if (window.confirm('Are you sure you want to delete this pharmacy? This action cannot be undone.')) {
       try {
-        const response = await API.delete(`/pharmacies/${pharmacyId}`);
+        const response = await API.delete(`/admin/pharmacies/${pharmacyId}`);
         if (response.data.success) {
           setSuccess('Pharmacy deleted successfully!');
           if (activeTab === 'pending') {
@@ -395,31 +395,37 @@ const AdminDashboard = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(pharmacy.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => handleViewPharmacyDetails(pharmacy)}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      Details
-                    </button>
-                    <button
-                      onClick={() => handleApprovePharmacy(pharmacy.id)}
-                      className="text-green-600 hover:text-green-900"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => handleRejectPharmacy(pharmacy.id)}
-                      className="text-yellow-600 hover:text-yellow-900"
-                    >
-                      Reject
-                    </button>
-                    <button
-                      onClick={() => handleDeletePharmacy(pharmacy.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Delete
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleViewPharmacyDetails(pharmacy)}
+                        className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+                      >
+                        Details
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleApprovePharmacy(pharmacy.id)}
+                        className="px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRejectPharmacy(pharmacy.id)}
+                        className="px-3 py-1.5 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors text-sm font-medium"
+                      >
+                        Reject
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePharmacy(pharmacy.id)}
+                        className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -476,19 +482,23 @@ const AdminDashboard = () => {
                       Approved
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => handleViewPharmacyDetails(pharmacy)}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      Details
-                    </button>
-                    <button
-                      onClick={() => handleDeletePharmacy(pharmacy.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Delete
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleViewPharmacyDetails(pharmacy)}
+                        className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+                      >
+                        Details
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePharmacy(pharmacy.id)}
+                        className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

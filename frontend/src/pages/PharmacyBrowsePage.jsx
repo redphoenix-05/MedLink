@@ -336,7 +336,7 @@ const PharmacyBrowsePage = () => {
             ) : pharmacyDetails ? (
               <div className="bg-white rounded-lg shadow">
                 {/* Pharmacy Header */}
-                <div className="bg-indigo-600 text-white p-6 rounded-t-lg">
+                <div className="bg-gradient-to-br from-green-600 via-green-700 to-emerald-800 text-white p-6 rounded-t-lg">
                   <h2 className="text-2xl font-bold">{pharmacyDetails.name}</h2>
                   <p className="mt-1">{pharmacyDetails.address}</p>
                   <p className="mt-1">📞 {pharmacyDetails.phone}</p>
@@ -365,7 +365,7 @@ const PharmacyBrowsePage = () => {
                       {pharmacyDetails.medicines.map((item) => (
                         <div
                           key={item.inventoryId}
-                          className="border border-gray-200 rounded-lg p-4 hover:border-indigo-300 transition-colors"
+                          className="border border-gray-200 rounded-lg p-4 hover:border-green-300 hover:shadow-md transition-all"
                         >
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
@@ -379,7 +379,7 @@ const PharmacyBrowsePage = () => {
                                 {item.medicine.genericName}
                               </p>
                               <div className="mt-2 flex items-center space-x-4 text-sm">
-                                <span className="text-indigo-600 font-medium">
+                                <span className="text-green-600 font-medium">
                                   Category: {item.medicine.category}
                                 </span>
                                 <span
@@ -413,11 +413,12 @@ const PharmacyBrowsePage = () => {
                                 ৳{item.price.toFixed(2)}
                               </p>
                               <button
+                                type="button"
                                 onClick={() => handleAddToCart(item)}
                                 disabled={!item.inStock}
-                                className={`mt-2 px-4 py-2 rounded-md text-sm font-medium ${
+                                className={`mt-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                                   item.inStock
-                                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                    ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:shadow-lg transform hover:scale-105 transition-all'
                                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 }`}
                               >

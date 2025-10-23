@@ -196,11 +196,12 @@ const deleteUser = async (req, res) => {
 
 const deletePharmacy = async (req, res) => {
   try {
-    const pharmacy = await Pharmacy.findByPk(req.params.pharmacyId);
+    const pharmacy = await Pharmacy.findByPk(req.params.id);
     if (!pharmacy) return res.status(404).json({ success: false, message: 'Pharmacy not found' });
     await pharmacy.destroy();
     res.json({ success: true, message: 'Pharmacy deleted successfully' });
   } catch (error) {
+    console.error('Delete pharmacy error:', error);
     res.status(500).json({ success: false, message: 'Error deleting pharmacy', error: error.message });
   }
 };

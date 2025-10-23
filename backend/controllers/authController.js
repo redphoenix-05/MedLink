@@ -37,6 +37,15 @@ const signupUser = async (req, res) => {
         });
       }
 
+      // Validate phone number format
+      const phoneRegex = /^01[3-9]\d{8}$/;
+      if (!phoneRegex.test(phone)) {
+        return res.status(400).json({
+          success: false,
+          message: 'The provided number is wrong. Phone number must be 11 digits starting with 01[3-9]'
+        });
+      }
+
       // Check if license number is already in use
       const existingLicense = await Pharmacy.findOne({ where: { licenseNumber } });
       if (existingLicense) {
@@ -247,7 +256,17 @@ const updateProfile = async (req, res) => {
 
     // Update basic fields
     if (name) user.name = name;
-    if (phone) user.phone = phone;
+    if (phone) {
+      // Validate phone number format if provided
+      const phoneRegex = /^01[3-9]\d{8}$/;
+      if (phone.trim() !== '' && !phoneRegex.test(phone)) {
+        return res.status(400).json({
+          success: false,
+          message: 'The provided number is wrong. Phone number must be 11 digits starting with 01[3-9]'
+        });
+      }
+      user.phone = phone;
+    }
 
     // Update password if provided
     if (newPassword) {
