@@ -63,9 +63,11 @@ const LoginPage = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center group">
-            <div className="w-14 h-14 bg-gradient-to-r from-green-600 to-green-700 rounded-xl mr-3 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-              <Pill className="w-8 h-8 text-white" />
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="MedLink Logo" 
+              className="w-16 h-16 object-contain mr-3 transform group-hover:scale-110 transition-transform"
+            />
             <span className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">MedLink</span>
           </Link>
           <p className="mt-4 text-xl text-gray-700 font-medium">Welcome back! Sign in to continue</p>
