@@ -107,6 +107,54 @@ const ProfilePage = () => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    // First confirmation
+    const firstConfirm = window.confirm(
+      '⚠️ WARNING: Are you sure you want to delete your account?\n\n' +
+      'This will permanently delete:\n' +
+      '• Your profile and personal information\n' +
+      '• All your orders and reservations\n' +
+      '• Your cart items\n' +
+      (user?.role === 'pharmacy' ? '• Your pharmacy and all inventory\n' : '') +
+      '\nThis action CANNOT be undone!'
+    );
+
+    if (!firstConfirm) return;
+
+    // Ask for password confirmation
+    const password = window.prompt(
+      'Please enter your password to confirm account deletion:'
+    );
+
+    if (!password) {
+      setError('Password is required to delete your account');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+
+      await api.delete('/auth/account', {
+        data: { password }
+      });
+
+      // Logout and redirect to home page
+      logout();
+      navigate('/', { 
+        state: { 
+          message: 'Your account has been successfully deleted. We\'re sorry to see you go.' 
+        } 
+      });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete account');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <CustomerLayout>
       <div className="max-w-3xl mx-auto">
