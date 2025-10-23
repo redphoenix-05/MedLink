@@ -101,9 +101,6 @@ Reservation.hasOne(Delivery, {
   as: 'delivery'
 });
 
-// Order relationships will be added later
-// Commented out for now to fix database sync issues
-
 // ==========================================
 // CART ASSOCIATIONS
 // ==========================================
