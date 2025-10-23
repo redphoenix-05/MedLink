@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const { sequelize } = require('../config/database');
+const { Op } = require('sequelize');
 
 // @desc    Get all orders for a pharmacy
 // @route   GET /api/pharmacy/orders
@@ -39,7 +40,9 @@ const getPharmacyStats = async (req, res) => {
     const orders = await Order.findAll({
       where: { 
         pharmacyId,
-        status: ['confirmed', 'delivered', 'completed']
+        status: {
+          [Op.in]: ['confirmed', 'delivered', 'completed']
+        }
       }
     });
 
@@ -48,12 +51,19 @@ const getPharmacyStats = async (req, res) => {
     const pickupOrders = orders.filter(o => o.deliveryType === 'pickup').length;
     const deliveryOrders = orders.filter(o => o.deliveryType === 'delivery').length;
     
+    console.log('📊 Calculating pharmacy earnings for', orders.length, 'orders');
+    
     // Total earnings = medicine cost + delivery charge (platform fee goes to platform)
     const totalEarnings = orders.reduce((sum, order) => {
-      const medicineTotal = parseFloat(order.totalPrice);
-      const deliveryCharge = parseFloat(order.deliveryCharge);
+      const medicineTotal = parseFloat(order.totalPrice) || 0;
+      const deliveryCharge = parseFloat(order.deliveryCharge) || 0;
+      
+      console.log(`Order ${order.id}: Medicine=৳${medicineTotal}, Delivery=৳${deliveryCharge}, Total=৳${medicineTotal + deliveryCharge}`);
+      
       return sum + medicineTotal + deliveryCharge;
     }, 0);
+    
+    console.log('✅ Total Earnings:', totalEarnings.toFixed(2));
 
     // Total medicines sold value
     const totalMedicinesSold = orders.reduce((sum, order) => 
