@@ -157,7 +157,7 @@ const getApprovedPharmacies = async (req, res) => {
 
 const approvePharmacy = async (req, res) => {
   try {
-    const pharmacy = await Pharmacy.findByPk(req.params.pharmacyId);
+    const pharmacy = await Pharmacy.findByPk(req.params.id);
     if (!pharmacy) return res.status(404).json({ success: false, message: 'Pharmacy not found' });
     pharmacy.status = 'approved';
     await pharmacy.save();
@@ -170,7 +170,7 @@ const approvePharmacy = async (req, res) => {
 
 const rejectPharmacy = async (req, res) => {
   try {
-    const pharmacy = await Pharmacy.findByPk(req.params.pharmacyId);
+    const pharmacy = await Pharmacy.findByPk(req.params.id);
     if (!pharmacy) return res.status(404).json({ success: false, message: 'Pharmacy not found' });
     pharmacy.status = 'rejected';
     pharmacy.rejectionReason = req.body.reason || 'Not specified';
@@ -195,12 +195,66 @@ const deleteUser = async (req, res) => {
 };
 
 const deletePharmacy = async (req, res) => {
+  const transaction = await require('../config/database').sequelize.transaction();
+  
   try {
     const pharmacy = await Pharmacy.findByPk(req.params.id);
-    if (!pharmacy) return res.status(404).json({ success: false, message: 'Pharmacy not found' });
-    await pharmacy.destroy();
+    if (!pharmacy) {
+      await transaction.rollback();
+      return res.status(404).json({ success: false, message: 'Pharmacy not found' });
+    }
+    
+    // Import additional models
+    const { PharmacyInventory, Cart, Delivery } = require('../models');
+    
+    // Get all reservation IDs for this pharmacy to delete related deliveries
+    const pharmacyReservations = await Reservation.findAll({
+      where: { pharmacyId: req.params.id },
+      attributes: ['id'],
+      transaction
+    });
+    const reservationIds = pharmacyReservations.map(r => r.id);
+    
+    // Delete related records manually in the correct order
+    // 1. Delete deliveries associated with this pharmacy's reservations
+    if (reservationIds.length > 0) {
+      await Delivery.destroy({ 
+        where: { reservationId: reservationIds },
+        transaction 
+      });
+    }
+    
+    // 2. Delete cart items
+    await Cart.destroy({ 
+      where: { pharmacyId: req.params.id },
+      transaction 
+    });
+    
+    // 3. Delete reservations
+    await Reservation.destroy({ 
+      where: { pharmacyId: req.params.id },
+      transaction 
+    });
+    
+    // 4. Delete orders
+    await Order.destroy({ 
+      where: { pharmacyId: req.params.id },
+      transaction 
+    });
+    
+    // 5. Delete pharmacy inventory
+    await PharmacyInventory.destroy({ 
+      where: { pharmacyId: req.params.id },
+      transaction 
+    });
+    
+    // 6. Finally delete the pharmacy itself
+    await pharmacy.destroy({ transaction });
+    
+    await transaction.commit();
     res.json({ success: true, message: 'Pharmacy deleted successfully' });
   } catch (error) {
+    await transaction.rollback();
     console.error('Delete pharmacy error:', error);
     res.status(500).json({ success: false, message: 'Error deleting pharmacy', error: error.message });
   }

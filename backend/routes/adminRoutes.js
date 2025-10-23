@@ -19,21 +19,6 @@ const { authMiddleware: auth, verifyAdmin } = require('../middleware/auth');
 router.use(auth);
 router.use(verifyAdmin);
 
-// @route   PUT /api/admin/pharmacies/:id/approve
-// @desc    Approve pharmacy
-// @access  Private (Admin only)
-router.put('/pharmacies/:id/approve', approvePharmacy);
-
-// @route   PUT /api/admin/pharmacies/:id/reject
-// @desc    Reject pharmacy
-// @access  Private (Admin only)
-router.put('/pharmacies/:id/reject', rejectPharmacy);
-
-// @route   DELETE /api/admin/pharmacies/:id
-// @desc    Delete pharmacy
-// @access  Private (Admin only)
-router.delete('/pharmacies/:id', require('../controllers/adminController').deletePharmacy);
-
 // @route   GET /api/admin/dashboard-stats
 // @desc    Get admin dashboard statistics
 // @access  Private (Admin only)
@@ -48,6 +33,21 @@ router.get('/pharmacies/pending', getPendingPharmacies);
 // @desc    Get approved pharmacies
 // @access  Private (Admin only)
 router.get('/pharmacies/approved', getApprovedPharmacies);
+
+// @route   PUT /api/admin/pharmacies/:id/approve
+// @desc    Approve pharmacy
+// @access  Private (Admin only)
+router.put('/pharmacies/:id/approve', approvePharmacy);
+
+// @route   PUT /api/admin/pharmacies/:id/reject
+// @desc    Reject pharmacy
+// @access  Private (Admin only)
+router.put('/pharmacies/:id/reject', rejectPharmacy);
+
+// @route   DELETE /api/admin/pharmacies/:id
+// @desc    Delete pharmacy
+// @access  Private (Admin only)
+router.delete('/pharmacies/:id', require('../controllers/adminController').deletePharmacy);
 
 // @route   GET /api/admin/users
 // @desc    Get all users (Admin view)
