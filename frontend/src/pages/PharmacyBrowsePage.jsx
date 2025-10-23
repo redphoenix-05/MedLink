@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { MapPin, Navigation } from 'lucide-react';
 import CustomerLayout from '../components/CustomerLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
@@ -17,6 +18,8 @@ const PharmacyBrowsePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showReservationForm, setShowReservationForm] = useState(false);
   const [selectedMedicine, setSelectedMedicine] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [gettingLocation, setGettingLocation] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,6 +37,68 @@ const PharmacyBrowsePage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Calculate distance between two coordinates using Haversine formula
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return distance; // Distance in kilometers
+  };
+
+  // Get user's current location
+  const getUserLocation = () => {
+    setGettingLocation(true);
+    setError('');
+
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser');
+      setGettingLocation(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const location = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        };
+        setUserLocation(location);
+        setSuccess('Location detected! Showing pharmacies sorted by distance.');
+        setTimeout(() => setSuccess(''), 3000);
+        setGettingLocation(false);
+      },
+      (error) => {
+        let errorMessage = 'Unable to get your location. ';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage += 'Please allow location access in your browser settings.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage += 'Location information is unavailable.';
+            break;
+          case error.TIMEOUT:
+            errorMessage += 'Location request timed out.';
+            break;
+          default:
+            errorMessage += 'An unknown error occurred.';
+        }
+        setError(errorMessage);
+        setGettingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
   };
 
   const fetchPharmacyDetails = async (pharmacyId) => {
@@ -84,6 +149,25 @@ const PharmacyBrowsePage = () => {
     pharmacy.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Add distance to pharmacies if user location is available
+  const pharmaciesWithDistance = filteredPharmacies.map(pharmacy => {
+    if (userLocation && pharmacy.latitude && pharmacy.longitude) {
+      const distance = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        pharmacy.latitude,
+        pharmacy.longitude
+      );
+      return { ...pharmacy, distance };
+    }
+    return pharmacy;
+  });
+
+  // Sort by distance if user location is available
+  const sortedPharmacies = userLocation
+    ? pharmaciesWithDistance.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity))
+    : pharmaciesWithDistance;
+
   if (loading) {
     return (
       <CustomerLayout>
@@ -98,29 +182,69 @@ const PharmacyBrowsePage = () => {
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Browse Pharmacies</h1>
           
-          {/* Search Bar */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search pharmacies by name or location..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-            <svg
-              className="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          {/* Search Bar and Location Button */}
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Search pharmacies by name or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
-            </svg>
+              <svg
+                className="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+
+            {/* Locate Me Button */}
+            <button
+              onClick={getUserLocation}
+              disabled={gettingLocation}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                gettingLocation
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : userLocation
+                  ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-200'
+                  : 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg'
+              }`}
+            >
+              {gettingLocation ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span className="hidden sm:inline">Getting Location...</span>
+                </>
+              ) : userLocation ? (
+                <>
+                  <MapPin className="w-5 h-5" />
+                  <span className="hidden sm:inline">Location Active</span>
+                </>
+              ) : (
+                <>
+                  <Navigation className="w-5 h-5" />
+                  <span className="hidden sm:inline">Locate Me</span>
+                </>
+              )}
+            </button>
           </div>
+
+          {/* Location Info */}
+          {userLocation && (
+            <div className="mt-3 flex items-center gap-2 text-sm text-green-700 bg-green-50 px-4 py-2 rounded-lg">
+              <MapPin className="w-4 h-4" />
+              <span>Showing pharmacies sorted by distance from your location</span>
+            </div>
+          )}
         </div>
 
         {error && <Alert type="error" message={error} />}
@@ -130,33 +254,50 @@ const PharmacyBrowsePage = () => {
           {/* Pharmacy List */}
           <div className="lg:col-span-1 space-y-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              {filteredPharmacies.length} Pharmacies
+              {sortedPharmacies.length} Pharmacies {userLocation && '(Sorted by Distance)'}
             </h2>
             
-            {filteredPharmacies.length === 0 ? (
+            {sortedPharmacies.length === 0 ? (
               <div className="bg-white rounded-lg shadow p-6 text-center">
                 <p className="text-gray-500">No pharmacies found</p>
               </div>
             ) : (
-              filteredPharmacies.map((pharmacy) => (
+              sortedPharmacies.map((pharmacy) => (
                 <div
                   key={pharmacy.id}
                   onClick={() => fetchPharmacyDetails(pharmacy.id)}
                   className={`bg-white rounded-lg shadow p-4 cursor-pointer transition-all ${
                     selectedPharmacy === pharmacy.id
-                      ? 'ring-2 ring-indigo-500 shadow-lg'
+                      ? 'ring-2 ring-green-500 shadow-lg'
                       : 'hover:shadow-md'
                   }`}
                 >
-                  <h3 className="font-semibold text-gray-900">{pharmacy.name}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{pharmacy.address}</p>
-                  <p className="text-sm text-gray-500 mt-1">📞 {pharmacy.phone}</p>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">{pharmacy.name}</h3>
+                      <p className="text-sm text-gray-600 mt-1">{pharmacy.address}</p>
+                      <p className="text-sm text-gray-500 mt-1">📞 {pharmacy.phone}</p>
+                    </div>
+                    {pharmacy.distance !== undefined && (
+                      <div className="ml-2 flex flex-col items-end">
+                        <div className="flex items-center gap-1 text-green-600">
+                          <MapPin className="w-4 h-4" />
+                          <span className="text-sm font-semibold">
+                            {pharmacy.distance < 1 
+                              ? `${(pharmacy.distance * 1000).toFixed(0)}m`
+                              : `${pharmacy.distance.toFixed(1)}km`
+                            }
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <div className="mt-2 flex justify-between items-center">
-                    <span className="text-xs text-indigo-600 font-medium">
+                    <span className="text-xs text-green-600 font-medium">
                       {pharmacy.medicinesCount} medicines available
                     </span>
                     {selectedPharmacy === pharmacy.id && (
-                      <span className="text-xs text-indigo-600">Selected ✓</span>
+                      <span className="text-xs text-green-600">Selected ✓</span>
                     )}
                   </div>
                 </div>

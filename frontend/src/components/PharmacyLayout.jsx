@@ -9,7 +9,6 @@ import {
   LogOut,
   Menu,
   X,
-  Bell,
   ChevronRight,
   Plus
 } from 'lucide-react';
@@ -193,12 +192,6 @@ const PharmacyLayout = ({ children }) => {
 
               {/* Right Side Actions */}
               <div className="flex items-center gap-3">
-                {/* Notifications */}
-                <button className="relative p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
-
                 {/* User Info - Desktop */}
                 <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
