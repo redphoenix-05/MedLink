@@ -393,10 +393,6 @@ const seedData = async () => {
     console.log('👤 CUSTOMERS:');
     console.log('   Email: Any customer email from above');
     console.log('   Password: customer123\n');
-
-    console.log('📍 All pharmacies are located in Khulna, Bangladesh');
-    console.log('🗺️  Coordinates are from real Google Maps locations\n');
-
   } catch (error) {
     console.error('❌ Error seeding data:', error);
     throw error;
