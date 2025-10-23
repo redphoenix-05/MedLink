@@ -325,7 +325,7 @@ const customers = [
 
 const seedData = async () => {
   try {
-    console.log('🌱 Starting Khulna seed data generation...\n');
+    console.log('🌱 Starting seed data generation...\n');
 
     // Test database connection
     await sequelize.authenticate();
@@ -336,7 +336,7 @@ const seedData = async () => {
     const customerPassword = await bcrypt.hash('customer123', 10);
 
     // Create pharmacies
-    console.log('📍 Creating 15 pharmacies in Khulna...');
+    console.log('📍 Creating 15 pharmacies');
     let pharmacyCount = 0;
     
     for (const pharmacy of khulnaPharmacies) {
