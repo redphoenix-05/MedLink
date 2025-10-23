@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import CustomerLayout from '../components/CustomerLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -6,7 +7,8 @@ import Alert from '../components/Alert';
 import api from '../services/api';
 
 const ProfilePage = () => {
-  const { user, updateUser } = useAuth();
+  const navigate = useNavigate();
+  const { user, updateUser, logout } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
