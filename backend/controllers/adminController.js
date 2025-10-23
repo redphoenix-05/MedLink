@@ -334,6 +334,206 @@ const getAllMedicines = async (req, res) => {
   }
 };
 
+const getIncompleteUsers = async (req, res) => {
+  try {
+    // Find users who are registered but have incomplete profiles
+    // Criteria: users without phone numbers or pharmacy users without pharmacy records
+    const incompleteUsers = await User.findAll({
+      attributes: ['id', 'name', 'email', 'phone', 'role', 'createdAt'],
+      where: {
+        [require('sequelize').Op.or]: [
+          { phone: null },
+          { phone: '' }
+        ]
+      },
+      order: [['createdAt', 'ASC']]
+    });
+
+    // Check for pharmacy users without pharmacy records
+    const pharmacyUsers = await User.findAll({
+      where: { role: 'pharmacy' },
+      attributes: ['id', 'name', 'email', 'phone', 'role', 'createdAt'],
+      include: [{
+        model: Pharmacy,
+        as: 'pharmacy',
+        required: false
+      }],
+      order: [['createdAt', 'ASC']]
+    });
+
+    // Filter pharmacy users without pharmacy records
+    const pharmacyUsersWithoutPharmacy = pharmacyUsers
+      .filter(user => !user.pharmacy)
+      .map(user => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        createdAt: user.createdAt,
+        issue: 'Pharmacy user without pharmacy record'
+      }));
+
+    // Combine incomplete users
+    const allIncompleteUsers = [
+      ...incompleteUsers.map(user => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        createdAt: user.createdAt,
+        issue: 'Missing phone number'
+      })),
+      ...pharmacyUsersWithoutPharmacy
+    ];
+
+    // Remove duplicates based on user ID
+    const uniqueIncompleteUsers = Array.from(
+      new Map(allIncompleteUsers.map(user => [user.id, user])).values()
+    );
+
+    res.json({ 
+      success: true, 
+      data: uniqueIncompleteUsers,
+      count: uniqueIncompleteUsers.length
+    });
+  } catch (error) {
+    console.error('Get incomplete users error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching incomplete users', error: error.message });
+  }
+};
+
+const cleanupIncompleteUsers = async (req, res) => {
+  const transaction = await require('../config/database').sequelize.transaction();
+  
+  try {
+    const { userIds } = req.body;
+
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      await transaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide an array of user IDs to delete'
+      });
+    }
+
+    // Prevent admin from deleting their own account
+    if (userIds.includes(req.user.id)) {
+      await transaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete your own account'
+      });
+    }
+
+    const { Cart, Reservation, Order, PharmacyInventory, Delivery } = require('../models');
+    
+    let deletedCount = 0;
+
+    for (const userId of userIds) {
+      const user = await User.findByPk(userId, { transaction });
+      
+      if (!user) continue;
+
+      // If user is a pharmacy owner, handle pharmacy deletion
+      if (user.role === 'pharmacy') {
+        const pharmacy = await Pharmacy.findOne({ where: { userId }, transaction });
+        
+        if (pharmacy) {
+          // Get all reservation IDs for this pharmacy
+          const pharmacyReservations = await Reservation.findAll({
+            where: { pharmacyId: pharmacy.id },
+            attributes: ['id'],
+            transaction
+          });
+          const reservationIds = pharmacyReservations.map(r => r.id);
+          
+          // Delete related records
+          if (reservationIds.length > 0) {
+            await Delivery.destroy({ 
+              where: { reservationId: reservationIds },
+              transaction 
+            });
+          }
+          
+          await Cart.destroy({ 
+            where: { pharmacyId: pharmacy.id },
+            transaction 
+          });
+          
+          await Reservation.destroy({ 
+            where: { pharmacyId: pharmacy.id },
+            transaction 
+          });
+          
+          await Order.destroy({ 
+            where: { pharmacyId: pharmacy.id },
+            transaction 
+          });
+          
+          await PharmacyInventory.destroy({ 
+            where: { pharmacyId: pharmacy.id },
+            transaction 
+          });
+          
+          await pharmacy.destroy({ transaction });
+        }
+      }
+
+      // Delete user's customer records
+      const userReservations = await Reservation.findAll({
+        where: { customerId: userId },
+        attributes: ['id'],
+        transaction
+      });
+      const userReservationIds = userReservations.map(r => r.id);
+      
+      if (userReservationIds.length > 0) {
+        await Delivery.destroy({ 
+          where: { reservationId: userReservationIds },
+          transaction 
+        });
+      }
+      
+      await Cart.destroy({ 
+        where: { customerId: userId },
+        transaction 
+      });
+      
+      await Reservation.destroy({ 
+        where: { customerId: userId },
+        transaction 
+      });
+      
+      await Order.destroy({ 
+        where: { userId },
+        transaction 
+      });
+
+      // Delete the user
+      await user.destroy({ transaction });
+      deletedCount++;
+    }
+
+    await transaction.commit();
+
+    res.json({
+      success: true,
+      message: `Successfully deleted ${deletedCount} incomplete user account(s)`,
+      deletedCount
+    });
+  } catch (error) {
+    await transaction.rollback();
+    console.error('Cleanup incomplete users error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error cleaning up incomplete users',
+      error: error.message
+    });
+  }
+};
+
 module.exports = { 
   getDashboardStats, 
   getAllUsers, 
@@ -347,5 +547,7 @@ module.exports = {
   updateUserStatus,
   getAllReservations,
   getAllDeliveries,
-  getAllMedicines
+  getAllMedicines,
+  getIncompleteUsers,
+  cleanupIncompleteUsers
 };

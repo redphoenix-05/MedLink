@@ -11,7 +11,9 @@ const {
   updateUserStatus,
   getAllReservations,
   getAllDeliveries,
-  getAllMedicines
+  getAllMedicines,
+  getIncompleteUsers,
+  cleanupIncompleteUsers
 } = require('../controllers/adminController');
 const { authMiddleware: auth, verifyAdmin } = require('../middleware/auth');
 
