@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const { sequelize } = require('../config/database');
 const User = require('../models/User');
 
-// Real pharmacy data from Khulna, Bangladesh (Google Maps)
 const khulnaPharmacies = [
   {
     email: 'lazz.pharma.khulna@gmail.com',
@@ -201,7 +200,6 @@ const khulnaPharmacies = [
   },
 ];
 
-// 20 Customer accounts with Bangladeshi names
 const customers = [
   {
     email: 'rahim.ahmed@gmail.com',
@@ -325,7 +323,7 @@ const customers = [
   },
 ];
 
-const seedKhulnaData = async () => {
+const seedData = async () => {
   try {
     console.log('🌱 Starting Khulna seed data generation...\n');
 
@@ -408,8 +406,7 @@ const seedKhulnaData = async () => {
   }
 };
 
-// Run the seed function
-seedKhulnaData()
+seedData()
   .then(() => {
     console.log('✅ Seed script completed successfully');
     process.exit(0);
