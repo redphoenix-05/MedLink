@@ -1,4 +1,3 @@
-const bcrypt = require('bcryptjs');
 const { sequelize } = require('../config/database');
 const User = require('../models/User');
 const Pharmacy = require('../models/Pharmacy');
@@ -175,7 +174,7 @@ const khulnaPharmacies = [
   },
   {
     email: 'central.pharmacy.khulna@gmail.com',
-    password: 'pharmacy123',
+    password: 'pharmacy2',
     name: 'Central Pharmacy',
     role: 'pharmacy',
     pharmacyName: 'Central Pharmacy',
@@ -332,10 +331,8 @@ const seedData = async () => {
     await sequelize.authenticate();
     console.log('✅ Database connected successfully\n');
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash('pharmacy123', 10);
-    const customerPassword = await bcrypt.hash('customer123', 10);
-
+    // No need to hash passwords here - the User model's beforeCreate hook will handle it
+    
     // Create pharmacies
     console.log('📍 Creating 15 pharmacies in Khulna...');
     let pharmacyCount = 0;
@@ -348,7 +345,7 @@ const seedData = async () => {
         // Create User account for pharmacy
         const pharmacyUser = await User.create({
           email: pharmacy.email,
-          password: hashedPassword,
+          password: pharmacy.password, // Model's beforeCreate hook will hash this
           name: pharmacy.name,
           role: 'pharmacy',
           phone: pharmacy.phone,
@@ -404,7 +401,7 @@ const seedData = async () => {
       if (!existingCustomer) {
         await User.create({
           ...customer,
-          password: customerPassword,
+          password: customer.password, // Model's beforeCreate hook will hash this
         });
         customerCount++;
         console.log(`   ✓ Created: ${customer.name} (${customer.email})`);
