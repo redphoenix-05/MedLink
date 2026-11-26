@@ -1,11 +1,19 @@
 const { PharmacyInventory, Medicine, Pharmacy } = require('../models');
 const { Op } = require('sequelize');
+const { isPharmacyStaff, getAccessiblePharmacies } = require('../utils/pharmacyAccess');
 
-// @desc    Add medicine to pharmacy inventory
+// @desc    Add medicine to pharmacy inventory (Owner or Manager)
 // @route   POST /api/inventory
-// @access  Private (Pharmacy only)
+// @access  Private (Pharmacy owner or manager)
 const addToInventory = async (req, res) => {
   try {
+    if (isPharmacyStaff(req.user)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Normal staff can view inventory and confirm orders, but cannot modify stock catalog',
+      });
+    }
+
     const {
       pharmacyId,
       medicineId,
@@ -25,15 +33,12 @@ const addToInventory = async (req, res) => {
       });
     }
 
-    // Get user's target pharmacy branch
-    const pharmacyWhere = { userId: req.user.id };
-    if (pharmacyId) {
-      pharmacyWhere.id = parseInt(pharmacyId, 10);
-    }
-    const pharmacy = await Pharmacy.findOne({
-      where: pharmacyWhere,
-      order: [['id', 'ASC']],
-    });
+    // Get user's accessible pharmacy branch
+    const branches = await getAccessiblePharmacies(req.user);
+    const requestedId = pharmacyId ? parseInt(pharmacyId, 10) : null;
+    const pharmacy = requestedId
+      ? branches.find((b) => b.id === requestedId)
+      : branches[0];
 
     if (!pharmacy) {
       return res.status(404).json({
@@ -133,8 +138,12 @@ const updateInventoryItem = async (req, res) => {
       });
     }
 
-    // Check if user owns this pharmacy
-    if (inventoryItem.pharmacy.userId !== req.user.id) {
+    // Check if user owns or manages this pharmacy branch
+    const accessibleBranches = await getAccessiblePharmacies(req.user);
+    const canEdit =
+      !isPharmacyStaff(req.user) &&
+      accessibleBranches.some((b) => b.id === inventoryItem.pharmacy.id);
+    if (!canEdit) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this inventory item',
@@ -208,8 +217,12 @@ const removeFromInventory = async (req, res) => {
       });
     }
 
-    // Check if user owns this pharmacy
-    if (inventoryItem.pharmacy.userId !== req.user.id) {
+    // Check if user owns or manages this pharmacy branch
+    const accessibleBranches = await getAccessiblePharmacies(req.user);
+    const canDelete =
+      !isPharmacyStaff(req.user) &&
+      accessibleBranches.some((b) => b.id === inventoryItem.pharmacy.id);
+    if (!canDelete) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to remove this inventory item',
@@ -319,15 +332,12 @@ const getMyInventory = async (req, res) => {
     const { page = 1, limit = 50, search, category, availability, pharmacyId } = req.query;
     const offset = (page - 1) * limit;
 
-    // Get user's target pharmacy branch
-    const pharmacyWhere = { userId: req.user.id };
-    if (pharmacyId) {
-      pharmacyWhere.id = parseInt(pharmacyId, 10);
-    }
-    const pharmacy = await Pharmacy.findOne({
-      where: pharmacyWhere,
-      order: [['id', 'ASC']],
-    });
+    // Get user's accessible pharmacy branch
+    const branches = await getAccessiblePharmacies(req.user);
+    const requestedId = pharmacyId ? parseInt(pharmacyId, 10) : null;
+    const pharmacy = requestedId
+      ? branches.find((b) => b.id === requestedId) || branches[0]
+      : branches[0];
 
     if (!pharmacy) {
       return res.status(404).json({

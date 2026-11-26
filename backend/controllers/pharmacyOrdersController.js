@@ -1,12 +1,10 @@
 const { Pharmacy } = require('../models');
 const Order = require('../models/Order');
 const { Op } = require('sequelize');
+const { getAccessiblePharmacies } = require('../utils/pharmacyAccess');
 
-const getOwnedBranchIds = async (userId, requestedPharmacyId) => {
-  const branches = await Pharmacy.findAll({
-    where: { userId },
-    attributes: ['id'],
-  });
+const getOwnedBranchIds = async (user, requestedPharmacyId) => {
+  const branches = await getAccessiblePharmacies(user);
   const ownedIds = branches.map((b) => b.id);
   if (requestedPharmacyId) {
     const parsed = parseInt(requestedPharmacyId, 10);
@@ -20,7 +18,7 @@ const getOwnedBranchIds = async (userId, requestedPharmacyId) => {
 // @access  Private (Pharmacy only)
 const getPharmacyOrders = async (req, res) => {
   try {
-    const branchIds = await getOwnedBranchIds(req.user.id, req.query.pharmacyId);
+    const branchIds = await getOwnedBranchIds(req.user, req.query.pharmacyId);
     if (branchIds.length === 0) {
       return res.json({ success: true, data: { orders: [] } });
     }
@@ -52,7 +50,7 @@ const getPharmacyOrders = async (req, res) => {
 // @access  Private (Pharmacy only)
 const getPharmacyStats = async (req, res) => {
   try {
-    const branchIds = await getOwnedBranchIds(req.user.id, req.query.pharmacyId);
+    const branchIds = await getOwnedBranchIds(req.user, req.query.pharmacyId);
     if (branchIds.length === 0) {
       return res.json({
         success: true,
@@ -142,7 +140,7 @@ const getPharmacyStats = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const branchIds = await getOwnedBranchIds(req.user.id);
+    const branchIds = await getOwnedBranchIds(req.user);
     const { status, deliveryDate } = req.body;
 
     const order = await Order.findOne({

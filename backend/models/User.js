@@ -53,6 +53,21 @@ const User = sequelize.define('User', {
     allowNull: false,
     defaultValue: 'customer',
   },
+  pharmacyRole: {
+    type: DataTypes.ENUM('owner', 'manager', 'staff'),
+    allowNull: true,
+    defaultValue: null,
+  },
+  assignedPharmacyId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: null,
+  },
+  parentUserId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: null,
+  },
 }, {
   tableName: 'users',
   timestamps: true,

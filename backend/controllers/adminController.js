@@ -628,6 +628,67 @@ const cleanupIncompleteUsers = async (req, res) => {
   }
 };
 
+// @desc    Create a new Admin user
+// @route   POST /api/admin/create-admin
+// @access  Private (Admin only)
+const createAdminUser = async (req, res) => {
+  try {
+    const { name, email, password, phone } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, email, and password are required',
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long',
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const existingUser = await User.findOne({ where: { email: normalizedEmail } });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'A user with this email already exists',
+      });
+    }
+
+    const newAdmin = await User.create({
+      name: name.trim(),
+      email: normalizedEmail,
+      password,
+      phone: phone ? phone.trim() : null,
+      role: 'admin',
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'New admin account created successfully',
+      data: {
+        user: {
+          id: newAdmin.id,
+          name: newAdmin.name,
+          email: newAdmin.email,
+          phone: newAdmin.phone,
+          role: newAdmin.role,
+          createdAt: newAdmin.createdAt,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Create admin user error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to create admin user',
+    });
+  }
+};
+
 module.exports = { 
   getDashboardStats, 
   getAllUsers, 
@@ -643,5 +704,6 @@ module.exports = {
   getAllDeliveries,
   getAllMedicines,
   getIncompleteUsers,
-  cleanupIncompleteUsers
+  cleanupIncompleteUsers,
+  createAdminUser
 };

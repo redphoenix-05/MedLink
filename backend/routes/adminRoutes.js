@@ -13,7 +13,8 @@ const {
   getAllDeliveries,
   getAllMedicines,
   getIncompleteUsers,
-  cleanupIncompleteUsers
+  cleanupIncompleteUsers,
+  createAdminUser
 } = require('../controllers/adminController');
 const { authMiddleware: auth, verifyAdmin } = require('../middleware/auth');
 
@@ -95,5 +96,10 @@ router.get('/users/incomplete', getIncompleteUsers);
 // @desc    Cleanup incomplete/unregistered users
 // @access  Private (Admin only)
 router.post('/users/cleanup', cleanupIncompleteUsers);
+
+// @route   POST /api/admin/create-admin
+// @desc    Create a new user with admin access
+// @access  Private (Admin only)
+router.post('/create-admin', createAdminUser);
 
 module.exports = router;

@@ -142,12 +142,14 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Find user by email OR name (treat provided 'email' as identifier)
+    const identifier = email.trim();
+
+    // Find user by email OR name (case-insensitive)
     const user = await User.findOne({
       where: {
         [Op.or]: [
-          { email: email },
-          { name: email }
+          { email: { [Op.iLike]: identifier } },
+          { name: { [Op.iLike]: identifier } }
         ]
       }
     });
@@ -180,7 +182,12 @@ const loginUser = async (req, res) => {
           id: user.id,
           name: user.name,
           email: user.email,
+          phone: user.phone,
           role: user.role,
+          pharmacyRole: user.role === 'pharmacy' ? (user.pharmacyRole || 'owner') : null,
+          assignedPharmacyId: user.assignedPharmacyId || null,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
         }
       }
     });
@@ -212,6 +219,8 @@ const getMe = async (req, res) => {
           email: user.email,
           phone: user.phone,
           role: user.role,
+          pharmacyRole: user.role === 'pharmacy' ? (user.pharmacyRole || 'owner') : null,
+          assignedPharmacyId: user.assignedPharmacyId || null,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         }
