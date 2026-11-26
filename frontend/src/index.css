@@ -1,11 +1,159 @@
-/* Tailwind CSS v4 - do not remove or modify the bellow import */
+/* Tailwind CSS v4 */
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-canvas: #F7F6F2;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #EFECE5;
+  --color-ink: #121816;
+  --color-ink-muted: #4E5B55;
+  --color-ink-subtle: #78857F;
+  --color-border-hairline: #E4E1D8;
+
+  --color-pine-950: #081C16;
+  --color-pine-900: #0B251D;
+  --color-pine-800: #0F4C3A;
+  --color-pine-700: #16634C;
+  --color-pine-600: #1B7A5E;
+  --color-pine-100: #E6F2EC;
+  --color-pine-50: #F2F8F5;
+
+  --color-clay-600: #B84C27;
+  --color-clay-500: #C85A32;
+  --color-clay-100: #FBECE6;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: #F7F6F2;
+}
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-sans);
+  background-color: #F7F6F2;
+  color: #121816;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.font-editorial {
+  font-family: var(--font-serif);
+}
+
+.font-mono-data {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle architectural grid background */
+.bg-clinical-grid {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(18, 24, 22, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(18, 24, 22, 0.045) 1px, transparent 1px);
+}
+
+.bg-clinical-grid-dark {
+  background-size: 44px 44px;
+  background-image:
+    linear-gradient(to right, rgba(247, 246, 242, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(247, 246, 242, 0.06) 1px, transparent 1px);
+}
+
+/* Tactile card interaction */
+.card-surface {
+  background-color: #FFFFFF;
+  border: 1px solid #E4E1D8;
+  transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-surface-hover:hover {
+  border-color: #C9C4B6;
+  box-shadow: 0 12px 32px -12px rgba(15, 76, 58, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Marquee ticker */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 34s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Live stock pulse */
+@keyframes livePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(1.45);
+  }
+}
+
+.live-dot {
+  animation: livePulse 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Smooth reveal animation */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Refined custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F7F6F2;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D0CCC0;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9DA49F;
+}
+
+/* Leaflet map container polish */
+.leaflet-container {
+  font-family: var(--font-sans) !important;
+  border-radius: 0.75rem;
 }

@@ -1,115 +1,56 @@
-// MedLink Design System - Consistent Theme Configuration
+// MedLink Design System — Clinical Editorial & Apothecary Tokens
 
 export const colors = {
+  canvas: '#F7F6F2',
+  surface: '#FFFFFF',
+  surfaceMuted: '#EFECE5',
+  ink: '#121816',
+  inkMuted: '#4E5B55',
+  border: '#E4E1D8',
   primary: {
-    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    main: '#667eea',
-    dark: '#764ba2',
+    main: '#0F4C3A',
+    hover: '#16634C',
+    light: '#E6F2EC',
+    dark: '#081C16',
   },
-  secondary: {
-    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    main: '#f093fb',
-    dark: '#f5576c',
-  },
-  tertiary: {
-    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    main: '#4facfe',
-    dark: '#00f2fe',
+  accent: {
+    main: '#C85A32',
+    hover: '#B84C27',
+    light: '#FBECE6',
   },
   success: {
-    gradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-    main: '#11998e',
-    light: '#38ef7d',
+    main: '#157347',
+    light: '#E6F4EC',
   },
   warning: {
-    gradient: 'linear-gradient(135deg, #f2994a 0%, #f2c94c 100%)',
-    main: '#f2994a',
-    light: '#f2c94c',
+    main: '#B45309',
+    light: '#FEF3C7',
   },
   danger: {
-    gradient: 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)',
-    main: '#eb3349',
-    light: '#f45c43',
-  },
-  info: {
-    gradient: 'linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)',
-    main: '#2193b0',
-    light: '#6dd5ed',
+    main: '#B91C1C',
+    light: '#FEE2E2',
   },
 };
 
-export const gradients = {
-  primary: 'bg-gradient-to-r from-purple-600 to-purple-800',
-  secondary: 'bg-gradient-to-r from-pink-500 to-red-500',
-  tertiary: 'bg-gradient-to-r from-blue-400 to-cyan-400',
-  success: 'bg-gradient-to-r from-teal-600 to-green-500',
-  warning: 'bg-gradient-to-r from-orange-500 to-yellow-500',
-  danger: 'bg-gradient-to-r from-red-600 to-red-500',
-  info: 'bg-gradient-to-r from-blue-600 to-cyan-400',
-  hero: 'bg-gradient-to-br from-purple-600 via-purple-800 to-pink-500',
-  card: 'bg-gradient-to-br from-white to-gray-50',
-};
-
-export const shadows = {
-  sm: 'shadow-sm',
-  md: 'shadow-md',
-  lg: 'shadow-lg',
-  xl: 'shadow-xl',
-  '2xl': 'shadow-2xl',
-  none: 'shadow-none',
-};
-
-export const borderRadius = {
-  sm: 'rounded-lg',
-  md: 'rounded-xl',
-  lg: 'rounded-2xl',
-  full: 'rounded-full',
-};
-
-export const spacing = {
-  section: 'py-24',
-  card: 'p-8',
-  container: 'container mx-auto px-6',
-};
-
-// Reusable CSS classes
-export const glassCard = 'bg-white/70 backdrop-blur-xl border border-white/30';
-export const cardHover = 'transition-all duration-300 hover:shadow-2xl hover:-translate-y-2';
-export const buttonPrimary = 'px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition';
-export const buttonSecondary = 'px-6 py-3 bg-white border-2 border-purple-600 text-purple-600 rounded-xl font-semibold hover:bg-purple-50 transition';
-export const inputClass = 'w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-600 focus:ring-4 focus:ring-purple-100 transition outline-none';
-export const labelClass = 'block text-sm font-semibold text-gray-700 mb-2';
-
-// Animation classes
-export const animations = {
-  fadeIn: 'animate-fade-in',
-  slideUp: 'animate-slide-up',
-  float: 'animate-float',
-};
-
-// Typography
-export const typography = {
-  h1: 'text-4xl md:text-5xl lg:text-6xl font-bold',
-  h2: 'text-3xl md:text-4xl lg:text-5xl font-bold',
-  h3: 'text-2xl md:text-3xl font-bold',
-  h4: 'text-xl md:text-2xl font-bold',
-  body: 'text-base md:text-lg',
-  small: 'text-sm',
-  gradientText: 'bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent',
-};
+export const cardSurface =
+  'bg-white border border-[#E4E1D8] rounded-xl transition-all duration-200';
+export const cardHover =
+  'hover:border-[#C9C4B6] hover:shadow-[0_12px_32px_-12px_rgba(15,76,58,0.12)] hover:-translate-y-0.5';
+export const buttonPrimary =
+  'inline-flex items-center justify-center px-5 py-2.5 bg-[#0F4C3A] text-[#F7F6F2] rounded-lg font-semibold text-sm hover:bg-[#16634C] active:scale-[0.99] transition-all duration-150 cursor-pointer';
+export const buttonSecondary =
+  'inline-flex items-center justify-center px-5 py-2.5 bg-white border border-[#D4D0C5] text-[#121816] rounded-lg font-semibold text-sm hover:bg-[#F7F6F2] hover:border-[#0F4C3A]/40 transition-all duration-150 cursor-pointer';
+export const inputClass =
+  'w-full px-4 py-3 bg-white rounded-lg border border-[#D4D0C5] text-[#121816] placeholder-[#78857F] focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 transition outline-none text-sm';
+export const labelClass =
+  'block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-2';
 
 export default {
   colors,
-  gradients,
-  shadows,
-  borderRadius,
-  spacing,
-  glassCard,
+  cardSurface,
   cardHover,
   buttonPrimary,
   buttonSecondary,
   inputClass,
   labelClass,
-  animations,
-  typography,
 };
