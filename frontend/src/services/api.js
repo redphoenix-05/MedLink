@@ -141,7 +141,10 @@ export const adminAPI = {
   getAllMedicines: (params) => API.get('/admin/medicines', { params }),
   
   // Activity logs
-  getActivityLogs: () => API.get('/admin/activity-logs')
+  getActivityLogs: () => API.get('/admin/activity-logs'),
+
+  // Create new admin user
+  createAdmin: (data) => API.post('/admin/create-admin', data)
 };
 
 export default API;

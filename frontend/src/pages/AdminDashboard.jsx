@@ -44,6 +44,23 @@ const AdminDashboard = () => {
   const [selectedPharmacy, setSelectedPharmacy] = useState(null);
   const [showPharmacyDetails, setShowPharmacyDetails] = useState(false);
 
+  // Admin Password Update state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  // Create New Admin User state
+  const [newAdminForm, setNewAdminForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+  });
+  const [creatingAdmin, setCreatingAdmin] = useState(false);
+
   useEffect(() => {
     fetchStats();
   }, []);
@@ -192,6 +209,201 @@ const AdminDashboard = () => {
       setError('Failed to fetch pharmacy details');
     }
   };
+
+  const handleAdminPasswordUpdate = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (passwordForm.newPassword.length < 6) {
+      setError('New password must be at least 6 characters long');
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setError('New passwords do not match');
+      return;
+    }
+
+    try {
+      setSavingPassword(true);
+      await API.put('/auth/profile', {
+        name: user?.name,
+        email: user?.email,
+        phone: user?.phone || '',
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+      setSuccess('Your admin password has been updated successfully.');
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update password');
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  const handleCreateAdmin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (newAdminForm.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
+    try {
+      setCreatingAdmin(true);
+      const res = await adminAPI.createAdmin(newAdminForm);
+      if (res.data.success) {
+        setSuccess(`New admin "${newAdminForm.name}" (${newAdminForm.email}) created successfully.`);
+        setNewAdminForm({ name: '', email: '', phone: '', password: '' });
+        fetchStats();
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to create admin user');
+    } finally {
+      setCreatingAdmin(false);
+    }
+  };
+
+  const renderSecurityAndAdmins = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Update Own Admin Password */}
+      <div className="bg-white border border-[#E4E1D8] rounded-2xl p-6">
+        <span className="font-mono-data text-[11px] uppercase tracking-wider text-[#0F4C3A]">
+          Account Security
+        </span>
+        <h2 className="text-xl font-bold text-[#121816] mt-1 mb-1">Update Admin Password</h2>
+        <p className="text-xs text-[#4E5B55] mb-5">
+          Change the password for your active administrator account ({user?.email}).
+        </p>
+
+        <form onSubmit={handleAdminPasswordUpdate} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+              Current Password
+            </label>
+            <input
+              type="password"
+              required
+              value={passwordForm.currentPassword}
+              onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+              className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+              placeholder="Enter current password"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+              New Password
+            </label>
+            <input
+              type="password"
+              required
+              value={passwordForm.newPassword}
+              onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+              className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+              placeholder="Min. 6 characters"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+              Confirm New Password
+            </label>
+            <input
+              type="password"
+              required
+              value={passwordForm.confirmPassword}
+              onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+              className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+              placeholder="Repeat new password"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={savingPassword}
+            className="w-full py-2.5 px-4 bg-[#081C16] text-white rounded-lg text-sm font-semibold hover:bg-[#0F4C3A] transition disabled:opacity-50 cursor-pointer"
+          >
+            {savingPassword ? 'Updating...' : 'Update Password'}
+          </button>
+        </form>
+      </div>
+
+      {/* Create New Admin Account */}
+      <div className="bg-white border border-[#E4E1D8] rounded-2xl p-6">
+        <span className="font-mono-data text-[11px] uppercase tracking-wider text-[#C85A32]">
+          Privileged Access
+        </span>
+        <h2 className="text-xl font-bold text-[#121816] mt-1 mb-1">Create New Admin User</h2>
+        <p className="text-xs text-[#4E5B55] mb-5">
+          Grant full MedLink administrator permissions to a trusted team member.
+        </p>
+
+        <form onSubmit={handleCreateAdmin} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              required
+              value={newAdminForm.name}
+              onChange={(e) => setNewAdminForm({ ...newAdminForm, name: e.target.value })}
+              className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+              placeholder="e.g., Operations Admin"
+            />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                required
+                value={newAdminForm.email}
+                onChange={(e) => setNewAdminForm({ ...newAdminForm, email: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+                placeholder="ops.admin@medlink.com"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+                Phone (11-digit BD)
+              </label>
+              <input
+                type="tel"
+                value={newAdminForm.phone}
+                onChange={(e) => setNewAdminForm({ ...newAdminForm, phone: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+                placeholder="017XXXXXXXX"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+              Initial Password *
+            </label>
+            <input
+              type="password"
+              required
+              value={newAdminForm.password}
+              onChange={(e) => setNewAdminForm({ ...newAdminForm, password: e.target.value })}
+              className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+              placeholder="Min. 6 characters"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={creatingAdmin}
+            className="w-full py-2.5 px-4 bg-[#0F4C3A] text-white rounded-lg text-sm font-semibold hover:bg-[#16634C] transition disabled:opacity-50 cursor-pointer"
+          >
+            {creatingAdmin ? 'Creating Admin...' : 'Create Admin Account'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 
   const renderOverview = () => (
     <div className="space-y-6">
@@ -691,12 +903,13 @@ const AdminDashboard = () => {
         {success && <Alert type="success" message={success} onClose={() => setSuccess('')} />}
 
         <div className="bg-white rounded-xl border border-[#E4E1D8] p-1.5">
-          <nav className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+          <nav className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
             {[
               { id: 'overview', label: 'Overview', short: 'Overview', icon: LayoutDashboard },
               { id: 'pending', label: 'Pending Pharmacies', short: 'Pending', icon: Store },
               { id: 'approved', label: 'Approved Pharmacies', short: 'Approved', icon: CheckCircle },
               { id: 'users', label: 'Users List', short: 'Users', icon: Users },
+              { id: 'security', label: 'Security & Admins', short: 'Admins', icon: ShieldCheck },
             ].map((tab) => {
               const Icon = tab.icon;
               const active = activeTab === tab.id;
@@ -730,6 +943,7 @@ const AdminDashboard = () => {
             {activeTab === 'pending' && renderPendingPharmacies()}
             {activeTab === 'approved' && renderApprovedPharmacies()}
             {activeTab === 'users' && renderUsers()}
+            {activeTab === 'security' && renderSecurityAndAdmins()}
           </div>
         )}
 

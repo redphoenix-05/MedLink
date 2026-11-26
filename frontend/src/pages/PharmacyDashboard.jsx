@@ -6,11 +6,26 @@ import Alert from '../components/Alert';
 import ComboBox from '../components/ComboBox';
 import PharmacyOrders from '../components/PharmacyOrders';
 import API from '../services/api';
-import { Store, User, Pill, Package, ClipboardList } from 'lucide-react';
+import { Store, User, Pill, Package, ClipboardList, Users, Trash2, UserPlus } from 'lucide-react';
 
 const PharmacyDashboard = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile');
+  const pharmacyRole = user?.pharmacyRole || 'owner';
+  const isOwner = pharmacyRole === 'owner';
+  const isManager = pharmacyRole === 'manager';
+  const isStaff = pharmacyRole === 'staff';
+
+  const [activeTab, setActiveTab] = useState(isStaff ? 'orders' : isManager ? 'inventory' : 'profile');
+  const [staffList, setStaffList] = useState([]);
+  const [staffLoading, setStaffLoading] = useState(false);
+  const [staffForm, setStaffForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    pharmacyRole: 'staff',
+    pharmacyId: '',
+  });
   const [pharmacy, setPharmacy] = useState(null);
   const [branches, setBranches] = useState([]);
   const [selectedBranchId, setSelectedBranchId] = useState(null);
@@ -67,7 +82,72 @@ const PharmacyDashboard = () => {
     fetchPharmacyData();
     fetchMedicines();
     fetchAllMedicines();
+    if (isOwner || isManager) {
+      fetchStaffList();
+    }
   }, []);
+
+  const fetchStaffList = async () => {
+    try {
+      setStaffLoading(true);
+      const res = await API.get('/pharmacies/staff');
+      if (res.data.success) {
+        setStaffList(res.data.data.staff || []);
+      }
+    } catch (err) {
+      console.error('Error fetching pharmacy staff:', err);
+    } finally {
+      setStaffLoading(false);
+    }
+  };
+
+  const handleCreateStaff = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (staffForm.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
+    try {
+      setStaffLoading(true);
+      const payload = {
+        ...staffForm,
+        pharmacyRole: isOwner ? staffForm.pharmacyRole : 'staff',
+        pharmacyId: staffForm.pharmacyId || pharmacy?.id,
+      };
+      const res = await API.post('/pharmacies/staff', payload);
+      if (res.data.success) {
+        setSuccess(res.data.message || 'Team member created successfully');
+        setStaffForm({
+          name: '',
+          email: '',
+          phone: '',
+          password: '',
+          pharmacyRole: 'staff',
+          pharmacyId: pharmacy?.id || '',
+        });
+        fetchStaffList();
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to create team member');
+    } finally {
+      setStaffLoading(false);
+    }
+  };
+
+  const handleDeleteStaff = async (staffId) => {
+    if (!window.confirm('Remove this team member account?')) return;
+    try {
+      await API.delete(`/pharmacies/staff/${staffId}`);
+      setSuccess('Team member removed');
+      fetchStaffList();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to remove team member');
+    }
+  };
 
   const fetchPharmacyData = async (branchIdOverride = null) => {
     try {
@@ -347,17 +427,25 @@ const PharmacyDashboard = () => {
     <PharmacyLayout>
       <div className="space-y-6">
         {/* Editorial Welcome Header */}
-        <div className="bg-[#0B251D] bg-clinical-grid-dark rounded-2xl border border-[#193B2F] p-7 sm:p-8 text-[#F7F6F2]">
+        <div className="bg-[#0B251D] bg-clinical-grid-dark rounded-2xl border border-[#193B2F] p-6 sm:p-8 text-[#F7F6F2]">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <span className="font-mono-data text-[11px] uppercase tracking-[0.16em] text-[#3DD598]">
-                Dispensary Management Portal
+                {isOwner
+                  ? 'Main Pharmacy Admin (Owner)'
+                  : isManager
+                  ? 'Store Manager Portal'
+                  : 'Store Staff Portal'}
               </span>
               <h1 className="font-editorial text-3xl sm:text-4xl text-white mt-1.5 mb-1.5">
                 Welcome back, {user?.name}
               </h1>
               <p className="text-[#B7CEC5] text-sm">
-                Manage branches across cities, live shelf inventory, and local fulfillment.
+                {isOwner
+                  ? 'Manage branches across cities, store managers, staff, inventory, and fulfillment.'
+                  : isManager
+                  ? 'Manage your store inventory, staff team, and customer order fulfillment.'
+                  : 'Confirm incoming customer orders, update delivery statuses, and view branch stock.'}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -369,13 +457,15 @@ const PharmacyDashboard = () => {
                   {branches.length === 1 ? 'Branch' : 'Branches'}
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={startNewBranch}
-                className="px-4 py-2.5 rounded-xl bg-[#F7F6F2] text-[#081C16] text-xs font-semibold hover:bg-white transition cursor-pointer"
-              >
-                + Add Branch
-              </button>
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={startNewBranch}
+                  className="px-4 py-2.5 rounded-xl bg-[#F7F6F2] text-[#081C16] text-xs font-semibold hover:bg-white transition cursor-pointer"
+                >
+                  + Add Branch
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -472,12 +562,19 @@ const PharmacyDashboard = () => {
 
         {/* Responsive Segmented Tabs */}
         <div className="bg-white rounded-xl border border-[#E4E1D8] p-1.5">
-          <nav className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+          <nav className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
             {[
-              { id: 'profile', label: 'Branch Profile', short: 'Profile', icon: User },
-              { id: 'medicines', label: 'Medicine Catalog', short: 'Medicines', icon: Pill },
+              ...(isOwner
+                ? [{ id: 'profile', label: 'Branch Profile', short: 'Profile', icon: User }]
+                : []),
+              ...(!isStaff
+                ? [{ id: 'medicines', label: 'Medicine Catalog', short: 'Medicines', icon: Pill }]
+                : []),
               { id: 'inventory', label: 'Branch Inventory', short: 'Inventory', icon: Package },
               { id: 'orders', label: 'Orders & Delivery', short: 'Orders', icon: ClipboardList },
+              ...(isOwner || isManager
+                ? [{ id: 'staff', label: 'Team & Staff', short: 'Team', icon: Users }]
+                : []),
             ].map((tab) => {
               const Icon = tab.icon;
               const active = activeTab === tab.id;
@@ -1173,8 +1270,197 @@ const PharmacyDashboard = () => {
 
         {/* Orders & Delivery Tab */}
         {activeTab === 'orders' && (
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className="bg-white border border-[#E4E1D8] rounded-2xl p-4 sm:p-6">
             <PharmacyOrders pharmacyId={pharmacy?.id} />
+          </div>
+        )}
+
+        {/* Team & Staff Management Tab (Owner & Store Manager) */}
+        {activeTab === 'staff' && (isOwner || isManager) && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Add Staff / Manager Form */}
+            <div className="lg:col-span-5 bg-white border border-[#E4E1D8] rounded-2xl p-5 sm:p-6">
+              <div className="flex items-center gap-2 mb-1">
+                <UserPlus className="w-4 h-4 text-[#0F4C3A]" />
+                <span className="font-mono-data text-[11px] uppercase tracking-wider text-[#0F4C3A]">
+                  {isOwner ? 'Add Manager or Staff' : 'Add Store Staff'}
+                </span>
+              </div>
+              <h2 className="text-xl font-bold text-[#121816] mb-1">
+                Create Team Account
+              </h2>
+              <p className="text-xs text-[#4E5B55] mb-5">
+                {isOwner
+                  ? 'Assign a Store Manager (manages branch stock, orders & staff) or Normal Staff (confirms orders).'
+                  : 'Create a Normal Staff account for your store to help confirm and fulfill customer orders.'}
+              </p>
+
+              <form onSubmit={handleCreateStaff} className="space-y-4">
+                {isOwner && (
+                  <>
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+                        Role *
+                      </label>
+                      <select
+                        value={staffForm.pharmacyRole}
+                        onChange={(e) => setStaffForm({ ...staffForm, pharmacyRole: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+                      >
+                        <option value="manager">Store Manager (Stock + Orders + Add Staff)</option>
+                        <option value="staff">Normal Staff (Confirm &amp; Fulfill Orders)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+                        Assigned Branch *
+                      </label>
+                      <select
+                        value={staffForm.pharmacyId || pharmacy?.id || ''}
+                        onChange={(e) => setStaffForm({ ...staffForm, pharmacyId: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+                      >
+                        {branches.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.city} · {b.branchName || b.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                )}
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={staffForm.name}
+                    onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })}
+                    placeholder="e.g., Karim Uddin"
+                    className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={staffForm.email}
+                      onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })}
+                      placeholder="staff@pharmacy.com"
+                      className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+                      Phone (11-digit BD)
+                    </label>
+                    <input
+                      type="tel"
+                      value={staffForm.phone}
+                      onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })}
+                      placeholder="017XXXXXXXX"
+                      className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+                    Password *
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={staffForm.password}
+                    onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })}
+                    placeholder="Min. 6 characters"
+                    className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm focus:bg-white focus:border-[#0F4C3A] outline-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={staffLoading}
+                  className="w-full py-2.5 px-4 bg-[#0F4C3A] text-white rounded-lg text-sm font-semibold hover:bg-[#16634C] transition disabled:opacity-50 cursor-pointer"
+                >
+                  {staffLoading ? 'Creating...' : 'Create Account'}
+                </button>
+              </form>
+            </div>
+
+            {/* Active Team Directory */}
+            <div className="lg:col-span-7 bg-white border border-[#E4E1D8] rounded-2xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-[#EFECE5] flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-bold text-[#121816]">Active Store Team</h2>
+                  <p className="text-xs text-[#78857F] mt-0.5">
+                    {staffList.length} team member(s) across your accessible branch(es)
+                  </p>
+                </div>
+              </div>
+
+              {staffList.length === 0 ? (
+                <div className="p-10 text-center text-sm text-[#4E5B55]">
+                  No managers or staff accounts created yet. Use the form to add your first team member.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-[#EFECE5]">
+                    <thead className="bg-[#FAF9F6]">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Member</th>
+                        <th className="px-4 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Role</th>
+                        <th className="px-4 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Branch</th>
+                        <th className="px-4 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#EFECE5] text-sm">
+                      {staffList.map((member) => (
+                        <tr key={member.id} className="hover:bg-[#FAF9F6]">
+                          <td className="px-4 py-3.5">
+                            <div className="font-semibold text-[#121816]">{member.name}</div>
+                            <div className="text-xs text-[#78857F]">{member.email}</div>
+                          </td>
+                          <td className="px-4 py-3.5 whitespace-nowrap">
+                            <span
+                              className={`font-mono-data uppercase text-[11px] px-2.5 py-0.5 rounded-full font-semibold ${
+                                member.pharmacyRole === 'manager'
+                                  ? 'bg-[#0B251D] text-[#3DD598]'
+                                  : 'bg-[#E6F2EC] text-[#0F4C3A]'
+                              }`}
+                            >
+                              {member.pharmacyRole}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3.5 text-xs text-[#4E5B55]">
+                            {member.branchName}
+                          </td>
+                          <td className="px-4 py-3.5 whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteStaff(member.id)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#FDF2F0] text-[#9A2E1B] border border-[#F3C8BF] hover:bg-[#FADFD9] text-xs font-semibold cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
