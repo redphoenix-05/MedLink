@@ -3,32 +3,28 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
-import { Pill, Eye, EyeOff, ArrowLeft, Lock, Mail } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Lock, Mail, ShieldCheck, MapPin, Clock } from 'lucide-react';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login, loading, error, clearError, isAuthenticated } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
   });
-
   const [showPassword, setShowPassword] = useState(false);
 
-
-
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !loading) {
-      navigate('/dashboard'); // Let DashboardRouter handle role-based routing
+      navigate('/dashboard');
     }
   }, [isAuthenticated, navigate, loading]);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
     if (error) clearError();
   };
@@ -37,8 +33,6 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       const response = await login(formData);
-
-      // After successful login, navigate directly to role-specific dashboard
       if (response && response.success && response.data?.user?.role) {
         const userRole = response.data.user.role;
         if (userRole === 'admin') {
@@ -54,139 +48,183 @@ const LoginPage = () => {
     }
   };
 
-
-
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 relative overflow-hidden">
-
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center group">
-            <img 
-              src="/logo.png" 
-              alt="MedLink Logo" 
-              className="w-16 h-16 object-contain mr-3 transform group-hover:scale-110 transition-transform"
-            />
-            <span className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">MedLink</span>
+    <div className="min-h-screen bg-[#F7F6F2] grid lg:grid-cols-12">
+      {/* Left Architectural Editorial Panel */}
+      <aside className="hidden lg:flex lg:col-span-5 bg-[#0B251D] bg-clinical-grid-dark text-[#F7F6F2] p-12 flex-col justify-between border-r border-[#193B2F]">
+        <div>
+          <Link to="/" className="inline-flex items-center gap-3 group">
+            <div className="w-10 h-10 rounded-lg bg-[#163D30] flex items-center justify-center p-1.5">
+              <img
+                src="/logo.png"
+                alt="MedLink"
+                className="w-full h-full object-contain brightness-0 invert"
+              />
+            </div>
+            <div>
+              <span className="text-xl font-bold tracking-tight text-white block leading-none">
+                MedLink
+              </span>
+              <span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#8FB3A5]">
+                Pharmacy Index
+              </span>
+            </div>
           </Link>
-          <p className="mt-4 text-xl text-gray-700 font-medium">Welcome back! Sign in to continue</p>
+
+          <div className="mt-16">
+            <span className="font-mono-data text-xs uppercase tracking-[0.16em] text-[#3DD598]">
+              Welcome Back
+            </span>
+            <h1 className="font-editorial text-5xl leading-[1.06] text-white mt-3 mb-5">
+              Real-time stock from licensed pharmacies near you.
+            </h1>
+            <p className="text-sm text-[#B7CEC5] leading-relaxed max-w-sm">
+              Sign in to search live inventory, manage your multi-pharmacy cart, track active deliveries, or administer your dispensary.
+            </p>
+          </div>
         </div>
 
-        {/* Login Form */}
-        <div className="bg-white/70 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-2xl sm:px-10 border border-white/30">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Error Alert */}
-            {error && (
-              <Alert 
-                type="error" 
-                message={error} 
-                onClose={clearError}
+        <div className="space-y-4 pt-8 border-t border-[#193B2F]">
+          <div className="flex items-start gap-3">
+            <ShieldCheck className="w-4 h-4 text-[#3DD598] mt-0.5 shrink-0" />
+            <p className="text-xs text-[#B7CEC5]">
+              Every dispensary is manually verified by drug license before going live.
+            </p>
+          </div>
+          <div className="flex items-start gap-3">
+            <MapPin className="w-4 h-4 text-[#3DD598] mt-0.5 shrink-0" />
+            <p className="text-xs text-[#B7CEC5]">
+              GPS distance sorting &amp; live Leaflet map directions built in.
+            </p>
+          </div>
+          <div className="flex items-start gap-3">
+            <Clock className="w-4 h-4 text-[#3DD598] mt-0.5 shrink-0" />
+            <p className="text-xs text-[#B7CEC5]">
+              Choose free in-store pickup or flat ৳60/pharmacy local courier delivery.
+            </p>
+          </div>
+        </div>
+      </aside>
+
+      {/* Right Form Panel */}
+      <main className="lg:col-span-7 flex flex-col justify-between px-5 sm:px-10 py-10">
+        <div className="flex items-center justify-between max-w-md w-full mx-auto">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#4E5B55] hover:text-[#121816] transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to home
+          </Link>
+          <Link to="/" className="lg:hidden flex items-center gap-2">
+            <div className="w-8 h-8 rounded-md bg-[#0F4C3A] p-1">
+              <img
+                src="/logo.png"
+                alt="MedLink"
+                className="w-full h-full object-contain brightness-0 invert"
               />
-            )}
-
-            {/* Email or Username */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" htmlFor="email">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  id="email"
-                  name="email"
-                  type="text"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none text-base"
-                  placeholder="Enter your email"
-                />
-              </div>
             </div>
+            <span className="font-bold text-[#121816]">MedLink</span>
+          </Link>
+        </div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2" htmlFor="password">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none text-base"
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition"
+        <div className="w-full max-w-md mx-auto my-10">
+          <div className="mb-8">
+            <h2 className="font-editorial text-4xl text-[#121816] tracking-tight">
+              Sign in to your account
+            </h2>
+            <p className="text-sm text-[#4E5B55] mt-2">
+              Enter your email and password to access your MedLink portal.
+            </p>
+          </div>
+
+          <div className="bg-white border border-[#E4E1D8] rounded-2xl p-7 sm:p-8 shadow-[0_12px_36px_-18px_rgba(18,24,22,0.1)]">
+            <form className="space-y-5" onSubmit={handleSubmit}>
+              {error && <Alert type="error" message={error} onClose={clearError} />}
+
+              <div>
+                <label
+                  className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-2"
+                  htmlFor="email"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78857F]" />
+                  <input
+                    id="email"
+                    name="email"
+                    type="text"
+                    autoComplete="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-4 py-3 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] placeholder-[#78857F] focus:bg-white focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 transition outline-none"
+                    placeholder="you@example.com"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Login Button */}
-            <div className="pt-2">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55]"
+                    htmlFor="password"
+                  >
+                    Password
+                  </label>
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78857F]" />
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-11 py-3 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] placeholder-[#78857F] focus:bg-white focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 transition outline-none"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#78857F] hover:text-[#121816] transition cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center py-3.5 px-4 bg-gradient-to-r from-green-600 to-green-700 text-white text-lg font-semibold rounded-xl hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full flex justify-center items-center py-3 px-4 bg-[#0F4C3A] text-[#F7F6F2] text-sm font-semibold rounded-lg hover:bg-[#16634C] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                {loading ? <LoadingSpinner size="small" /> : 'Sign In'}
+                {loading ? <LoadingSpinner size="small" /> : 'Sign in'}
               </button>
-            </div>
+            </form>
 
-            {/* Forgot Password */}
-            <div className="text-center">
-              <a href="#" className="text-green-600 hover:text-green-700 text-sm font-medium transition">
-                Forgot password?
-              </a>
+            <div className="mt-6 pt-6 border-t border-[#EFECE5] text-center">
+              <p className="text-sm text-[#4E5B55]">
+                New to MedLink?{' '}
+                <Link
+                  to="/signup"
+                  className="font-semibold text-[#0F4C3A] hover:underline"
+                >
+                  Create an account
+                </Link>
+              </p>
             </div>
-          </form>
-
-          {/* Divider */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t-2 border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white/70 text-gray-600 font-medium">Don't have an account?</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Sign Up Button */}
-          <div className="mt-6">
-            <Link
-              to="/signup"
-              className="w-full flex justify-center py-3.5 px-4 border-2 border-green-600 text-lg font-semibold rounded-xl text-green-600 hover:bg-green-50 transition-all"
-            >
-              Create New Account
-            </Link>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="mt-8 text-center">
-          <Link
-            to="/"
-            className="inline-flex items-center text-gray-700 hover:text-green-600 font-medium transition"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Link>
+        <div className="max-w-md w-full mx-auto text-center text-xs text-[#78857F]">
+          Protected session · MedLink Pharmacy Network
         </div>
-      </div>
+      </main>
     </div>
   );
 };

@@ -3,12 +3,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
-import { Pill, Eye, EyeOff, ArrowLeft, Mail, Lock, User, Building2, MapPin, Phone, FileText } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  Mail,
+  Lock,
+  User,
+  Building2,
+  MapPin,
+  Phone,
+  FileText,
+  CheckCircle2,
+} from 'lucide-react';
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const { signup, loading, error, clearError, isAuthenticated } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -20,7 +32,7 @@ const SignupPage = () => {
     ownerName: '',
     address: '',
     licenseNumber: '',
-    phone: ''
+    phone: '',
   });
 
   const [validationError, setValidationError] = useState('');
@@ -36,8 +48,14 @@ const SignupPage = () => {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
+    if (error) clearError();
+    if (validationError) setValidationError('');
+  };
+
+  const setRole = (role) => {
+    setFormData((prev) => ({ ...prev, role }));
     if (error) clearError();
     if (validationError) setValidationError('');
   };
@@ -51,42 +69,63 @@ const SignupPage = () => {
       setValidationError('Password must be at least 6 characters long');
       return false;
     }
-    
+
     if (formData.role === 'customer') {
       if (!formData.firstName.trim() || !formData.lastName.trim()) {
         setValidationError('First name and last name are required');
         return false;
       }
     } else if (formData.role === 'pharmacy') {
-      if (!formData.pharmacyName.trim() || !formData.ownerName.trim() || !formData.address.trim() || !formData.licenseNumber.trim() || !formData.phone.trim()) {
+      if (
+        !formData.pharmacyName.trim() ||
+        !formData.ownerName.trim() ||
+        !formData.address.trim() ||
+        !formData.licenseNumber.trim() ||
+        !formData.phone.trim()
+      ) {
         setValidationError('All pharmacy fields are required');
         return false;
       }
     }
-    
+
     return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+
+    if (!validateForm()) return;
 
     try {
       const { confirmPassword, ...signupData } = formData;
-      
+
       let dataToSend;
       if (formData.role === 'customer') {
-        const { firstName, lastName, pharmacyName, ownerName, address, licenseNumber, ...customerData } = signupData;
+        const {
+          firstName,
+          lastName,
+          pharmacyName,
+          ownerName,
+          address,
+          licenseNumber,
+          ...customerData
+        } = signupData;
         dataToSend = {
           ...customerData,
           name: `${firstName.trim()} ${lastName.trim()}`,
-          role: 'customer'
+          role: 'customer',
         };
-      } else if (formData.role === 'pharmacy') {
-        const { firstName, lastName, pharmacyName, ownerName, address, licenseNumber, phone, ...pharmacyData } = signupData;
+      } else {
+        const {
+          firstName,
+          lastName,
+          pharmacyName,
+          ownerName,
+          address,
+          licenseNumber,
+          phone,
+          ...pharmacyData
+        } = signupData;
         dataToSend = {
           ...pharmacyData,
           name: ownerName.trim(),
@@ -94,12 +133,12 @@ const SignupPage = () => {
           pharmacyName: pharmacyName.trim(),
           address: address.trim(),
           licenseNumber: licenseNumber.trim(),
-          phone: phone.trim()
+          phone: phone.trim(),
         };
       }
-      
+
       const response = await signup(dataToSend);
-      
+
       if (response && response.success) {
         if (formData.role === 'pharmacy') {
           navigate('/pharmacy/dashboard');
@@ -113,283 +152,361 @@ const SignupPage = () => {
   };
 
   const currentError = validationError || error;
+  const inputBase =
+    'w-full pl-10 pr-4 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] placeholder-[#78857F] focus:bg-white focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 transition outline-none';
+  const labelBase =
+    'block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5';
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 relative overflow-hidden">
-
-      <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center group">
-            <img 
-              src="/logo.png" 
-              alt="MedLink Logo" 
-              className="w-16 h-16 object-contain mr-3 transform group-hover:scale-110 transition-transform"
-            />
-            <span className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">MedLink</span>
-          </Link>
-          <p className="mt-4 text-xl text-gray-700 font-medium">Create your account</p>
-        </div>
-
-        {/* Signup Form */}
-        <div className="bg-white/70 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-2xl sm:px-10 border border-white/30">
-          <form className="space-y-5" onSubmit={handleSubmit}>
-            {/* Error Alert */}
-            {currentError && (
-              <Alert 
-                type="error" 
-                message={currentError} 
-                onClose={() => {
-                  clearError();
-                  setValidationError('');
-                }}
+    <div className="min-h-screen bg-[#F7F6F2] grid lg:grid-cols-12">
+      {/* Left Architectural Panel */}
+      <aside className="hidden lg:flex lg:col-span-5 bg-[#0B251D] bg-clinical-grid-dark text-[#F7F6F2] p-12 flex-col justify-between border-r border-[#193B2F]">
+        <div>
+          <Link to="/" className="inline-flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-[#163D30] flex items-center justify-center p-1.5">
+              <img
+                src="/logo.png"
+                alt="MedLink"
+                className="w-full h-full object-contain brightness-0 invert"
               />
-            )}
-
-            {/* Role Selection */}
+            </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Account Type
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none"
-              >
-                <option value="customer">Customer Account</option>
-                <option value="pharmacy">Pharmacy Account</option>
-              </select>
+              <span className="text-xl font-bold tracking-tight text-white block leading-none">
+                MedLink
+              </span>
+              <span className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#8FB3A5]">
+                Pharmacy Index
+              </span>
             </div>
+          </Link>
 
-            {/* Dynamic Fields Based on Role */}
-            {formData.role === 'customer' ? (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      name="firstName"
-                      type="text"
-                      required
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none"
-                      placeholder="John"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      name="lastName"
-                      type="text"
-                      required
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none"
-                      placeholder="Doe"
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Pharmacy Name</label>
-                  <div className="relative">
-                    <Building2 className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      name="pharmacyName"
-                      type="text"
-                      required
-                      value={formData.pharmacyName}
-                      onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none"
-                      placeholder="HealthCare Pharmacy"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Owner Name</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      name="ownerName"
-                      type="text"
-                      required
-                      value={formData.ownerName}
-                      onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none"
-                      placeholder="Owner's full name"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Address</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
-                    <textarea
-                      name="address"
-                      rows="3"
-                      required
-                      value={formData.address}
-                      onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none resize-none"
-                      placeholder="Full pharmacy address"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">License Number</label>
-                  <div className="relative">
-                    <FileText className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      name="licenseNumber"
-                      type="text"
-                      required
-                      value={formData.licenseNumber}
-                      onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none"
-                      placeholder="License #"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      name="phone"
-                      type="tel"
-                      required
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none"
-                      placeholder="+880 1234567890"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none"
-                  placeholder="your@email.com"
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none"
-                  placeholder="Create a password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-100 transition outline-none"
-                  placeholder="Confirm your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
-                >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Sign Up Button */}
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center items-center py-3.5 px-4 bg-gradient-to-r from-green-600 to-green-700 text-white text-lg font-semibold rounded-xl hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {loading ? <LoadingSpinner size="small" /> : 'Create Account'}
-              </button>
-            </div>
-          </form>
-
-          {/* Divider */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t-2 border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white/70 text-gray-600 font-medium">Already have an account?</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Login Link */}
-          <div className="mt-6">
-            <Link
-              to="/login"
-              className="w-full flex justify-center py-3.5 px-4 border-2 border-green-600 text-lg font-semibold rounded-xl text-green-600 hover:bg-green-50 transition-all"
-            >
-              Sign In
-            </Link>
+          <div className="mt-16">
+            <span className="font-mono-data text-xs uppercase tracking-[0.16em] text-[#3DD598]">
+              {formData.role === 'pharmacy' ? 'Dispensary Onboarding' : 'Patient Registration'}
+            </span>
+            <h1 className="font-editorial text-5xl leading-[1.06] text-white mt-3 mb-5">
+              {formData.role === 'pharmacy'
+                ? 'Bring your pharmacy inventory online in minutes.'
+                : 'Search real-time stock across your neighborhood.'}
+            </h1>
+            <p className="text-sm text-[#B7CEC5] leading-relaxed max-w-sm">
+              {formData.role === 'pharmacy'
+                ? 'Submit your license details for admin verification, publish live shelf counts, and receive direct local orders.'
+                : 'Create a free account to locate medicines, compare transparent BDT prices, and reserve for pickup or delivery.'}
+            </p>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="mt-8 text-center">
+        <div className="space-y-3.5 pt-8 border-t border-[#193B2F] text-xs text-[#B7CEC5]">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="w-4 h-4 text-[#3DD598] shrink-0" />
+            <span>No subscription fees for patients</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="w-4 h-4 text-[#3DD598] shrink-0" />
+            <span>Direct SSLCommerz encrypted checkout</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="w-4 h-4 text-[#3DD598] shrink-0" />
+            <span>Full order &amp; reservation tracking</span>
+          </div>
+        </div>
+      </aside>
+
+      {/* Right Form Panel */}
+      <main className="lg:col-span-7 flex flex-col justify-between px-5 sm:px-10 py-10">
+        <div className="flex items-center justify-between max-w-lg w-full mx-auto">
           <Link
             to="/"
-            className="inline-flex items-center text-gray-700 hover:text-green-600 font-medium transition"
+            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#4E5B55] hover:text-[#121816] transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+            <ArrowLeft className="w-4 h-4" />
+            Back to home
+          </Link>
+          <Link to="/" className="lg:hidden flex items-center gap-2">
+            <div className="w-8 h-8 rounded-md bg-[#0F4C3A] p-1">
+              <img
+                src="/logo.png"
+                alt="MedLink"
+                className="w-full h-full object-contain brightness-0 invert"
+              />
+            </div>
+            <span className="font-bold text-[#121816]">MedLink</span>
           </Link>
         </div>
-      </div>
+
+        <div className="w-full max-w-lg mx-auto my-8">
+          <div className="mb-6">
+            <h2 className="font-editorial text-4xl text-[#121816] tracking-tight">
+              Create your account
+            </h2>
+            <p className="text-sm text-[#4E5B55] mt-1.5">
+              Choose whether you are registering as a patient or a licensed pharmacy.
+            </p>
+          </div>
+
+          <div className="bg-white border border-[#E4E1D8] rounded-2xl p-6 sm:p-8 shadow-[0_12px_36px_-18px_rgba(18,24,22,0.1)]">
+            {/* Tactile Role Switcher */}
+            <div className="grid grid-cols-2 gap-2.5 p-1.5 rounded-xl bg-[#F2F0E9] border border-[#E4E1D8] mb-6">
+              <button
+                type="button"
+                onClick={() => setRole('customer')}
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                  formData.role === 'customer'
+                    ? 'bg-[#0F4C3A] text-[#F7F6F2] shadow-sm'
+                    : 'text-[#4E5B55] hover:text-[#121816]'
+                }`}
+              >
+                <User className="w-4 h-4" />
+                Customer
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('pharmacy')}
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                  formData.role === 'pharmacy'
+                    ? 'bg-[#0F4C3A] text-[#F7F6F2] shadow-sm'
+                    : 'text-[#4E5B55] hover:text-[#121816]'
+                }`}
+              >
+                <Building2 className="w-4 h-4" />
+                Pharmacy
+              </button>
+            </div>
+
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              {currentError && (
+                <Alert
+                  type="error"
+                  message={currentError}
+                  onClose={() => {
+                    clearError();
+                    setValidationError('');
+                  }}
+                />
+              )}
+
+              {formData.role === 'customer' ? (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelBase}>First Name</label>
+                    <div className="relative">
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78857F]" />
+                      <input
+                        name="firstName"
+                        type="text"
+                        required
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        className={inputBase}
+                        placeholder="Ariyan"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={labelBase}>Last Name</label>
+                    <div className="relative">
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78857F]" />
+                      <input
+                        name="lastName"
+                        type="text"
+                        required
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        className={inputBase}
+                        placeholder="Rahman"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className={labelBase}>Pharmacy Name</label>
+                      <div className="relative">
+                        <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78857F]" />
+                        <input
+                          name="pharmacyName"
+                          type="text"
+                          required
+                          value={formData.pharmacyName}
+                          onChange={handleChange}
+                          className={inputBase}
+                          placeholder="Lazz Pharma"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className={labelBase}>Owner Name</label>
+                      <div className="relative">
+                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78857F]" />
+                        <input
+                          name="ownerName"
+                          type="text"
+                          required
+                          value={formData.ownerName}
+                          onChange={handleChange}
+                          className={inputBase}
+                          placeholder="Full name"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelBase}>Street Address</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3.5 top-3 w-4 h-4 text-[#78857F]" />
+                      <textarea
+                        name="address"
+                        rows="2"
+                        required
+                        value={formData.address}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-4 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] placeholder-[#78857F] focus:bg-white focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 transition outline-none resize-none"
+                        placeholder="Full pharmacy street address"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className={labelBase}>License Number</label>
+                      <div className="relative">
+                        <FileText className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78857F]" />
+                        <input
+                          name="licenseNumber"
+                          type="text"
+                          required
+                          value={formData.licenseNumber}
+                          onChange={handleChange}
+                          className={inputBase}
+                          placeholder="DGDA-XXXX"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className={labelBase}>Phone Number</label>
+                      <div className="relative">
+                        <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78857F]" />
+                        <input
+                          name="phone"
+                          type="tel"
+                          required
+                          value={formData.phone}
+                          onChange={handleChange}
+                          className={inputBase}
+                          placeholder="+880 17XXXXXXXX"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div>
+                <label className={labelBase}>Email Address</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78857F]" />
+                  <input
+                    name="email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={inputBase}
+                    placeholder="you@example.com"
+                  />
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelBase}>Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78857F]" />
+                    <input
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-10 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] placeholder-[#78857F] focus:bg-white focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 transition outline-none"
+                      placeholder="Min. 6 characters"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#78857F] hover:text-[#121816] cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelBase}>Confirm Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#78857F]" />
+                    <input
+                      name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-10 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] placeholder-[#78857F] focus:bg-white focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 transition outline-none"
+                      placeholder="Repeat password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#78857F] hover:text-[#121816] cursor-pointer"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center items-center py-3 px-4 bg-[#0F4C3A] text-[#F7F6F2] text-sm font-semibold rounded-lg hover:bg-[#16634C] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {loading ? (
+                    <LoadingSpinner size="small" />
+                  ) : formData.role === 'pharmacy' ? (
+                    'Register Pharmacy'
+                  ) : (
+                    'Create Customer Account'
+                  )}
+                </button>
+              </div>
+            </form>
+
+            <div className="mt-6 pt-5 border-t border-[#EFECE5] text-center">
+              <p className="text-sm text-[#4E5B55]">
+                Already registered?{' '}
+                <Link to="/login" className="font-semibold text-[#0F4C3A] hover:underline">
+                  Sign in instead
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-lg w-full mx-auto text-center text-xs text-[#78857F]">
+          By creating an account, you agree to MedLink’s pharmacy verification guidelines.
+        </div>
+      </main>
     </div>
   );
 };
 
 export default SignupPage;
-
