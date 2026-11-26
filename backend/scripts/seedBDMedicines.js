@@ -185,6 +185,32 @@ const BD_MEDICINES = [
   { name: 'Cinaron 15', genericName: 'Cinnarizine', brand: 'Square Pharma', category: 'over-the-counter', dosageForm: 'tablet', strength: '15mg', requiresPrescription: false, basePrice: 20 },
 ];
 
+// Core famous / high-demand medicines in Bangladesh stocked by EVERY store (normal + famous)
+const FAMOUS_MEDICINE_NAMES = new Set([
+  'napa', 'napa extra', 'napa extend', 'napa syrup', 'napa drops',
+  'ace', 'ace plus', 'renova', 'fast', 'rolac 10', 'clofenac 50', 'naprox 500', 'naprox plus', 'etorix 90', 'algin 50',
+  'seclo 20', 'seclo 40', 'sergel 20', 'sergel 40', 'maxpro 20', 'nexum 20', 'losectil 20', 'pantonix 20', 'finix 20',
+  'entacyd plus', 'gavisol syrup', 'motigut 10', 'omidon 10', 'famotack 20',
+  'azithro 500', 'zimax 500', 'cef-3 200', 'cefotil 500', 'ciprocin 500', 'levoxin 500', 'moxacil 500', 'tyclav 625',
+  'amodis 400', 'filmet 400', 'almex 400', 'flugal 50', 'flugal 150',
+  'monas 10', 'montair 10', 'fexo 120', 'fenadin 120', 'alatrol 10', 'histacin', 'basok syrup', 'adryl syrup',
+  'ambrox syrup', 'sultolin inhaler', 'antazol nasal drops',
+  'atova 10', 'atova 20', 'rosuva 10', 'ecosprin 75', 'clopid 75', 'bizoran 5/20', 'camlodin 5', 'osartil 50', 'bisocor 5', 'lasix 40',
+  'comet 500', 'metfo 500', 'secrin 2', 'linaglip 5',
+  'ceevit', 'calbo-d', 'coralcal-d', 'neuro-b', 'bextrum gold', 'filwel gold', 'zif-ci', 'xinc 20', 'd-rise 20000',
+  'e-cap 400', 'orsaline-n', 'tasty saline',
+  'fungidal hc cream', 'burna cream', 'tearon eye drops', 'ciprocin eye drops',
+]);
+
+// National flagship / famous chains that carry ALL medicine types
+const FAMOUS_CHAINS = new Set([
+  'lazz pharma',
+  'tamanna pharmacy',
+  'arogga pharmacy',
+  'popular pharmacy',
+  'model pharmacy',
+]);
+
 async function seedBDMedicines() {
   try {
     console.log('🔌 Connecting to database...');
@@ -225,10 +251,16 @@ async function seedBDMedicines() {
     const allMeds = await Medicine.findAll({ raw: true });
     const priceByName = new Map(BD_MEDICINES.map((m) => [m.name.toLowerCase(), m.basePrice]));
 
-    // 2. Stock across all approved pharmacy branches (~50 medicines per branch)
+    const famousMeds = allMeds.filter((m) => FAMOUS_MEDICINE_NAMES.has(m.name.toLowerCase()));
+    const specialtyMeds = allMeds.filter((m) => !FAMOUS_MEDICINE_NAMES.has(m.name.toLowerCase()));
+
+    // 2. Tiered Stocking:
+    //    - Famous national chains (Lazz, Tamanna, Arogga, Popular, Model): ALL medicines (100% catalog)
+    //    - City-local multi-branch stores (Central Pharma, Health Mart): ALL famous medicines + 40 specialty medicines
+    //    - Normal independent stores: ALL famous medicines + 18 rotating local medicines
     const pharmacies = await Pharmacy.findAll({
       where: { status: 'approved' },
-      attributes: ['id', 'city'],
+      attributes: ['id', 'name', 'chainName', 'city'],
       raw: true,
     });
 
@@ -239,14 +271,50 @@ async function seedBDMedicines() {
     const existingPairs = new Set(existingInv.map((r) => `${r.pharmacyId}-${r.medicineId}`));
 
     const newInventoryRows = [];
-    pharmacies.forEach((branch, bIdx) => {
-      // Stock 50 medicines per branch using deterministic spread so every medicine is widely available across all 8 cities
-      const totalMeds = allMeds.length;
-      const step = 3;
-      const offset = (bIdx * 7) % totalMeds;
+    let famousStoreCount = 0;
+    let regionalStoreCount = 0;
+    let normalStoreCount = 0;
 
-      for (let k = 0; k < Math.min(50, totalMeds); k++) {
-        const med = allMeds[(offset + k * step) % totalMeds];
+    pharmacies.forEach((branch, bIdx) => {
+      const chainLower = (branch.chainName || '').toLowerCase();
+      const nameLower = (branch.name || '').toLowerCase();
+      const isFamousStore =
+        FAMOUS_CHAINS.has(chainLower) ||
+        Array.from(FAMOUS_CHAINS).some((fc) => nameLower.includes(fc));
+      const isRegionalChain =
+        !isFamousStore &&
+        (nameLower.includes('central pharma') || nameLower.includes('health mart'));
+
+      let targetMeds = [];
+      let baseStockMin = 20;
+      let stockSpread = 60;
+
+      if (isFamousStore) {
+        famousStoreCount++;
+        targetMeds = allMeds; // Famous stores stock ALL medicine types
+        baseStockMin = 45;
+        stockSpread = 120;
+      } else if (isRegionalChain) {
+        regionalStoreCount++;
+        const extra = [];
+        for (let k = 0; k < Math.min(40, specialtyMeds.length); k++) {
+          extra.push(specialtyMeds[(bIdx * 5 + k * 2) % specialtyMeds.length]);
+        }
+        targetMeds = [...famousMeds, ...extra];
+        baseStockMin = 30;
+        stockSpread = 80;
+      } else {
+        normalStoreCount++;
+        const extra = [];
+        for (let k = 0; k < Math.min(18, specialtyMeds.length); k++) {
+          extra.push(specialtyMeds[(bIdx * 7 + k * 3) % specialtyMeds.length]);
+        }
+        targetMeds = [...famousMeds, ...extra];
+        baseStockMin = 15;
+        stockSpread = 55;
+      }
+
+      for (const med of targetMeds) {
         const key = `${branch.id}-${med.id}`;
         if (existingPairs.has(key)) continue;
         existingPairs.add(key);
@@ -254,7 +322,7 @@ async function seedBDMedicines() {
         const basePrice = priceByName.get(med.name.toLowerCase()) || 80;
         const variance = ((bIdx + med.id) % 5) - 2;
         const price = Math.max(8, basePrice + variance);
-        const stock = 15 + ((bIdx * 13 + med.id * 7) % 110);
+        const stock = baseStockMin + ((bIdx * 13 + med.id * 7) % stockSpread);
 
         newInventoryRows.push({
           pharmacyId: branch.id,
@@ -277,7 +345,9 @@ async function seedBDMedicines() {
     const finalMedCount = await Medicine.count();
     const finalInvCount = await PharmacyInventory.count();
 
-    console.log(`🏥 Stocked across ${pharmacies.length} approved branches.`);
+    console.log(
+      `🏥 Tiered stocking complete: ${famousStoreCount} Famous stores (ALL ${allMeds.length} medicines) | ${regionalStoreCount} Regional chains | ${normalStoreCount} Normal stores (all ${famousMeds.length} famous medicines + local stock).`
+    );
     console.log(`📦 Added ${newInventoryRows.length} new inventory rows.`);
     console.log(`✅ TOTAL IN DATABASE: ${finalMedCount} medicines | ${finalInvCount} live pharmacy inventory listings.`);
     process.exit(0);
