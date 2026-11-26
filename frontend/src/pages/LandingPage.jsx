@@ -1,259 +1,337 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Pill, Clock, MapPin, ShieldCheck, ArrowRight, ChevronRight, Zap, TrendingUp, Users, Package } from 'lucide-react';
+import {
+  Search,
+  MapPin,
+  ArrowRight,
+  ArrowUpRight,
+  ShieldCheck,
+  Clock,
+  Store,
+  Check,
+  Navigation,
+  Receipt,
+  Building2,
+  Phone,
+  Mail,
+} from 'lucide-react';
+import TopNav from '../components/TopNav';
+import Reveal from '../components/Reveal';
+import { useAuth } from '../context/AuthContext';
 
-const MedLink = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+const SAMPLE_MEDICINES = [
+  {
+    key: 'Napa Extra',
+    generic: 'Paracetamol 500mg + Caffeine 65mg',
+    manufacturer: 'Beximco Pharma',
+    listings: [
+      { pharmacy: 'Lazz Pharma — Dhanmondi 27', distance: '0.4 km', stock: 48, price: 25.0, updated: '2m ago' },
+      { pharmacy: 'Tamanna Pharmacy — Green Road', distance: '0.9 km', stock: 19, price: 24.5, updated: '5m ago' },
+      { pharmacy: 'Popular Dispensary — Satmasjid', distance: '1.3 km', stock: 6, price: 25.0, updated: '1m ago', low: true },
+    ],
+  },
+  {
+    key: 'Seclo 20mg',
+    generic: 'Omeprazole 20mg Capsule',
+    manufacturer: 'Square Pharmaceuticals',
+    listings: [
+      { pharmacy: 'Arogga Corner — Banani 11', distance: '0.6 km', stock: 84, price: 60.0, updated: '1m ago' },
+      { pharmacy: 'Lazz Pharma — Gulshan 1', distance: '1.1 km', stock: 32, price: 60.0, updated: '4m ago' },
+      { pharmacy: 'City Care Chemist — Mohakhali', distance: '1.8 km', stock: 14, price: 58.0, updated: '9m ago' },
+    ],
+  },
+  {
+    key: 'Monas 10',
+    generic: 'Montelukast Sodium 10mg',
+    manufacturer: 'ACME Laboratories',
+    listings: [
+      { pharmacy: 'Wellbeing Pharmacy — Uttara 7', distance: '0.5 km', stock: 27, price: 175.0, updated: '3m ago' },
+      { pharmacy: 'LifeSpring Meds — Sector 3', distance: '1.2 km', stock: 41, price: 172.0, updated: '6m ago' },
+      { pharmacy: 'Crescent Drug House — Jasimuddin', distance: '1.9 km', stock: 5, price: 175.0, updated: '2m ago', low: true },
+    ],
+  },
+  {
+    key: 'Azithro 500',
+    generic: 'Azithromycin 500mg Tablet',
+    manufacturer: 'Incepta Pharma',
+    listings: [
+      { pharmacy: 'Central Medico — Mirpur 10', distance: '0.7 km', stock: 36, price: 140.0, updated: '2m ago' },
+      { pharmacy: 'CarePlus Pharmacy — Pallabi', distance: '1.4 km', stock: 22, price: 138.0, updated: '7m ago' },
+      { pharmacy: 'Shifa Dispensary — Kazipara', distance: '2.1 km', stock: 9, price: 140.0, updated: '4m ago', low: true },
+    ],
+  },
+];
 
+const WORKFLOW_STEPS = [
+  {
+    num: '01',
+    title: 'Search by brand or generic name',
+    description:
+      'Type the exact brand on your prescription or its generic salt. MedLink matches live shelf records across every approved neighborhood pharmacy.',
+    meta: 'Instant salt & brand matching',
+  },
+  {
+    num: '02',
+    title: 'Compare stock, price & distance',
+    description:
+      'See exact box counts, unit pricing in BDT, and walking or driving distance on an interactive Leaflet map before committing.',
+    meta: 'Zero blind phone calls',
+  },
+  {
+    num: '03',
+    title: 'Reserve for pickup or courier delivery',
+    description:
+      'Lock your items from one or multiple pharmacies in a single SSLCommerz checkout, with transparent ৳60/pharmacy delivery or free in-store pickup.',
+    meta: 'Real-time order tracking',
+  },
+];
+
+const TICKER_ITEMS = [
+  'DGDA-LICENSED PHARMACIES',
+  'REAL-TIME SHELF INVENTORY',
+  'GENERIC & BRAND LOOKUP',
+  'INTERACTIVE NEIGHBORHOOD MAP',
+  'TRANSPARENT BDT PRICING',
+  'SSLCOMMERZ PROTECTED CHECKOUT',
+  'PICKUP OR DOORSTEP COURIER',
+  'VERIFIED BATCH AUTHENTICITY',
+];
+
+const LandingPage = () => {
+  const { isAuthenticated } = useAuth();
+  const [selectedMedKey, setSelectedMedKey] = useState(SAMPLE_MEDICINES[0].key);
+  const [customQuery, setCustomQuery] = useState('');
+  const [activeStep, setActiveStep] = useState(0);
+
+  // Auto-cycle workflow preview gently unless user interacts
+  const [stepPaused, setStepPaused] = useState(false);
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
+    if (stepPaused) return;
+    const timer = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % WORKFLOW_STEPS.length);
+    }, 5500);
+    return () => clearInterval(timer);
+  }, [stepPaused]);
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const activeMedicine =
+    SAMPLE_MEDICINES.find((m) => m.key === selectedMedKey) || SAMPLE_MEDICINES[0];
+
+  const filteredListings = customQuery.trim()
+    ? activeMedicine.listings.filter(
+        (l) =>
+          l.pharmacy.toLowerCase().includes(customQuery.toLowerCase()) ||
+          activeMedicine.key.toLowerCase().includes(customQuery.toLowerCase()) ||
+          activeMedicine.generic.toLowerCase().includes(customQuery.toLowerCase())
+      )
+    : activeMedicine.listings;
 
   const handleSmoothScroll = (e, targetId) => {
     e.preventDefault();
-    
     if (targetId === '#') return;
-    
-    const targetElement = document.querySelector(targetId);
-    if (targetElement) {
-      targetElement.scrollIntoView({
-        behavior: 'smooth'
-      });
-      
-      // Close mobile menu if open
-      setIsMobileMenuOpen(false);
-    }
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+    const el = document.querySelector(targetId);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
-        * {
-          font-family: 'Inter', sans-serif;
-        }
-        
-        .gradient-text {
-          background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        
-        .gradient-bg-primary {
-          background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
-        }
-        
-        .gradient-bg-secondary {
-          background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
-        }
-        
-        .gradient-bg-tertiary {
-          background: linear-gradient(135deg, #4ade80 0%, #86efac 100%);
-        }
-        
-        .gradient-bg-hero {
-          background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%);
-        }
-        
-        .glass-card {
-          background: rgba(255, 255, 255, 0.7);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .feature-card {
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          position: relative;
-          overflow: hidden;
-        }
-        
-        .feature-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-          transition: left 0.5s;
-        }
-        
-        .feature-card:hover::before {
-          left: 100%;
-        }
-        
-        .feature-card:hover {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
-        
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        
-        .floating {
-          animation: float 6s ease-in-out infinite;
-        }
-        
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .fade-in-up {
-          animation: fadeInUp 0.8s ease-out forwards;
-        }
-        
-        .stats-card {
-          transition: all 0.3s ease;
-        }
-        
-        .stats-card:hover {
-          transform: scale(1.05);
-        }
-      `}</style>
+    <div className="min-h-screen bg-[#F7F6F2] text-[#121816] overflow-x-hidden">
+      <TopNav onSectionClick={handleSmoothScroll} />
 
-      {/* Header/Navbar */}
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'glass-card shadow-lg' : 'bg-white/80 backdrop-blur-sm'
-      }`}>
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-                  <Link to="/" className="flex items-center space-x-2 group">
-                    <img src="/logo.png" alt="MedLink Logo" className="w-10 h-10 rounded-lg object-contain" />
-                    <span className="text-2xl font-bold gradient-text">MedLink</span>
-                  </Link>
-                  
-                  {/* Mobile menu button */}
-            <div className="md:hidden">
-              <button 
-                onClick={toggleMobileMenu}
-                className="p-2 rounded-lg hover:bg-gray-200 transition"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-            
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" onClick={(e) => handleSmoothScroll(e, '#features')} 
-                 className="text-gray-700 hover:text-green-600 font-medium transition">Features</a>
-              <a href="#how-it-works" onClick={(e) => handleSmoothScroll(e, '#how-it-works')} 
-                 className="text-gray-700 hover:text-green-600 font-medium transition">How it Works</a>
-              <a href="#stats" onClick={(e) => handleSmoothScroll(e, '#stats')} 
-                 className="text-gray-700 hover:text-green-600 font-medium transition">About</a>
-              <Link to="/login" className="text-gray-700 hover:text-green-600 font-medium transition">Login</Link>
-              <Link to="/signup" className="px-6 py-2.5 gradient-bg-primary text-white rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition">
-                Get Started
-              </Link>
-            </div>
-          </div>
-          
-          {/* Mobile Navigation */}
-          <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden mt-4 pb-4 space-y-2`}>
-            <a href="#features" onClick={(e) => handleSmoothScroll(e, '#features')} 
-               className="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">Features</a>
-            <a href="#how-it-works" onClick={(e) => handleSmoothScroll(e, '#how-it-works')} 
-               className="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">How it Works</a>
-            <a href="#stats" onClick={(e) => handleSmoothScroll(e, '#stats')} 
-               className="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">About</a>
-            <Link to="/login" className="block py-2 px-4 rounded-lg hover:bg-gray-100 transition">Login</Link>
-            <Link to="/signup" className="block py-2.5 px-4 gradient-bg-primary text-white rounded-lg font-semibold text-center">Get Started</Link>
-          </div>
-        </nav>
-      </header>
-
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="fade-in-up">
-              <div className="inline-block mb-4 px-4 py-2 glass-card rounded-full">
-                <span className="text-sm font-semibold gradient-text">Healthcare Made Simple</span>
+      {/* HERO SECTION */}
+      <section className="relative bg-clinical-grid border-b border-[#E4E1D8]">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-14 pb-20 lg:pt-20 lg:pb-28">
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-10 items-start">
+            {/* Left Editorial Column */}
+            <div className="lg:col-span-6 lg:pt-4">
+              <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white border border-[#E4E1D8] mb-7">
+                <span className="w-2 h-2 rounded-full bg-[#1B7A5E] live-dot" />
+                <span className="text-[11px] font-mono-data uppercase tracking-[0.12em] text-[#4E5B55]">
+                  Live Neighborhood Pharmacy Network
+                </span>
               </div>
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight mb-6">
-                Find Your <span className="gradient-text">Medicines</span> Instantly
+
+              <h1 className="font-editorial text-[48px] sm:text-[62px] lg:text-[68px] leading-[1.02] tracking-[-0.02em] text-[#121816] mb-6">
+                Know which pharmacy has your medicine{' '}
+                <span className="italic text-[#0F4C3A]">before you step out.</span>
               </h1>
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Connect with verified pharmacies in real-time. Check availability, compare prices, and get your medicines delivered to your doorstep.
+
+              <p className="text-[17px] sm:text-[18px] text-[#4E5B55] leading-relaxed max-w-xl mb-9">
+                Stop calling five pharmacies in a row. MedLink indexes live shelf stock across licensed local dispensaries so you can verify availability, compare prices, and reserve for pickup or delivery in seconds.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/signup" className="group px-8 py-4 gradient-bg-primary text-white rounded-xl font-semibold text-lg hover:shadow-2xl transform hover:scale-105 transition flex items-center justify-center">
-                  Get Started Free
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 mb-12">
+                <Link
+                  to={isAuthenticated ? '/dashboard' : '/signup'}
+                  className="group inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#0F4C3A] text-[#F7F6F2] font-semibold text-sm hover:bg-[#16634C] transition-all cursor-pointer"
+                >
+                  {isAuthenticated ? 'Go to Medicine Search' : 'Start searching medicines'}
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
-                <Link to="/login" className="px-8 py-4 glass-card rounded-xl font-semibold text-lg hover:shadow-xl transition flex items-center justify-center">
-                  Sign In
-                  <ChevronRight className="ml-2 w-5 h-5" />
+                <Link
+                  to="/about"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-white border border-[#D4D0C5] text-[#121816] font-semibold text-sm hover:border-[#0F4C3A]/40 hover:bg-[#FAF9F6] transition-all"
+                >
+                  How verification works
                 </Link>
               </div>
-              
-              {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-6 mt-12">
-                <div className="stats-card">
-                  <div className="text-3xl font-bold gradient-text">500+</div>
-                  <div className="text-sm text-gray-600 mt-1">Pharmacies</div>
+
+              {/* Grounded Metric Strip */}
+              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-[#E4E1D8]">
+                <div>
+                  <div className="font-mono-data text-2xl sm:text-3xl font-semibold text-[#121816]">
+                    500+
+                  </div>
+                  <div className="text-xs text-[#4E5B55] mt-1">Licensed pharmacies</div>
                 </div>
-                <div className="stats-card">
-                  <div className="text-3xl font-bold gradient-text">50k+</div>
-                  <div className="text-sm text-gray-600 mt-1">Medicines</div>
+                <div>
+                  <div className="font-mono-data text-2xl sm:text-3xl font-semibold text-[#121816]">
+                    50k+
+                  </div>
+                  <div className="text-xs text-[#4E5B55] mt-1">Indexed medicine SKUs</div>
                 </div>
-                <div className="stats-card">
-                  <div className="text-3xl font-bold gradient-text">99%</div>
-                  <div className="text-sm text-gray-600 mt-1">Satisfied</div>
+                <div>
+                  <div className="font-mono-data text-2xl sm:text-3xl font-semibold text-[#121816]">
+                    ৳60
+                  </div>
+                  <div className="text-xs text-[#4E5B55] mt-1">Flat local delivery</div>
                 </div>
               </div>
             </div>
-            
-            <div className="relative">
-              <div className="relative z-10 floating">
-                <div className="glass-card rounded-3xl p-8 shadow-2xl">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="gradient-bg-primary rounded-2xl p-6 text-white">
-                      <Clock className="w-8 h-8 mb-3" />
-                      <div className="text-2xl font-bold">24/7</div>
-                      <div className="text-sm opacity-90">Available</div>
-                    </div>
-                    <div className="gradient-bg-secondary rounded-2xl p-6 text-white">
-                      <Zap className="w-8 h-8 mb-3" />
-                      <div className="text-2xl font-bold">Fast</div>
-                      <div className="text-sm opacity-90">Delivery</div>
-                    </div>
-                    <div className="gradient-bg-tertiary rounded-2xl p-6 text-white">
-                      <ShieldCheck className="w-8 h-8 mb-3" />
-                      <div className="text-2xl font-bold">100%</div>
-                      <div className="text-sm opacity-90">Verified</div>
-                    </div>
-                    <div className="bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl p-6 text-white">
-                      <MapPin className="w-8 h-8 mb-3" />
-                      <div className="text-2xl font-bold">Near</div>
-                      <div className="text-sm opacity-90">You</div>
+
+            {/* Right Interactive Live Dispatch Console */}
+            <div className="lg:col-span-6">
+              <div className="bg-white rounded-2xl border border-[#DFDCD2] shadow-[0_24px_60px_-24px_rgba(15,76,58,0.16)] overflow-hidden">
+                {/* Console Top Bar */}
+                <div className="px-5 py-3.5 bg-[#0B251D] text-[#F7F6F2] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#3DD598] live-dot" />
+                    <span className="font-mono-data text-xs tracking-wider uppercase text-[#CBE5DA]">
+                      Live Availability Preview
+                    </span>
+                  </div>
+                  <span className="font-mono-data text-[11px] text-[#8FB3A5]">
+                    REAL-TIME SHELF SYNC
+                  </span>
+                </div>
+
+                {/* Search & Quick Filter Bar */}
+                <div className="p-5 border-b border-[#ECE9E0] bg-[#FAF9F6]">
+                  <div className="relative mb-3.5">
+                    <Search className="w-4 h-4 text-[#78857F] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={customQuery}
+                      onChange={(e) => setCustomQuery(e.target.value)}
+                      placeholder="Filter pharmacy or dosage..."
+                      aria-label="Filter preview pharmacies"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white border border-[#DCD8CC] text-sm text-[#121816] placeholder-[#78857F] focus:outline-none focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/10 transition"
+                    />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[11px] font-mono-data uppercase text-[#78857F] mr-1">
+                      Try:
+                    </span>
+                    {SAMPLE_MEDICINES.map((med) => {
+                      const isSelected = med.key === selectedMedKey;
+                      return (
+                        <button
+                          key={med.key}
+                          type="button"
+                          onClick={() => {
+                            setSelectedMedKey(med.key);
+                            setCustomQuery('');
+                          }}
+                          className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-[#0F4C3A] text-[#F7F6F2]'
+                              : 'bg-white border border-[#DCD8CC] text-[#4E5B55] hover:border-[#0F4C3A]/40 hover:text-[#121816]'
+                          }`}
+                        >
+                          {med.key}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Selected Medicine Spec Header */}
+                <div className="px-5 py-3.5 border-b border-[#ECE9E0] flex flex-wrap items-center justify-between gap-2 bg-white">
+                  <div>
+                    <div className="text-sm font-bold text-[#121816]">{activeMedicine.key}</div>
+                    <div className="text-xs text-[#4E5B55]">
+                      {activeMedicine.generic} · {activeMedicine.manufacturer}
                     </div>
                   </div>
+                  <span className="font-mono-data text-[11px] px-2.5 py-1 rounded-md bg-[#E6F2EC] text-[#0F4C3A] font-medium">
+                    {filteredListings.length} nearby matches
+                  </span>
+                </div>
+
+                {/* Live Pharmacy Stock Rows */}
+                <div className="divide-y divide-[#EFECE5]">
+                  {filteredListings.length > 0 ? (
+                    filteredListings.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="px-5 py-4 hover:bg-[#FAF9F6] transition-colors flex items-center justify-between gap-4"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-[#121816] truncate">
+                              {item.pharmacy}
+                            </span>
+                            <ShieldCheck className="w-3.5 h-3.5 text-[#0F4C3A] shrink-0" />
+                          </div>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-[#4E5B55]">
+                            <span className="inline-flex items-center gap-1 font-mono-data">
+                              <MapPin className="w-3 h-3 text-[#78857F]" />
+                              {item.distance}
+                            </span>
+                            <span className="text-[#D4D0C5]">•</span>
+                            <span
+                              className={`font-mono-data font-medium ${
+                                item.low ? 'text-[#C85A32]' : 'text-[#0F4C3A]'
+                              }`}
+                            >
+                              {item.stock} strips in stock
+                            </span>
+                            <span className="hidden sm:inline text-[#D4D0C5]">•</span>
+                            <span className="hidden sm:inline text-[#78857F]">{item.updated}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 shrink-0">
+                          <div className="text-right">
+                            <div className="font-mono-data text-sm font-semibold text-[#121816]">
+                              ৳{item.price.toFixed(2)}
+                            </div>
+                            <div className="text-[10px] text-[#78857F]">per strip</div>
+                          </div>
+                          <Link
+                            to={isAuthenticated ? '/customer/dashboard' : '/signup'}
+                            className="px-3 py-1.5 rounded-md bg-[#F2F8F5] border border-[#CBE5DA] text-[#0F4C3A] text-xs font-semibold hover:bg-[#0F4C3A] hover:text-white transition-colors"
+                          >
+                            Reserve
+                          </Link>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="px-5 py-8 text-center text-sm text-[#4E5B55]">
+                      No preview pharmacies match "{customQuery}". Sign in to search all 500+ live pharmacies.
+                    </div>
+                  )}
+                </div>
+
+                {/* Console Footer */}
+                <div className="px-5 py-3 bg-[#FAF9F6] border-t border-[#ECE9E0] flex items-center justify-between text-xs text-[#4E5B55]">
+                  <span>Want to search real-time inventory near your GPS location?</span>
+                  <Link
+                    to={isAuthenticated ? '/customer/browse' : '/signup'}
+                    className="inline-flex items-center gap-1 font-semibold text-[#0F4C3A] hover:underline shrink-0"
+                  >
+                    Open full map
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -261,239 +339,579 @@ const MedLink = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-24 bg-white relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Why Choose <span className="gradient-text">MedLink</span>?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Experience healthcare reimagined with cutting-edge technology and user-centric design
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Feature 1 */}
-            <div className="feature-card group bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-              <div className="w-16 h-16 gradient-bg-primary rounded-xl flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform">
-                <Clock className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Real-time Updates</h3>
-              <p className="text-gray-600 leading-relaxed">Instant stock availability across all pharmacies in your area</p>
+      {/* EDITORIAL MARQUEE STRIP */}
+      <div className="bg-[#0B251D] text-[#CBE5DA] py-3.5 border-b border-[#193B2F] overflow-hidden">
+        <div className="animate-marquee">
+          {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, idx) => (
+            <div key={idx} className="flex items-center shrink-0">
+              <span className="font-mono-data text-[11px] tracking-[0.16em] uppercase px-6">
+                {item}
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C85A32]" />
             </div>
-            
-            {/* Feature 2 */}
-            <div className="feature-card group bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-              <div className="w-16 h-16 gradient-bg-secondary rounded-xl flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform">
-                <Package className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Smart Ordering</h3>
-              <p className="text-gray-600 leading-relaxed">Seamless checkout with multiple payment options</p>
-            </div>
-            
-            {/* Feature 3 */}
-            <div className="feature-card group bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-              <div className="w-16 h-16 gradient-bg-tertiary rounded-xl flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform">
-                <Zap className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Lightning Fast</h3>
-              <p className="text-gray-600 leading-relaxed">Express delivery within hours to your location</p>
-            </div>
-            
-            {/* Feature 4 */}
-            <div className="feature-card group bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform">
-                <ShieldCheck className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">100% Verified</h3>
-              <p className="text-gray-600 leading-relaxed">All pharmacies are licensed and authenticated</p>
-            </div>
-          </div>
+          ))}
         </div>
-      </section>
+      </div>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 bg-gray-50 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              How It <span className="gradient-text">Works</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Get your medicines delivered in three simple steps
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Step 1 */}
-            <div className="relative">
-              <div className="glass-card p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-2">
-                <div className="flex items-center justify-center mb-6">
-                  <div className="w-20 h-20 rounded-full gradient-bg-primary flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                    1
-                  </div>
-                </div>
-                <div className="gradient-bg-primary w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6">
-                  <Pill className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">Search Medicine</h3>
-                <p className="text-gray-600 text-center leading-relaxed">
-                  Enter medicine name and browse through available options with real-time pricing
-                </p>
-              </div>
-              {/* Connector Line */}
-              <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-1 bg-gradient-to-r from-green-400 to-emerald-400 transform -translate-y-1/2"></div>
-            </div>
-            
-            {/* Step 2 */}
-            <div className="relative">
-              <div className="glass-card p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-2">
-                <div className="flex items-center justify-center mb-6">
-                  <div className="w-20 h-20 rounded-full gradient-bg-secondary flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                    2
-                  </div>
-                </div>
-                <div className="gradient-bg-secondary w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6">
-                  <MapPin className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">Select Pharmacy</h3>
-                <p className="text-gray-600 text-center leading-relaxed">
-                  Choose from nearby verified pharmacies based on distance and availability
-                </p>
-              </div>
-              {/* Connector Line */}
-              <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-1 bg-gradient-to-r from-emerald-400 to-lime-400 transform -translate-y-1/2"></div>
-            </div>
-            
-            {/* Step 3 */}
-            <div className="relative">
-              <div className="glass-card p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-2">
-                <div className="flex items-center justify-center mb-6">
-                  <div className="w-20 h-20 rounded-full gradient-bg-tertiary flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                    3
-                  </div>
-                </div>
-                <div className="gradient-bg-tertiary w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6">
-                  <Package className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">Order & Receive</h3>
-                <p className="text-gray-600 text-center leading-relaxed">
-                  Complete payment and get medicines delivered or schedule a pickup
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-16 text-center">
-            <Link to="/signup" className="inline-flex items-center px-10 py-4 gradient-bg-primary text-white rounded-xl font-bold text-lg hover:shadow-2xl transform hover:scale-105 transition">
-              Start Ordering Now
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-      </section>
-      
-      {/* Stats Section */}
-      <section id="stats" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center stats-card glass-card p-8 rounded-2xl">
-              <Users className="w-12 h-12 mx-auto mb-4 text-green-600" />
-              <div className="text-4xl font-bold gradient-text mb-2">10k+</div>
-              <div className="text-gray-600 font-medium">Happy Users</div>
-            </div>
-            <div className="text-center stats-card glass-card p-8 rounded-2xl">
-              <MapPin className="w-12 h-12 mx-auto mb-4 text-green-600" />
-              <div className="text-4xl font-bold gradient-text mb-2">500+</div>
-              <div className="text-gray-600 font-medium">Pharmacies</div>
-            </div>
-            <div className="text-center stats-card glass-card p-8 rounded-2xl">
-              <Package className="w-12 h-12 mx-auto mb-4 text-green-600" />
-              <div className="text-4xl font-bold gradient-text mb-2">50k+</div>
-              <div className="text-gray-600 font-medium">Orders Delivered</div>
-            </div>
-            <div className="text-center stats-card glass-card p-8 rounded-2xl">
-              <TrendingUp className="w-12 h-12 mx-auto mb-4 text-green-600" />
-              <div className="text-4xl font-bold gradient-text mb-2">99%</div>
-              <div className="text-gray-600 font-medium">Satisfaction</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 relative overflow-hidden bg-gradient-to-br from-green-800 via-green-900 to-emerald-900">
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-              Ready to Transform Your Healthcare Experience?
-            </h2>
-            <p className="text-xl text-white mb-10 opacity-90 leading-relaxed">
-              Join thousands of users who trust MedLink for their medicine needs. Start your journey today.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link to="/signup" className="px-10 py-4 bg-white text-green-700 rounded-xl font-bold text-lg hover:bg-gray-100 transform hover:scale-105 transition shadow-2xl">
-                Create Free Account
-              </Link>
-              <Link to="/login" className="px-10 py-4 glass-card text-white rounded-xl font-bold text-lg hover:bg-white hover:bg-opacity-20 transition border-2 border-white border-opacity-50">
-                Sign In Now
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            <div className="md:col-span-2">
-              <Link to="/" className="flex items-center space-x-3 mb-4">
-                <img 
-                  src="/logo.png" 
-                  alt="MedLink Logo" 
-                  className="w-12 h-12 object-contain"
-                />
-                <span className="text-2xl font-bold">MedLink</span>
-              </Link>
-              <p className="text-gray-400 mb-6 leading-relaxed">
-                Revolutionizing healthcare access with instant medicine availability and verified pharmacy connections.
+      {/* ASYMMETRIC BENTO CAPABILITIES */}
+      <section id="capabilities" className="py-24 lg:py-28">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <Reveal>
+            <div className="max-w-2xl mb-14">
+              <span className="font-mono-data text-xs uppercase tracking-[0.16em] text-[#C85A32] font-medium">
+                Built for real pharmacy trips
+              </span>
+              <h2 className="font-editorial text-4xl sm:text-5xl leading-[1.06] text-[#121816] mt-3 mb-4">
+                Practical tools for finding urgent medicine without the guesswork.
+              </h2>
+              <p className="text-base text-[#4E5B55] leading-relaxed">
+                Every feature in MedLink is designed around how people actually buy prescriptions — checking stock first, verifying legitimacy, and avoiding wasted trips across town.
               </p>
-              <div className="flex space-x-4">
-                {['facebook', 'twitter', 'instagram', 'linkedin'].map((social) => (
-                  <a key={social} href="#" className="w-10 h-10 rounded-full bg-gray-800 hover:bg-gradient-to-r hover:from-green-600 hover:to-emerald-600 flex items-center justify-center transition">
-                    <span className="sr-only">{social}</span>
-                    <div className="w-5 h-5 bg-gray-400 rounded"></div>
+            </div>
+          </Reveal>
+
+          <div className="grid lg:grid-cols-12 gap-6">
+            {/* Bento 1: Live Shelf Ledger (7 cols) */}
+            <Reveal className="lg:col-span-7" delay={40}>
+              <div className="h-full card-surface card-surface-hover rounded-2xl p-7 sm:p-8 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="font-mono-data text-xs uppercase tracking-wider text-[#0F4C3A] bg-[#E6F2EC] px-2.5 py-1 rounded-md">
+                      01 · Live Inventory
+                    </span>
+                    <Clock className="w-5 h-5 text-[#78857F]" />
+                  </div>
+                  <h3 className="text-2xl font-bold tracking-tight text-[#121816] mb-2.5">
+                    Real-time shelf quantities, updated by pharmacists
+                  </h3>
+                  <p className="text-sm text-[#4E5B55] leading-relaxed max-w-lg mb-7">
+                    Pharmacies manage their stock directly from the MedLink portal. When a medicine runs low or restocks, your search results reflect it immediately.
+                  </p>
+                </div>
+
+                {/* Mini Ledger UI */}
+                <div className="rounded-xl border border-[#E4E1D8] bg-[#FAF9F6] overflow-hidden">
+                  <div className="grid grid-cols-12 px-4 py-2.5 border-b border-[#E4E1D8] font-mono-data text-[10px] uppercase tracking-wider text-[#78857F]">
+                    <span className="col-span-5">Medicine</span>
+                    <span className="col-span-3">Status</span>
+                    <span className="col-span-2 text-right">Stock</span>
+                    <span className="col-span-2 text-right">Price</span>
+                  </div>
+                  {[
+                    { name: 'Insulin Glargine', status: 'In Stock', qty: '18 pens', price: '৳890', ok: true },
+                    { name: 'Atorvastatin 20mg', status: 'In Stock', qty: '64 strips', price: '৳120', ok: true },
+                    { name: 'Clopidogrel 75mg', status: 'Low Stock', qty: '4 strips', price: '৳145', ok: false },
+                  ].map((row, i) => (
+                    <div
+                      key={i}
+                      className="grid grid-cols-12 px-4 py-3 text-xs border-b last:border-b-0 border-[#ECE9E0] items-center bg-white"
+                    >
+                      <span className="col-span-5 font-semibold text-[#121816] truncate pr-2">
+                        {row.name}
+                      </span>
+                      <span className="col-span-3">
+                        <span
+                          className={`inline-flex items-center gap-1.5 font-mono-data text-[11px] ${
+                            row.ok ? 'text-[#0F4C3A]' : 'text-[#C85A32]'
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              row.ok ? 'bg-[#1B7A5E]' : 'bg-[#C85A32]'
+                            }`}
+                          />
+                          {row.status}
+                        </span>
+                      </span>
+                      <span className="col-span-2 text-right font-mono-data text-[#4E5B55]">
+                        {row.qty}
+                      </span>
+                      <span className="col-span-2 text-right font-mono-data font-semibold text-[#121816]">
+                        {row.price}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Bento 2: Dark Architectural Map Card (5 cols) */}
+            <Reveal className="lg:col-span-5" delay={100}>
+              <div className="h-full rounded-2xl bg-[#0B251D] bg-clinical-grid-dark text-[#F7F6F2] p-7 sm:p-8 border border-[#193B2F] flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="font-mono-data text-xs uppercase tracking-wider text-[#CBE5DA] bg-[#163D30] px-2.5 py-1 rounded-md">
+                      02 · Geolocation
+                    </span>
+                    <Navigation className="w-5 h-5 text-[#8FB3A5]" />
+                  </div>
+                  <h3 className="text-2xl font-bold tracking-tight text-white mb-2.5">
+                    Distance-sorted interactive pharmacy map
+                  </h3>
+                  <p className="text-sm text-[#B7CEC5] leading-relaxed mb-8">
+                    Enable location once to sort every stocked pharmacy by Haversine distance from your exact spot, complete with Leaflet map pins and direct call buttons.
+                  </p>
+                </div>
+
+                {/* Tactile Distance Rings Graphic */}
+                <div className="rounded-xl bg-[#081C16] border border-[#1C4537] p-5">
+                  <div className="flex items-center justify-between text-xs font-mono-data text-[#8FB3A5] mb-4">
+                    <span>NEAREST VERIFIED DISPENSARIES</span>
+                    <span className="text-[#3DD598]">GPS READY</span>
+                  </div>
+                  <div className="space-y-2.5">
+                    {[
+                      { label: '0.4 km · Dhanmondi 27', bar: 'w-[28%]' },
+                      { label: '0.9 km · Green Road', bar: 'w-[54%]' },
+                      { label: '1.6 km · Kalabagan', bar: 'w-[82%]' },
+                    ].map((ring, idx) => (
+                      <div key={idx}>
+                        <div className="flex justify-between text-xs text-[#E4EFEA] mb-1">
+                          <span>{ring.label}</span>
+                          <span className="font-mono-data text-[11px] text-[#8FB3A5]">Open</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-[#15352A] overflow-hidden">
+                          <div className={`h-full rounded-full bg-[#3DD598] ${ring.bar}`} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Bento 3: License Verification (5 cols) */}
+            <Reveal className="lg:col-span-5" delay={140}>
+              <div className="h-full card-surface card-surface-hover rounded-2xl p-7 sm:p-8 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="font-mono-data text-xs uppercase tracking-wider text-[#C85A32] bg-[#FBECE6] px-2.5 py-1 rounded-md">
+                      03 · Verification
+                    </span>
+                    <ShieldCheck className="w-5 h-5 text-[#78857F]" />
+                  </div>
+                  <h3 className="text-2xl font-bold tracking-tight text-[#121816] mb-2.5">
+                    Admin-reviewed pharmacy licenses
+                  </h3>
+                  <p className="text-sm text-[#4E5B55] leading-relaxed mb-7">
+                    No unverified sellers. Every pharmacy submits its official drug license number and physical address for manual admin approval before appearing in search.
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-[#E4E1D8] bg-[#FAF9F6] p-4 flex items-center justify-between">
+                  <div>
+                    <div className="text-[11px] font-mono-data uppercase text-[#78857F]">
+                      License Registry
+                    </div>
+                    <div className="font-mono-data text-sm font-semibold text-[#121816] mt-0.5">
+                      DGDA-LIC-2026-0842
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#E6F2EC] text-[#0F4C3A] text-xs font-semibold">
+                    <Check className="w-3.5 h-3.5" />
+                    Approved
+                  </span>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Bento 4: Multi-Pharmacy Cart & Transparent Checkout (7 cols) */}
+            <Reveal className="lg:col-span-7" delay={180}>
+              <div className="h-full card-surface card-surface-hover rounded-2xl p-7 sm:p-8 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="font-mono-data text-xs uppercase tracking-wider text-[#0F4C3A] bg-[#E6F2EC] px-2.5 py-1 rounded-md">
+                      04 · Checkout
+                    </span>
+                    <Receipt className="w-5 h-5 text-[#78857F]" />
+                  </div>
+                  <h3 className="text-2xl font-bold tracking-tight text-[#121816] mb-2.5">
+                    One cart across multiple pharmacies, zero hidden markups
+                  </h3>
+                  <p className="text-sm text-[#4E5B55] leading-relaxed max-w-xl mb-7">
+                    Need two items from different stores? Combine them in one cart, choose pickup or doorstep delivery, and pay securely through SSLCommerz with itemized fee transparency.
+                  </p>
+                </div>
+
+                <div className="grid sm:grid-cols-3 gap-3">
+                  <div className="rounded-xl border border-[#E4E1D8] bg-[#FAF9F6] p-4">
+                    <div className="text-xs text-[#78857F]">In-store pickup</div>
+                    <div className="font-mono-data text-lg font-semibold text-[#0F4C3A] mt-1">
+                      ৳0.00
+                    </div>
+                    <div className="text-[11px] text-[#4E5B55] mt-1">Skip the counter queue</div>
+                  </div>
+                  <div className="rounded-xl border border-[#E4E1D8] bg-[#FAF9F6] p-4">
+                    <div className="text-xs text-[#78857F]">Home delivery</div>
+                    <div className="font-mono-data text-lg font-semibold text-[#121816] mt-1">
+                      ৳60.00
+                    </div>
+                    <div className="text-[11px] text-[#4E5B55] mt-1">Flat fee per pharmacy</div>
+                  </div>
+                  <div className="rounded-xl border border-[#E4E1D8] bg-[#FAF9F6] p-4">
+                    <div className="text-xs text-[#78857F]">Platform fee</div>
+                    <div className="font-mono-data text-lg font-semibold text-[#121816] mt-1">
+                      0.3%
+                    </div>
+                    <div className="text-[11px] text-[#4E5B55] mt-1">SSLCommerz secured</div>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* INTERACTIVE WORKFLOW SWITCHER */}
+      <section id="workflow" className="py-24 bg-white border-y border-[#E4E1D8]">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <Reveal>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+              <div className="max-w-xl">
+                <span className="font-mono-data text-xs uppercase tracking-[0.16em] text-[#0F4C3A] font-medium">
+                  The Patient Flow
+                </span>
+                <h2 className="font-editorial text-4xl sm:text-5xl leading-[1.06] text-[#121816] mt-3">
+                  From prescription to doorstep in three clear steps.
+                </h2>
+              </div>
+              <Link
+                to="/signup"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-[#0F4C3A] hover:text-[#16634C]"
+              >
+                Create a free patient account
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </Reveal>
+
+          <div className="grid lg:grid-cols-12 gap-8 items-stretch">
+            {/* Step Selectors */}
+            <div className="lg:col-span-5 space-y-3">
+              {WORKFLOW_STEPS.map((step, index) => {
+                const active = activeStep === index;
+                return (
+                  <button
+                    key={step.num}
+                    type="button"
+                    onClick={() => {
+                      setActiveStep(index);
+                      setStepPaused(true);
+                    }}
+                    className={`w-full text-left p-5 rounded-xl border transition-all duration-200 cursor-pointer ${
+                      active
+                        ? 'bg-[#F7F6F2] border-[#0F4C3A] shadow-sm'
+                        : 'bg-white border-[#E4E1D8] hover:border-[#C9C4B6]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span
+                        className={`font-mono-data text-xs font-semibold ${
+                          active ? 'text-[#0F4C3A]' : 'text-[#78857F]'
+                        }`}
+                      >
+                        STEP {step.num}
+                      </span>
+                      <span className="text-[11px] font-mono-data text-[#78857F]">
+                        {step.meta}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-bold text-[#121816] mb-1.5">{step.title}</h3>
+                    <p className="text-sm text-[#4E5B55] leading-relaxed">{step.description}</p>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Interactive Visual Preview Stage */}
+            <div className="lg:col-span-7">
+              <div className="h-full min-h-[340px] rounded-2xl bg-[#F7F6F2] border border-[#E4E1D8] p-6 sm:p-8 flex flex-col justify-between">
+                <div className="flex items-center justify-between pb-4 border-b border-[#E4E1D8]">
+                  <span className="font-mono-data text-xs uppercase tracking-wider text-[#4E5B55]">
+                    Preview · {WORKFLOW_STEPS[activeStep].num} / 03
+                  </span>
+                  <div className="flex gap-1.5">
+                    {WORKFLOW_STEPS.map((_, idx) => (
+                      <span
+                        key={idx}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          idx === activeStep ? 'w-7 bg-[#0F4C3A]' : 'w-2 bg-[#D4D0C5]'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="py-6 flex-1 flex items-center">
+                  {activeStep === 0 && (
+                    <div className="w-full space-y-4">
+                      <div className="bg-white rounded-xl border border-[#DFDCD2] p-4 shadow-sm">
+                        <div className="flex items-center gap-3 text-sm text-[#121816] font-medium">
+                          <Search className="w-4 h-4 text-[#0F4C3A]" />
+                          <span>Napa Extra 500mg</span>
+                          <span className="ml-auto font-mono-data text-xs text-[#0F4C3A] bg-[#E6F2EC] px-2 py-0.5 rounded">
+                            Generic: Paracetamol
+                          </span>
+                        </div>
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <div className="bg-white rounded-xl border border-[#E4E1D8] p-4">
+                          <div className="text-xs font-mono-data text-[#78857F]">EXACT MATCH</div>
+                          <div className="text-sm font-bold text-[#121816] mt-1">
+                            Napa Extra · Beximco
+                          </div>
+                          <div className="text-xs text-[#0F4C3A] mt-2 font-medium">
+                            Available at 14 pharmacies nearby
+                          </div>
+                        </div>
+                        <div className="bg-white rounded-xl border border-[#E4E1D8] p-4">
+                          <div className="text-xs font-mono-data text-[#78857F]">SAME GENERIC</div>
+                          <div className="text-sm font-bold text-[#121816] mt-1">
+                            Ace Plus · Square
+                          </div>
+                          <div className="text-xs text-[#4E5B55] mt-2">
+                            Available at 11 pharmacies nearby
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeStep === 1 && (
+                    <div className="w-full bg-white rounded-xl border border-[#DFDCD2] p-5 shadow-sm space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-bold text-[#121816]">
+                            Lazz Pharma — Dhanmondi 27
+                          </div>
+                          <div className="text-xs text-[#4E5B55] mt-0.5">
+                            House 12, Road 27, Dhanmondi · Open until 11:00 PM
+                          </div>
+                        </div>
+                        <span className="font-mono-data text-xs font-semibold px-2.5 py-1 rounded-md bg-[#E6F2EC] text-[#0F4C3A]">
+                          0.4 km away
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3 pt-3 border-t border-[#EFECE5]">
+                        <div>
+                          <div className="text-[11px] text-[#78857F]">Unit Price</div>
+                          <div className="font-mono-data text-base font-semibold text-[#121816]">
+                            ৳25.00
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-[11px] text-[#78857F]">Verified Stock</div>
+                          <div className="font-mono-data text-base font-semibold text-[#0F4C3A]">
+                            48 strips
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-[11px] text-[#78857F]">License</div>
+                          <div className="font-mono-data text-base font-semibold text-[#121816]">
+                            Verified
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeStep === 2 && (
+                    <div className="w-full bg-white rounded-xl border border-[#DFDCD2] p-5 shadow-sm">
+                      <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#EFECE5]">
+                        <span className="text-sm font-bold text-[#121816]">Order Summary</span>
+                        <span className="font-mono-data text-xs text-[#0F4C3A] bg-[#E6F2EC] px-2 py-0.5 rounded">
+                          SSLCommerz Verified
+                        </span>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between text-[#4E5B55]">
+                          <span>Napa Extra (×2 strips)</span>
+                          <span className="font-mono-data text-[#121816]">৳50.00</span>
+                        </div>
+                        <div className="flex justify-between text-[#4E5B55]">
+                          <span>Courier Delivery (1 pharmacy)</span>
+                          <span className="font-mono-data text-[#121816]">৳60.00</span>
+                        </div>
+                        <div className="flex justify-between text-[#4E5B55]">
+                          <span>Platform Fee (0.3%)</span>
+                          <span className="font-mono-data text-[#121816]">৳0.15</span>
+                        </div>
+                        <div className="flex justify-between pt-3 mt-2 border-t border-[#EFECE5] font-bold text-[#121816]">
+                          <span>Total Payable</span>
+                          <span className="font-mono-data text-[#0F4C3A]">৳110.15</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-4 border-t border-[#E4E1D8] flex items-center justify-between text-xs text-[#4E5B55]">
+                  <span>{WORKFLOW_STEPS[activeStep].meta}</span>
+                  <Link
+                    to="/signup"
+                    className="font-semibold text-[#0F4C3A] hover:underline inline-flex items-center gap-1"
+                  >
+                    Try it live
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* DUAL AUDIENCE SECTION: PATIENTS & PHARMACIES */}
+      <section id="pharmacies" className="py-24">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <div className="grid md:grid-cols-2 gap-6">
+            <Reveal>
+              <div className="h-full card-surface rounded-2xl p-8 sm:p-10 flex flex-col justify-between">
+                <div>
+                  <div className="w-11 h-11 rounded-xl bg-[#E6F2EC] text-[#0F4C3A] flex items-center justify-center mb-6">
+                    <Store className="w-5 h-5" />
+                  </div>
+                  <span className="font-mono-data text-xs uppercase tracking-[0.14em] text-[#4E5B55]">
+                    For Patients &amp; Caregivers
+                  </span>
+                  <h3 className="font-editorial text-3xl sm:text-4xl text-[#121816] mt-2 mb-4">
+                    Find essential prescriptions without crossing the city.
+                  </h3>
+                  <p className="text-sm text-[#4E5B55] leading-relaxed mb-8">
+                    Search live stock, filter by distance from your location, and track every order from pharmacy confirmation to doorstep arrival.
+                  </p>
+                </div>
+                <div>
+                  <Link
+                    to="/signup"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-[#0F4C3A] text-[#F7F6F2] text-sm font-semibold hover:bg-[#16634C] transition-colors"
+                  >
+                    Create customer account
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal delay={90}>
+              <div className="h-full rounded-2xl bg-[#0B251D] text-[#F7F6F2] border border-[#193B2F] p-8 sm:p-10 flex flex-col justify-between">
+                <div>
+                  <div className="w-11 h-11 rounded-xl bg-[#163D30] text-[#CBE5DA] flex items-center justify-center mb-6">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <span className="font-mono-data text-xs uppercase tracking-[0.14em] text-[#8FB3A5]">
+                    For Independent Pharmacies
+                  </span>
+                  <h3 className="font-editorial text-3xl sm:text-4xl text-white mt-2 mb-4">
+                    Turn your counter inventory into neighborhood orders.
+                  </h3>
+                  <p className="text-sm text-[#B7CEC5] leading-relaxed mb-8">
+                    List your licensed dispensary, manage medicine stock in real time, and fulfill verified local pickup and courier orders from one clean dashboard.
+                  </p>
+                </div>
+                <div>
+                  <Link
+                    to="/signup"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-[#F7F6F2] text-[#081C16] text-sm font-semibold hover:bg-white transition-colors"
+                  >
+                    Register your pharmacy
+                    <ArrowUpRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* EDITORIAL FOOTER */}
+      <footer className="bg-[#081C16] text-[#B7CEC5] border-t border-[#16362B]">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-[#16362B]">
+            <div className="md:col-span-5">
+              <Link to="/" className="inline-flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 rounded-lg bg-[#163D30] flex items-center justify-center p-1.5">
+                  <img
+                    src="/logo.png"
+                    alt="MedLink"
+                    className="w-full h-full object-contain brightness-0 invert"
+                  />
+                </div>
+                <span className="text-xl font-bold text-white tracking-tight">MedLink</span>
+              </Link>
+              <p className="text-sm text-[#8FB3A5] leading-relaxed max-w-sm mb-5">
+                Real-time neighborhood medicine availability and licensed pharmacy locator built for faster, more transparent healthcare access.
+              </p>
+              <div className="space-y-1.5 text-xs font-mono-data text-[#8FB3A5]">
+                <div className="flex items-center gap-2">
+                  <Phone className="w-3.5 h-3.5 text-[#3DD598]" />
+                  <span>+880 300-3723666 (Mon–Sun, 8AM–10PM)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-[#3DD598]" />
+                  <span>support@medlinkpharmacies.com</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-3 md:col-start-7">
+              <h4 className="font-mono-data text-xs uppercase tracking-[0.14em] text-white mb-4">
+                Platform
+              </h4>
+              <ul className="space-y-2.5 text-sm">
+                <li>
+                  <a
+                    href="#capabilities"
+                    onClick={(e) => handleSmoothScroll(e, '#capabilities')}
+                    className="hover:text-white transition-colors"
+                  >
+                    Capabilities
                   </a>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-bold mb-4 gradient-text">Quick Links</h3>
-              <ul className="space-y-3">
-                <li><a href="#features" onClick={(e) => handleSmoothScroll(e, '#features')} className="text-gray-400 hover:text-white transition flex items-center"><ChevronRight className="w-4 h-4 mr-1" /> Features</a></li>
-                <li><a href="#how-it-works" onClick={(e) => handleSmoothScroll(e, '#how-it-works')} className="text-gray-400 hover:text-white transition flex items-center"><ChevronRight className="w-4 h-4 mr-1" /> How it Works</a></li>
-                <li><Link to="/signup" className="text-gray-400 hover:text-white transition flex items-center"><ChevronRight className="w-4 h-4 mr-1" /> Get Started</Link></li>
-                <li><Link to="/login" className="text-gray-400 hover:text-white transition flex items-center"><ChevronRight className="w-4 h-4 mr-1" /> Sign In</Link></li>
+                </li>
+                <li>
+                  <a
+                    href="#workflow"
+                    onClick={(e) => handleSmoothScroll(e, '#workflow')}
+                    className="hover:text-white transition-colors"
+                  >
+                    How it works
+                  </a>
+                </li>
+                <li>
+                  <Link to="/about" className="hover:text-white transition-colors">
+                    About MedLink
+                  </Link>
+                </li>
               </ul>
             </div>
-            
-            <div>
-              <h3 className="text-lg font-bold mb-4 gradient-text">Legal</h3>
-              <ul className="space-y-3">
-                <li><a href="#" className="text-gray-400 hover:text-white transition flex items-center"><ChevronRight className="w-4 h-4 mr-1" /> Privacy Policy</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition flex items-center"><ChevronRight className="w-4 h-4 mr-1" /> Terms of Service</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition flex items-center"><ChevronRight className="w-4 h-4 mr-1" /> Contact Us</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition flex items-center"><ChevronRight className="w-4 h-4 mr-1" /> Support</a></li>
+
+            <div className="md:col-span-3">
+              <h4 className="font-mono-data text-xs uppercase tracking-[0.14em] text-white mb-4">
+                Account
+              </h4>
+              <ul className="space-y-2.5 text-sm">
+                <li>
+                  <Link to="/login" className="hover:text-white transition-colors">
+                    Sign in
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/signup" className="hover:text-white transition-colors">
+                    Customer registration
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/signup" className="hover:text-white transition-colors">
+                    Pharmacy onboarding
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
-          
-          <div className="border-t border-gray-800 pt-8 text-center">
-            <p className="text-gray-400">© 2025 MedLink. All rights reserved. Built with care for better healthcare.</p>
+
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#6E9284]">
+            <span>© {new Date().getFullYear()} MedLink Pharmacy Index. All rights reserved.</span>
+            <span className="font-mono-data">Verified Dispensary Network · SSLCommerz Integrated</span>
           </div>
         </div>
       </footer>
@@ -501,4 +919,4 @@ const MedLink = () => {
   );
 };
 
-export default MedLink;
+export default LandingPage;
