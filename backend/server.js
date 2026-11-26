@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -23,9 +23,16 @@ const app = express();
 // Connect to database
 connectDB();
 
+// Trust proxy headers (x-forwarded-proto, x-forwarded-host) on Vercel
+app.set('trust proxy', 1);
+
 // Middleware
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map((o) => o.trim()).filter(Boolean)
+  : null;
+
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: allowedOrigins && allowedOrigins.length > 0 ? allowedOrigins : true,
   credentials: true
 }));
 
@@ -74,8 +81,12 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🔗 Client URL: ${process.env.CLIENT_URL}`);
-});
+if (!process.env.VERCEL && require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
+    console.log(`🔗 Client URL: ${process.env.CLIENT_URL || 'same-origin'}`);
+  });
+}
+
+module.exports = app;

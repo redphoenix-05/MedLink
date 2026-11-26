@@ -2,6 +2,17 @@ const axios = require('axios');
 const { Reservation, User, Medicine, Pharmacy } = require('../models');
 const { sequelize } = require('../config/database');
 
+const getRequestOrigin = (req) => {
+  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+  const host = req.headers['x-forwarded-host'] || req.get('host');
+  return host ? `${proto}://${host}` : 'http://localhost:5000';
+};
+
+const getClientUrl = (req) => {
+  if (process.env.CLIENT_URL) return process.env.CLIENT_URL.replace(/\/$/, '');
+  return getRequestOrigin(req);
+};
+
 // @desc    Initiate payment with SSLCommerz
 // @route   POST /api/payments/initiate
 // @access  Private (Customer only)
@@ -71,16 +82,17 @@ const initiatePayment = async (req, res) => {
     const transactionId = `TXN-${Date.now()}-${reservationId}`;
 
     // Prepare SSLCommerz payment data
+    const origin = getRequestOrigin(req);
     const paymentData = {
       store_id: process.env.STORE_ID,
       store_passwd: process.env.STORE_PASSWORD,
       total_amount: parseFloat(reservation.totalPrice).toFixed(2),
       currency: process.env.CURRENCY || 'BDT',
       tran_id: transactionId,
-      success_url: `${process.env.SUCCESS_URL}?tran_id=${transactionId}&reservation_id=${reservationId}`,
-      fail_url: `${process.env.FAIL_URL}?tran_id=${transactionId}&reservation_id=${reservationId}`,
-      cancel_url: `${process.env.CANCEL_URL}?tran_id=${transactionId}&reservation_id=${reservationId}`,
-      ipn_url: `${process.env.IPN_URL || process.env.SUCCESS_URL}`,
+      success_url: `${process.env.SUCCESS_URL || `${origin}/api/payments/success`}?tran_id=${transactionId}&reservation_id=${reservationId}`,
+      fail_url: `${process.env.FAIL_URL || `${origin}/api/payments/fail`}?tran_id=${transactionId}&reservation_id=${reservationId}`,
+      cancel_url: `${process.env.CANCEL_URL || `${origin}/api/payments/cancel`}?tran_id=${transactionId}&reservation_id=${reservationId}`,
+      ipn_url: `${process.env.IPN_URL || process.env.SUCCESS_URL || `${origin}/api/payments/success`}`,
       
       // Product information
       product_name: `Medicine: ${reservation.medicine.name} (${reservation.medicine.brand})`,
@@ -167,8 +179,9 @@ const paymentSuccess = async (req, res) => {
   try {
     const { tran_id, reservation_id, val_id } = req.query;
 
+    const clientUrl = getClientUrl(req);
     if (!tran_id || !reservation_id || !val_id) {
-      return res.redirect(`${process.env.CLIENT_URL}/payment/failed?error=missing_params`);
+      return res.redirect(`${clientUrl}/payment/failed?error=missing_params`);
     }
 
     // Validate payment with SSLCommerz
@@ -191,7 +204,7 @@ const paymentSuccess = async (req, res) => {
       validationResponse.data.status !== 'VALIDATED'
     ) {
       console.error('Payment validation failed:', validationResponse.data);
-      return res.redirect(`${process.env.CLIENT_URL}/payment/failed?error=invalid_payment`);
+      return res.redirect(`${clientUrl}/payment/failed?error=invalid_payment`);
     }
 
     // Get reservation
@@ -204,13 +217,13 @@ const paymentSuccess = async (req, res) => {
     });
 
     if (!reservation) {
-      return res.redirect(`${process.env.CLIENT_URL}/payment/failed?error=reservation_not_found`);
+      return res.redirect(`${clientUrl}/payment/failed?error=reservation_not_found`);
     }
 
     // Verify transaction ID matches
     if (reservation.transactionId !== tran_id) {
       console.error('Transaction ID mismatch');
-      return res.redirect(`${process.env.CLIENT_URL}/payment/failed?error=transaction_mismatch`);
+      return res.redirect(`${clientUrl}/payment/failed?error=transaction_mismatch`);
     }
 
     // Update reservation as paid
@@ -231,11 +244,11 @@ const paymentSuccess = async (req, res) => {
     console.log('Payment successful for reservation:', reservation_id);
 
     // Redirect to success page
-    res.redirect(`${process.env.CLIENT_URL}/payment/success?reservation_id=${reservation_id}&amount=${reservation.totalPrice}`);
+    res.redirect(`${clientUrl}/payment/success?reservation_id=${reservation_id}&amount=${reservation.totalPrice}`);
   } catch (error) {
     await transaction.rollback();
     console.error('Payment success handler error:', error);
-    res.redirect(`${process.env.CLIENT_URL}/payment/failed?error=server_error`);
+    res.redirect(`${getClientUrl(req)}/payment/failed?error=server_error`);
   }
 };
 
@@ -256,10 +269,10 @@ const paymentFail = async (req, res) => {
     }
 
     console.log('Payment failed for transaction:', tran_id);
-    res.redirect(`${process.env.CLIENT_URL}/payment/failed?reservation_id=${reservation_id}`);
+    res.redirect(`${getClientUrl(req)}/payment/failed?reservation_id=${reservation_id}`);
   } catch (error) {
     console.error('Payment fail handler error:', error);
-    res.redirect(`${process.env.CLIENT_URL}/payment/failed?error=server_error`);
+    res.redirect(`${getClientUrl(req)}/payment/failed?error=server_error`);
   }
 };
 
@@ -280,10 +293,10 @@ const paymentCancel = async (req, res) => {
     }
 
     console.log('Payment cancelled for transaction:', tran_id);
-    res.redirect(`${process.env.CLIENT_URL}/payment/cancelled?reservation_id=${reservation_id}`);
+    res.redirect(`${getClientUrl(req)}/payment/cancelled?reservation_id=${reservation_id}`);
   } catch (error) {
     console.error('Payment cancel handler error:', error);
-    res.redirect(`${process.env.CLIENT_URL}/payment/cancelled?error=server_error`);
+    res.redirect(`${getClientUrl(req)}/payment/cancelled?error=server_error`);
   }
 };
 

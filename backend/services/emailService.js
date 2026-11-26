@@ -104,7 +104,7 @@ const sendReservationConfirmationEmail = async (reservation, customer, medicine,
               </ul>
 
               <center>
-                <a href="${process.env.CLIENT_URL}/customer/reservations" class="btn">View My Orders</a>
+                <a href="${process.env.CLIENT_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173')}/customer/dashboard" class="btn">View My Orders</a>
               </center>
 
               <div class="footer">

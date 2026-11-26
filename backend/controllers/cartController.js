@@ -6,7 +6,23 @@ const SSLCommerzPayment = require('sslcommerz-lts');
 // SSLCommerz Configuration
 const store_id = process.env.SSLCOMMERZ_STORE_ID || 'ridee67573b7e3a7d3';
 const store_passwd = process.env.SSLCOMMERZ_STORE_PASSWORD || 'ridee67573b7e3a7d3@ssl';
-const is_live = false; // true for live, false for sandbox
+const is_live = process.env.SSLCOMMERZ_IS_LIVE === 'true';
+
+const getRequestOrigin = (req) => {
+  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+  const host = req.headers['x-forwarded-host'] || req.get('host');
+  return host ? `${proto}://${host}` : 'http://localhost:5000';
+};
+
+const getApiBaseUrl = (req) => {
+  if (process.env.BACKEND_URL) return process.env.BACKEND_URL.replace(/\/$/, '');
+  return getRequestOrigin(req);
+};
+
+const getClientBaseUrl = (req) => {
+  if (process.env.CLIENT_URL) return process.env.CLIENT_URL.replace(/\/$/, '');
+  return getRequestOrigin(req);
+};
 
 // @desc    Add item to cart
 // @route   POST /api/cart
@@ -579,14 +595,15 @@ const initializePayment = async (req, res) => {
     const tranId = `MEDLINK_${Date.now()}_${customerId}`;
 
     // SSLCommerz payment data
+    const apiBaseUrl = getApiBaseUrl(req);
     const data = {
       total_amount: grandTotal.toFixed(2),
       currency: 'BDT',
       tran_id: tranId,
-      success_url: `http://localhost:5000/api/cart/payment-success`,
-      fail_url: `http://localhost:5000/api/cart/payment-fail`,
-      cancel_url: `http://localhost:5000/api/cart/payment-cancel`,
-      ipn_url: `http://localhost:5000/api/cart/payment-ipn`,
+      success_url: `${apiBaseUrl}/api/cart/payment-success`,
+      fail_url: `${apiBaseUrl}/api/cart/payment-fail`,
+      cancel_url: `${apiBaseUrl}/api/cart/payment-cancel`,
+      ipn_url: `${apiBaseUrl}/api/cart/payment-ipn`,
       shipping_method: deliveryType === 'delivery' ? 'Delivery' : 'Pickup',
       product_name: 'Medicine Order',
       product_category: 'Healthcare',
@@ -668,9 +685,10 @@ const paymentSuccess = async (req, res) => {
       customerId: value_a 
     });
 
+    const clientBaseUrl = getClientBaseUrl(req);
     if (!val_id || !tran_id) {
       console.error('❌ Missing required payment parameters');
-      return res.redirect(`http://localhost:5173/payment/failed?reason=${encodeURIComponent('Invalid payment callback')}`);
+      return res.redirect(`${clientBaseUrl}/payment/failed?reason=${encodeURIComponent('Invalid payment callback')}`);
     }
 
     // Validate payment with SSLCommerz
@@ -681,7 +699,7 @@ const paymentSuccess = async (req, res) => {
 
     if (validation.status !== 'VALID' && validation.status !== 'VALIDATED') {
       console.error('❌ Payment validation failed:', validation);
-      return res.redirect(`http://localhost:5173/payment/failed?reason=${encodeURIComponent('Payment validation failed')}`);
+      return res.redirect(`${clientBaseUrl}/payment/failed?reason=${encodeURIComponent('Payment validation failed')}`);
     }
 
     const customerId = parseInt(value_a);
@@ -718,7 +736,7 @@ const paymentSuccess = async (req, res) => {
     if (cartItems.length === 0) {
       await transaction.rollback();
       console.error('❌ Cart is empty for customer:', customerId);
-      return res.redirect(`http://localhost:5173/payment/failed?reason=${encodeURIComponent('Cart is empty')}`);
+      return res.redirect(`${clientBaseUrl}/payment/failed?reason=${encodeURIComponent('Cart is empty')}`);
     }
 
     // Recalculate delivery charge based on actual cart data
@@ -755,7 +773,7 @@ const paymentSuccess = async (req, res) => {
         await transaction.rollback();
         const errorMsg = `Insufficient stock for ${item.medicine?.name}`;
         console.error('❌', errorMsg);
-        return res.redirect(`http://localhost:5173/payment/failed?reason=${encodeURIComponent(errorMsg)}`);
+        return res.redirect(`${clientBaseUrl}/payment/failed?reason=${encodeURIComponent(errorMsg)}`);
       }
 
       const unitPrice = parseFloat(item.price);
@@ -804,14 +822,15 @@ const paymentSuccess = async (req, res) => {
     await transaction.commit();
 
     console.log(`✅ ${orders.length} orders created after successful payment for customer ${customerId}`);
-    res.redirect(`http://localhost:5173/payment/success?tran_id=${tran_id}&orders=${orders.length}`);
+    res.redirect(`${clientBaseUrl}/payment/success?tran_id=${tran_id}&orders=${orders.length}`);
 
   } catch (error) {
     if (transaction) {
       await transaction.rollback();
     }
     console.error('❌ Payment success handling error:', error);
-    res.redirect(`http://localhost:5173/payment/failed?reason=${encodeURIComponent(error.message)}`);
+    const clientBaseUrl = getClientBaseUrl(req);
+    res.redirect(`${clientBaseUrl}/payment/failed?reason=${encodeURIComponent(error.message)}`);
   }
 };
 
@@ -822,7 +841,8 @@ const paymentFail = async (req, res) => {
   const data = req.method === 'GET' ? req.query : req.body;
   const { tran_id, error } = data;
   console.log('❌ Payment Failed:', { tran_id, error });
-  res.redirect(`http://localhost:5173/cart?error=${encodeURIComponent(error || 'Payment failed. Please try again.')}`);
+  const clientBaseUrl = getClientBaseUrl(req);
+  res.redirect(`${clientBaseUrl}/customer/cart?error=${encodeURIComponent(error || 'Payment failed. Please try again.')}`);
 };
 
 // @desc    Handle cancelled payment
@@ -832,7 +852,8 @@ const paymentCancel = async (req, res) => {
   const data = req.method === 'GET' ? req.query : req.body;
   const { tran_id } = data;
   console.log('⚠️ Payment Cancelled:', { tran_id });
-  res.redirect(`http://localhost:5173/cart?message=${encodeURIComponent('Payment cancelled. Your items are still in the cart.')}`);
+  const clientBaseUrl = getClientBaseUrl(req);
+  res.redirect(`${clientBaseUrl}/customer/cart?message=${encodeURIComponent('Payment cancelled. Your items are still in the cart.')}`);
 };
 
 // @desc    IPN handler
