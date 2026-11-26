@@ -84,25 +84,33 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Check if user is already logged in on app load
+  // Check if user is already logged in on app load and verify token with backend
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       try {
         const token = localStorage.getItem('token');
         const user = authService.getCurrentUser();
-        
 
-        
         if (token && user) {
-          dispatch({
-            type: AUTH_ACTIONS.LOGIN_SUCCESS,
-            payload: { user, token }
-          });
+          try {
+            const response = await authService.getMe();
+            const verifiedUser = response?.data?.user || user;
+            localStorage.setItem('user', JSON.stringify(verifiedUser));
+            dispatch({
+              type: AUTH_ACTIONS.LOGIN_SUCCESS,
+              payload: { user: verifiedUser, token }
+            });
+          } catch {
+            // Token is expired or invalid — clear stale session
+            authService.logout();
+            dispatch({ type: AUTH_ACTIONS.LOGOUT });
+          }
         } else {
           dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
+        authService.logout();
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     };

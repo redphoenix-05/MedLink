@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, ArrowUpRight, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const TopNav = ({ onSectionClick }) => {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    setOpen(false);
+    navigate('/login');
+  };
 
   const isHome = location.pathname === '/';
   const isActive = (path) => location.pathname === path;
@@ -103,13 +110,23 @@ const TopNav = ({ onSectionClick }) => {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
-              <Link
-                to="/dashboard"
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-[#0F4C3A] text-[#F7F6F2] text-sm font-semibold hover:bg-[#16634C] transition-colors"
-              >
-                Open Dashboard
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
+              <>
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-[#0F4C3A] text-[#F7F6F2] text-sm font-semibold hover:bg-[#16634C] transition-colors"
+                >
+                  Open Dashboard
+                  <ArrowUpRight className="w-4 h-4" />
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg border border-[#D4D0C5] bg-white text-[#4E5B55] hover:text-[#9A2E1B] hover:border-[#F3C8BF] text-sm font-semibold transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign out
+                </button>
+              </>
             ) : (
               <>
                 <Link
@@ -187,13 +204,22 @@ const TopNav = ({ onSectionClick }) => {
             </Link>
             <div className="pt-3 border-t border-[#E4E1D8] flex gap-2.5">
               {isAuthenticated ? (
-                <Link
-                  to="/dashboard"
-                  onClick={() => setOpen(false)}
-                  className="flex-1 text-center py-2.5 rounded-lg bg-[#0F4C3A] text-[#F7F6F2] text-sm font-semibold"
-                >
-                  Open Dashboard
-                </Link>
+                <>
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="flex-1 text-center py-2.5 rounded-lg bg-[#0F4C3A] text-[#F7F6F2] text-sm font-semibold"
+                  >
+                    Open Dashboard
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="px-4 py-2.5 rounded-lg border border-[#D4D0C5] text-[#9A2E1B] text-sm font-semibold bg-white cursor-pointer"
+                  >
+                    Sign out
+                  </button>
+                </>
               ) : (
                 <>
                   <Link
