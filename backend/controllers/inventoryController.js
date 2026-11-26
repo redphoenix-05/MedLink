@@ -7,6 +7,7 @@ const { Op } = require('sequelize');
 const addToInventory = async (req, res) => {
   try {
     const {
+      pharmacyId,
       medicineId,
       price,
       stock,
@@ -24,9 +25,14 @@ const addToInventory = async (req, res) => {
       });
     }
 
-    // Get user's pharmacy
+    // Get user's target pharmacy branch
+    const pharmacyWhere = { userId: req.user.id };
+    if (pharmacyId) {
+      pharmacyWhere.id = parseInt(pharmacyId, 10);
+    }
     const pharmacy = await Pharmacy.findOne({
-      where: { userId: req.user.id },
+      where: pharmacyWhere,
+      order: [['id', 'ASC']],
     });
 
     if (!pharmacy) {
@@ -305,17 +311,22 @@ const getPharmacyInventory = async (req, res) => {
   }
 };
 
-// @desc    Get current user's pharmacy inventory
+// @desc    Get current user's pharmacy inventory (supports ?pharmacyId=... for multi-branch)
 // @route   GET /api/inventory/my-inventory
 // @access  Private (Pharmacy only)
 const getMyInventory = async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, category, availability } = req.query;
+    const { page = 1, limit = 50, search, category, availability, pharmacyId } = req.query;
     const offset = (page - 1) * limit;
 
-    // Get user's pharmacy
+    // Get user's target pharmacy branch
+    const pharmacyWhere = { userId: req.user.id };
+    if (pharmacyId) {
+      pharmacyWhere.id = parseInt(pharmacyId, 10);
+    }
     const pharmacy = await Pharmacy.findOne({
-      where: { userId: req.user.id },
+      where: pharmacyWhere,
+      order: [['id', 'ASC']],
     });
 
     if (!pharmacy) {

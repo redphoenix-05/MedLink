@@ -37,9 +37,12 @@ const searchMedicines = async (req, res) => {
             {
               model: Pharmacy,
               as: 'pharmacy',
-              where: { status: 'approved' }, // Only approved pharmacies
+              where: {
+                status: 'approved',
+                ...(req.query.city ? { city: { [Op.iLike]: req.query.city.trim() } } : {}),
+              }, // Only approved pharmacies
               attributes: [
-                'id', 'name', 'address', 'phone', 
+                'id', 'name', 'chainName', 'branchName', 'city', 'address', 'phone',
                 'latitude', 'longitude', 'operatingHours'
               ],
               include: [
@@ -62,6 +65,9 @@ const searchMedicines = async (req, res) => {
         .map(inventory => ({
           id: inventory.pharmacy.id,
           name: inventory.pharmacy.name,
+          chainName: inventory.pharmacy.chainName,
+          branchName: inventory.pharmacy.branchName,
+          city: inventory.pharmacy.city,
           address: inventory.pharmacy.address,
           phone: inventory.pharmacy.phone,
           latitude: inventory.pharmacy.latitude,
@@ -94,6 +100,9 @@ const searchMedicines = async (req, res) => {
         flatResults.push({
           id: pharmacy.id,
           name: pharmacy.name,
+          chainName: pharmacy.chainName,
+          branchName: pharmacy.branchName,
+          city: pharmacy.city,
           address: pharmacy.address,
           phone: pharmacy.phone,
           latitude: pharmacy.latitude,
@@ -137,9 +146,10 @@ const getPharmacyLocations = async (req, res) => {
         status: 'approved',
         latitude: { [Op.not]: null },
         longitude: { [Op.not]: null },
+        ...(req.query.city ? { city: { [Op.iLike]: req.query.city.trim() } } : {}),
       },
       attributes: [
-        'id', 'name', 'address', 'phone', 
+        'id', 'name', 'chainName', 'branchName', 'city', 'address', 'phone',
         'latitude', 'longitude', 'operatingHours'
       ],
       include: [
@@ -172,6 +182,9 @@ const getPharmacyLocations = async (req, res) => {
     const formattedPharmacies = pharmacies.map(pharmacy => ({
       id: pharmacy.id,
       name: pharmacy.name,
+      chainName: pharmacy.chainName,
+      branchName: pharmacy.branchName,
+      city: pharmacy.city,
       address: pharmacy.address,
       phone: pharmacy.phone,
       latitude: parseFloat(pharmacy.latitude),

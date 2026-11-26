@@ -8,10 +8,15 @@ const Cart = require('./Cart');
 const Order = require('./Order');
 
 // Define associations
-// User -> Pharmacy (One to One)
+// User -> Pharmacy (One to Many for multi-branch chains, plus hasOne alias for backwards compatibility)
 User.hasOne(Pharmacy, {
   foreignKey: 'userId',
   as: 'pharmacy',
+  onDelete: 'CASCADE',
+});
+User.hasMany(Pharmacy, {
+  foreignKey: 'userId',
+  as: 'pharmacies',
   onDelete: 'CASCADE',
 });
 Pharmacy.belongsTo(User, {

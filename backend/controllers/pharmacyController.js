@@ -2,13 +2,16 @@ const { Pharmacy, User, PharmacyInventory, Medicine } = require('../models');
 const Order = require('../models/Order');
 const { Op } = require('sequelize');
 
-// @desc    Register pharmacy information
+// @desc    Register pharmacy or add a new branch
 // @route   POST /api/pharmacies
 // @access  Private (Pharmacy users only)
 const registerPharmacy = async (req, res) => {
   try {
     const {
       name,
+      chainName,
+      branchName,
+      city,
       address,
       phone,
       licenseNumber,
@@ -34,18 +37,6 @@ const registerPharmacy = async (req, res) => {
       });
     }
 
-    // Check if user already has a pharmacy registered
-    const existingPharmacy = await Pharmacy.findOne({
-      where: { userId: req.user.id },
-    });
-
-    if (existingPharmacy) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already has a pharmacy registered',
-      });
-    }
-
     // Check if license number is already in use
     const existingLicense = await Pharmacy.findOne({
       where: { licenseNumber },
@@ -58,22 +49,25 @@ const registerPharmacy = async (req, res) => {
       });
     }
 
-    // Create pharmacy
+    // Create pharmacy branch (owners can register multiple branches in one or more cities)
     const pharmacy = await Pharmacy.create({
       userId: req.user.id,
       name,
+      chainName: chainName || name,
+      branchName: branchName || 'Main Branch',
+      city: city || 'Dhaka',
       address,
       phone,
       licenseNumber,
       latitude: latitude || null,
       longitude: longitude || null,
-      operatingHours: operatingHours || undefined, // Use default if not provided
+      operatingHours: operatingHours || undefined,
       status: 'pending',
     });
 
     res.status(201).json({
       success: true,
-      message: 'Pharmacy registered successfully. Awaiting admin approval.',
+      message: 'Pharmacy branch registered successfully. Awaiting admin approval.',
       data: { pharmacy },
     });
   } catch (error) {
@@ -159,6 +153,9 @@ const updatePharmacy = async (req, res) => {
 
     const {
       name,
+      chainName,
+      branchName,
+      city,
       address,
       phone,
       licenseNumber,
@@ -198,6 +195,9 @@ const updatePharmacy = async (req, res) => {
     // Update pharmacy
     await pharmacy.update({
       name: name || pharmacy.name,
+      chainName: chainName !== undefined ? chainName : pharmacy.chainName,
+      branchName: branchName !== undefined ? branchName : pharmacy.branchName,
+      city: city || pharmacy.city,
       address: address || pharmacy.address,
       phone: phone || pharmacy.phone,
       licenseNumber: licenseNumber || pharmacy.licenseNumber,
@@ -278,12 +278,12 @@ const getAllPharmacies = async (req, res) => {
   }
 };
 
-// @desc    Get current user's pharmacy
-// @route   GET /api/pharmacies/my-pharmacy
+// @desc    Get all branches belonging to current user
+// @route   GET /api/pharmacies/my-pharmacies
 // @access  Private (Pharmacy users only)
-const getMyPharmacy = async (req, res) => {
+const getMyPharmacies = async (req, res) => {
   try {
-    const pharmacy = await Pharmacy.findOne({
+    const branches = await Pharmacy.findAll({
       where: { userId: req.user.id },
       include: [
         {
@@ -292,18 +292,58 @@ const getMyPharmacy = async (req, res) => {
           attributes: ['id', 'name', 'email'],
         },
       ],
+      order: [['city', 'ASC'], ['id', 'ASC']],
     });
 
-    if (!pharmacy) {
+    res.json({
+      success: true,
+      data: {
+        branches,
+        count: branches.length,
+      },
+    });
+  } catch (error) {
+    console.error('Get my pharmacies error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Get current user's pharmacy (supports ?pharmacyId=... for multi-branch owners)
+// @route   GET /api/pharmacies/my-pharmacy
+// @access  Private (Pharmacy users only)
+const getMyPharmacy = async (req, res) => {
+  try {
+    const branches = await Pharmacy.findAll({
+      where: { userId: req.user.id },
+      include: [
+        {
+          model: User,
+          as: 'owner',
+          attributes: ['id', 'name', 'email'],
+        },
+      ],
+      order: [['city', 'ASC'], ['id', 'ASC']],
+    });
+
+    if (!branches || branches.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'No pharmacy found for this user',
       });
     }
 
+    const requestedId = req.query.pharmacyId ? parseInt(req.query.pharmacyId, 10) : null;
+    const pharmacy = requestedId
+      ? branches.find((b) => b.id === requestedId) || branches[0]
+      : branches[0];
+
     res.json({
       success: true,
-      data: { pharmacy },
+      data: { pharmacy, branches },
     });
   } catch (error) {
     console.error('Get my pharmacy error:', error);
@@ -315,31 +355,40 @@ const getMyPharmacy = async (req, res) => {
   }
 };
 
-// @desc    Get pharmacy orders
+// @desc    Get pharmacy orders (supports all branches or specific ?pharmacyId=...)
 // @route   GET /api/pharmacies/orders
 // @access  Private (Pharmacy users only)
 const getPharmacyOrders = async (req, res) => {
   try {
-    // First get the pharmacy for this user
-    const pharmacy = await Pharmacy.findOne({
-      where: { userId: req.user.id }
+    const branches = await Pharmacy.findAll({
+      where: { userId: req.user.id },
+      attributes: ['id', 'name', 'branchName', 'city'],
     });
 
-    if (!pharmacy) {
+    if (!branches || branches.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'No pharmacy found for this user'
       });
     }
 
-    // Get all orders for this pharmacy
+    const requestedId = req.query.pharmacyId ? parseInt(req.query.pharmacyId, 10) : null;
+    const ownedIds = branches.map((b) => b.id);
+    const targetIds = requestedId && ownedIds.includes(requestedId) ? [requestedId] : ownedIds;
+
+    // Get all orders across target branch(es)
     const orders = await Order.findAll({
-      where: { pharmacyId: pharmacy.id },
+      where: { pharmacyId: { [Op.in]: targetIds } },
       include: [
         {
           model: User,
           as: 'customer',
           attributes: ['id', 'name', 'email', 'phone']
+        },
+        {
+          model: Pharmacy,
+          as: 'pharmacy',
+          attributes: ['id', 'name', 'branchName', 'city']
         }
       ],
       order: [['orderDate', 'DESC']]
@@ -406,23 +455,26 @@ const updateOrderStatus = async (req, res) => {
     const { orderId } = req.params;
     const { status, deliveryDate } = req.body;
 
-    // First get the pharmacy for this user
-    const pharmacy = await Pharmacy.findOne({
-      where: { userId: req.user.id }
+    // Get all branches owned by this user
+    const branches = await Pharmacy.findAll({
+      where: { userId: req.user.id },
+      attributes: ['id'],
     });
 
-    if (!pharmacy) {
+    if (!branches || branches.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'No pharmacy found for this user'
       });
     }
 
-    // Get the order
+    const branchIds = branches.map((b) => b.id);
+
+    // Get the order belonging to any of the owner's branches
     const order = await Order.findOne({
       where: { 
         id: orderId,
-        pharmacyId: pharmacy.id 
+        pharmacyId: { [Op.in]: branchIds }
       }
     });
 
@@ -462,6 +514,7 @@ module.exports = {
   updatePharmacy,
   getAllPharmacies,
   getMyPharmacy,
+  getMyPharmacies,
   getPharmacyOrders,
   updateOrderStatus
 };

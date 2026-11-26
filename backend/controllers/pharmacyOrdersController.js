@@ -1,30 +1,48 @@
+const { Pharmacy } = require('../models');
 const Order = require('../models/Order');
-const { sequelize } = require('../config/database');
 const { Op } = require('sequelize');
 
-// @desc    Get all orders for a pharmacy
+const getOwnedBranchIds = async (userId, requestedPharmacyId) => {
+  const branches = await Pharmacy.findAll({
+    where: { userId },
+    attributes: ['id'],
+  });
+  const ownedIds = branches.map((b) => b.id);
+  if (requestedPharmacyId) {
+    const parsed = parseInt(requestedPharmacyId, 10);
+    if (ownedIds.includes(parsed)) return [parsed];
+  }
+  return ownedIds;
+};
+
+// @desc    Get all orders for a pharmacy (all branches or filtered by ?pharmacyId=)
 // @route   GET /api/pharmacy/orders
 // @access  Private (Pharmacy only)
 const getPharmacyOrders = async (req, res) => {
   try {
-    const pharmacyId = req.user.id;
+    const branchIds = await getOwnedBranchIds(req.user.id, req.query.pharmacyId);
+    if (branchIds.length === 0) {
+      return res.json({ success: true, data: { orders: [] } });
+    }
 
     const orders = await Order.findAll({
-      where: { pharmacyId },
-      order: [['orderDate', 'DESC']]
+      where: { pharmacyId: { [Op.in]: branchIds } },
+      include: [
+        { model: Pharmacy, as: 'pharmacy', attributes: ['id', 'name', 'branchName', 'city'] },
+      ],
+      order: [['orderDate', 'DESC']],
     });
 
     res.json({
       success: true,
-      data: { orders }
+      data: { orders },
     });
-
   } catch (error) {
     console.error('Get pharmacy orders error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to get orders', 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get orders',
+      error: error.message,
     });
   }
 };
@@ -34,16 +52,34 @@ const getPharmacyOrders = async (req, res) => {
 // @access  Private (Pharmacy only)
 const getPharmacyStats = async (req, res) => {
   try {
-    const pharmacyId = req.user.id;
+    const branchIds = await getOwnedBranchIds(req.user.id, req.query.pharmacyId);
+    if (branchIds.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          stats: {
+            totalEarnings: '0.00',
+            totalOrders: 0,
+            pickupOrders: 0,
+            deliveryOrders: 0,
+            totalMedicinesSold: '0.00',
+            totalQuantity: 0,
+          },
+          orders: [],
+        },
+      });
+    }
 
-    // Get all completed orders
     const orders = await Order.findAll({
-      where: { 
-        pharmacyId,
+      where: {
+        pharmacyId: { [Op.in]: branchIds },
         status: {
-          [Op.in]: ['confirmed', 'delivered', 'completed']
-        }
-      }
+          [Op.in]: ['confirmed', 'delivered', 'completed'],
+        },
+      },
+      include: [
+        { model: Pharmacy, as: 'pharmacy', attributes: ['id', 'name', 'branchName', 'city'] },
+      ],
     });
 
     // Calculate statistics
@@ -106,11 +142,11 @@ const getPharmacyStats = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const pharmacyId = req.user.id;
+    const branchIds = await getOwnedBranchIds(req.user.id);
     const { status, deliveryDate } = req.body;
 
     const order = await Order.findOne({
-      where: { id, pharmacyId }
+      where: { id, pharmacyId: { [Op.in]: branchIds } }
     });
 
     if (!order) {

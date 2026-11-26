@@ -24,6 +24,20 @@ const Pharmacy = sequelize.define('Pharmacy', {
       len: [2, 200],
     },
   },
+  chainName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  branchName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: 'Main Branch',
+  },
+  city: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'Dhaka',
+  },
   address: {
     type: DataTypes.TEXT,
     allowNull: false,
@@ -85,6 +99,8 @@ const Pharmacy = sequelize.define('Pharmacy', {
   indexes: [
     { fields: ['userId'] },
     { fields: ['status'] },
+    { fields: ['city'] },
+    { fields: ['chainName'] },
     { fields: ['licenseNumber'], unique: true },
   ],
 });

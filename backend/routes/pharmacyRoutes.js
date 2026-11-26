@@ -6,6 +6,7 @@ const {
   updatePharmacy,
   getAllPharmacies,
   getMyPharmacy,
+  getMyPharmacies,
   getPharmacyOrders,
   updateOrderStatus
 } = require('../controllers/pharmacyController');
@@ -13,12 +14,17 @@ const { authMiddleware: auth } = require('../middleware/auth');
 const roleMiddleware = require('../middleware/roleMiddleware');
 
 // @route   POST /api/pharmacies
-// @desc    Register pharmacy information
+// @desc    Register pharmacy or add a new branch
 // @access  Private (Pharmacy users only)
 router.post('/', auth, roleMiddleware('pharmacy'), registerPharmacy);
 
+// @route   GET /api/pharmacies/my-pharmacies
+// @desc    Get all branches belonging to the current pharmacy owner
+// @access  Private (Pharmacy users only)
+router.get('/my-pharmacies', auth, roleMiddleware('pharmacy'), getMyPharmacies);
+
 // @route   GET /api/pharmacies/my-pharmacy
-// @desc    Get current user's pharmacy
+// @desc    Get current user's pharmacy (supports ?pharmacyId=...)
 // @access  Private (Pharmacy users only)
 router.get('/my-pharmacy', auth, roleMiddleware('pharmacy'), getMyPharmacy);
 
