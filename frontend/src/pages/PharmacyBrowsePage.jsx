@@ -16,6 +16,7 @@ const PharmacyBrowsePage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCity, setSelectedCity] = useState('All');
   const [showReservationForm, setShowReservationForm] = useState(false);
   const [selectedMedicine, setSelectedMedicine] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
@@ -144,10 +145,19 @@ const PharmacyBrowsePage = () => {
     setSelectedMedicine(null);
   };
 
-  const filteredPharmacies = pharmacies.filter(pharmacy =>
-    pharmacy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    pharmacy.address.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const cities = ['All', ...Array.from(new Set(pharmacies.map(p => p.city).filter(Boolean))).sort()];
+
+  const filteredPharmacies = pharmacies.filter(pharmacy => {
+    const matchesCity = selectedCity === 'All' || pharmacy.city === selectedCity;
+    const q = searchQuery.toLowerCase();
+    const matchesSearch =
+      pharmacy.name.toLowerCase().includes(q) ||
+      pharmacy.address.toLowerCase().includes(q) ||
+      (pharmacy.city && pharmacy.city.toLowerCase().includes(q)) ||
+      (pharmacy.branchName && pharmacy.branchName.toLowerCase().includes(q)) ||
+      (pharmacy.chainName && pharmacy.chainName.toLowerCase().includes(q));
+    return matchesCity && matchesSearch;
+  });
 
   // Add distance to pharmacies if user location is available
   const pharmaciesWithDistance = filteredPharmacies.map(pharmacy => {
@@ -180,20 +190,25 @@ const PharmacyBrowsePage = () => {
     <CustomerLayout>
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Browse Pharmacies</h1>
+          <span className="font-mono-data text-[11px] uppercase tracking-[0.16em] text-[#0F4C3A]">
+            Nationwide Pharmacy Directory
+          </span>
+          <h1 className="font-editorial text-3xl sm:text-4xl text-[#121816] mt-1 mb-4">
+            Browse Licensed Pharmacies
+          </h1>
           
           {/* Search Bar and Location Button */}
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <input
                 type="text"
-                placeholder="Search pharmacies by name or location..."
+                placeholder="Search by pharmacy, chain, branch, or city..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-3 pl-10 bg-white border border-[#D4D0C5] rounded-lg text-sm text-[#121816] placeholder-[#78857F] focus:outline-none focus:ring-2 focus:ring-[#0F4C3A]/15 focus:border-[#0F4C3A] transition"
               />
               <svg
-                className="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
+                className="absolute left-3.5 top-3.5 h-4 w-4 text-[#78857F]"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -209,34 +224,65 @@ const PharmacyBrowsePage = () => {
 
             {/* Locate Me Button */}
             <button
+              type="button"
               onClick={getUserLocation}
               disabled={gettingLocation}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+              className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
                 gettingLocation
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? 'bg-[#E4E1D8] text-[#78857F] cursor-not-allowed'
                   : userLocation
-                  ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-200'
-                  : 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg'
+                  ? 'bg-[#E6F2EC] text-[#0F4C3A] border border-[#CBE5DA]'
+                  : 'bg-[#0F4C3A] text-[#F7F6F2] hover:bg-[#16634C]'
               }`}
             >
               {gettingLocation ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span className="hidden sm:inline">Getting Location...</span>
+                  <div className="w-4 h-4 border-2 border-[#0F4C3A] border-t-transparent rounded-full animate-spin"></div>
+                  <span>Locating...</span>
                 </>
               ) : userLocation ? (
                 <>
-                  <MapPin className="w-5 h-5" />
-                  <span className="hidden sm:inline">Location Active</span>
+                  <MapPin className="w-4 h-4" />
+                  <span>Location Active</span>
                 </>
               ) : (
                 <>
-                  <Navigation className="w-5 h-5" />
-                  <span className="hidden sm:inline">Locate Me</span>
+                  <Navigation className="w-4 h-4" />
+                  <span>Sort by Distance</span>
                 </>
               )}
             </button>
           </div>
+
+          {/* City Filter Bar */}
+          {cities.length > 1 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {cities.map((city) => {
+                const count =
+                  city === 'All'
+                    ? pharmacies.length
+                    : pharmacies.filter((p) => p.city === city).length;
+                const active = selectedCity === city;
+                return (
+                  <button
+                    key={city}
+                    type="button"
+                    onClick={() => setSelectedCity(city)}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+                      active
+                        ? 'bg-[#0F4C3A] text-[#F7F6F2] border-[#0F4C3A]'
+                        : 'bg-white text-[#4E5B55] border-[#E4E1D8] hover:border-[#0F4C3A]/40 hover:text-[#121816]'
+                    }`}
+                  >
+                    {city}
+                    <span className={`ml-1.5 font-mono-data ${active ? 'text-[#CBE5DA]' : 'text-[#78857F]'}`}>
+                      ({count})
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Location Info */}
           {userLocation && (

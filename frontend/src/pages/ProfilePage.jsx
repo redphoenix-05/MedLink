@@ -157,23 +157,30 @@ const ProfilePage = () => {
 
   return (
     <CustomerLayout>
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Profile Settings</h1>
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div>
+          <span className="font-mono-data text-[11px] uppercase tracking-[0.16em] text-[#0F4C3A]">
+            Account Settings
+          </span>
+          <h1 className="font-editorial text-3xl sm:text-4xl text-[#121816] mt-1">
+            Profile &amp; Security
+          </h1>
+        </div>
 
-        {error && <Alert type="error" message={error} />}
-        {success && <Alert type="success" message={success} />}
+        {error && <Alert type="error" message={error} onClose={() => setError('')} />}
+        {success && <Alert type="success" message={success} onClose={() => setSuccess('')} />}
 
-        <div className="bg-white rounded-lg shadow">
+        <div className="bg-white border border-[#E4E1D8] rounded-2xl overflow-hidden">
           <form onSubmit={handleSubmit}>
             {/* Basic Information */}
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <div className="p-5 sm:p-6 border-b border-[#EFECE5]">
+              <h2 className="text-base font-bold text-[#121816] mb-4">
                 Basic Information
               </h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
                     Full Name
                   </label>
                   <input
@@ -182,12 +189,12 @@ const ProfilePage = () => {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-4 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] focus:bg-white focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 outline-none transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
                     Email Address
                   </label>
                   <input
@@ -196,12 +203,12 @@ const ProfilePage = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-4 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] focus:bg-white focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 outline-none transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
                     Phone Number
                   </label>
                   <input
@@ -210,29 +217,27 @@ const ProfilePage = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     required
-                    placeholder="+880XXXXXXXXXX"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder="017XXXXXXXX"
+                    className="w-full px-4 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] focus:bg-white focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 outline-none transition"
                   />
                 </div>
 
-                <div className="pt-4">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-sm font-medium text-gray-700">
-                      User Role
-                    </label>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-                      {user?.role?.toUpperCase()}
-                    </span>
-                  </div>
+                <div className="pt-2 flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#4E5B55]">
+                    Account Role
+                  </span>
+                  <span className="font-mono-data uppercase text-xs px-3 py-1 rounded-full bg-[#E6F2EC] text-[#0F4C3A] font-semibold">
+                    {user?.role}
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Password Change Section */}
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-5 sm:p-6 border-b border-[#EFECE5]">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Change Password
+                <h2 className="text-base font-bold text-[#121816]">
+                  Password &amp; Security
                 </h2>
                 <button
                   type="button"
@@ -246,16 +251,16 @@ const ProfilePage = () => {
                     }));
                     setError('');
                   }}
-                  className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                  className="text-xs font-semibold text-[#0F4C3A] hover:underline cursor-pointer"
                 >
-                  {isChangingPassword ? 'Cancel' : 'Change Password'}
+                  {isChangingPassword ? 'Cancel' : 'Change password'}
                 </button>
               </div>
 
               {isChangingPassword && (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
                       Current Password
                     </label>
                     <input
@@ -263,60 +268,37 @@ const ProfilePage = () => {
                       name="currentPassword"
                       value={formData.currentPassword}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-4 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] focus:bg-white focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 outline-none transition"
                       placeholder="Enter current password"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      New Password
-                    </label>
-                    <input
-                      type="password"
-                      name="newPassword"
-                      value={formData.newPassword}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="Enter new password (min 6 characters)"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Confirm New Password
-                    </label>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="Confirm new password"
-                    />
-                  </div>
-
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <svg
-                          className="h-5 w-5 text-yellow-400"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm text-yellow-700">
-                          Make sure your new password is strong and unique. You'll need to log in
-                          again after changing your password.
-                        </p>
-                      </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+                        New Password
+                      </label>
+                      <input
+                        type="password"
+                        name="newPassword"
+                        value={formData.newPassword}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] focus:bg-white focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 outline-none transition"
+                        placeholder="Min 6 characters"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4E5B55] mb-1.5">
+                        Confirm New Password
+                      </label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2.5 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] focus:bg-white focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/15 outline-none transition"
+                        placeholder="Repeat new password"
+                      />
                     </div>
                   </div>
                 </div>
@@ -324,90 +306,59 @@ const ProfilePage = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="p-6 bg-gray-50 rounded-b-lg">
-              <div className="flex justify-end space-x-3">
+            <div className="p-5 sm:p-6 bg-[#FAF9F6]">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => window.history.back()}
-                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium"
+                  className="px-5 py-2.5 border border-[#D4D0C5] bg-white rounded-lg text-sm font-semibold text-[#121816] hover:bg-[#EFECE5] transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 font-medium"
+                  className="px-6 py-2.5 bg-[#0F4C3A] text-[#F7F6F2] rounded-lg text-sm font-semibold hover:bg-[#16634C] disabled:opacity-50 transition cursor-pointer"
                 >
-                  {loading ? (
-                    <span className="flex items-center">
-                      <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
-                      </svg>
-                      Saving...
-                    </span>
-                  ) : (
-                    'Save Changes'
-                  )}
+                  {loading ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </div>
           </form>
         </div>
 
-        {/* Account Information */}
-        <div className="mt-6 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Account Information
-          </h2>
-          <div className="space-y-3 text-sm">
+        {/* Account Metadata */}
+        <div className="bg-white border border-[#E4E1D8] rounded-2xl p-5 sm:p-6">
+          <h2 className="text-base font-bold text-[#121816] mb-3">Account Metadata</h2>
+          <div className="space-y-2.5 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Account Created:</span>
-              <span className="font-medium text-gray-900">
-                {new Date(user?.createdAt).toLocaleDateString()}
+              <span className="text-[#4E5B55]">Account Created</span>
+              <span className="font-mono-data text-xs font-medium text-[#121816]">
+                {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Last Updated:</span>
-              <span className="font-medium text-gray-900">
-                {new Date(user?.updatedAt).toLocaleDateString()}
+              <span className="text-[#4E5B55]">Last Updated</span>
+              <span className="font-mono-data text-xs font-medium text-[#121816]">
+                {user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : '—'}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Danger Zone - Delete Account */}
-        <div className="mt-6 bg-white rounded-lg shadow border-2 border-red-200">
-          <div className="p-6">
-            <h2 className="text-xl font-semibold text-red-600 mb-2">
-              Danger Zone
-            </h2>
-            <p className="text-gray-600 text-sm mb-4">
-              Once you delete your account, there is no going back. This action cannot be undone.
-              All your data including orders, reservations, and cart items will be permanently deleted.
-            </p>
-            <button
-              onClick={handleDeleteAccount}
-              className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium"
-            >
-              Delete Account
-            </button>
-          </div>
+        {/* Danger Zone */}
+        <div className="bg-white border border-[#F3C8BF] rounded-2xl p-5 sm:p-6">
+          <h2 className="text-base font-bold text-[#9A2E1B] mb-1.5">Danger Zone</h2>
+          <p className="text-xs sm:text-sm text-[#4E5B55] mb-4">
+            Deleting your account permanently removes your profile, orders, reservations, and cart items. This action cannot be undone.
+          </p>
+          <button
+            type="button"
+            onClick={handleDeleteAccount}
+            className="w-full sm:w-auto px-5 py-2.5 bg-[#FDF2F0] text-[#9A2E1B] border border-[#F3C8BF] rounded-lg text-sm font-semibold hover:bg-[#9A2E1B] hover:text-white transition cursor-pointer"
+          >
+            Delete Account
+          </button>
         </div>
       </div>
     </CustomerLayout>

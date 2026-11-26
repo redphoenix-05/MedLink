@@ -12,6 +12,9 @@ const PharmacyDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [pharmacy, setPharmacy] = useState(null);
+  const [branches, setBranches] = useState([]);
+  const [selectedBranchId, setSelectedBranchId] = useState(null);
+  const [creatingBranch, setCreatingBranch] = useState(false);
   const [inventory, setInventory] = useState([]);
   const [medicines, setMedicines] = useState([]);
   const [allMedicines, setAllMedicines] = useState([]); // All medicines in system
@@ -24,6 +27,9 @@ const PharmacyDashboard = () => {
   // Pharmacy profile form state
   const [profileForm, setProfileForm] = useState({
     name: '',
+    chainName: '',
+    branchName: 'Main Branch',
+    city: 'Dhaka',
     address: '',
     phone: '',
     licenseNumber: '',
@@ -63,41 +69,72 @@ const PharmacyDashboard = () => {
     fetchAllMedicines();
   }, []);
 
-  const fetchPharmacyData = async () => {
+  const fetchPharmacyData = async (branchIdOverride = null) => {
     try {
       setLoading(true);
-      
-      // Fetch pharmacy profile
-      const pharmacyResponse = await API.get('/pharmacies/my-pharmacy');
+      const targetId = branchIdOverride || selectedBranchId;
+      const query = targetId ? `?pharmacyId=${targetId}` : '';
+
+      // Fetch pharmacy profile & all owned branches
+      const pharmacyResponse = await API.get(`/pharmacies/my-pharmacy${query}`);
       if (pharmacyResponse.data.success) {
         const pharmacyData = pharmacyResponse.data.data.pharmacy;
+        const allBranches = pharmacyResponse.data.data.branches || [pharmacyData];
+        setBranches(allBranches);
         setPharmacy(pharmacyData);
+        setSelectedBranchId(pharmacyData.id);
+        setCreatingBranch(false);
         setProfileForm({
           name: pharmacyData.name || '',
+          chainName: pharmacyData.chainName || '',
+          branchName: pharmacyData.branchName || 'Main Branch',
+          city: pharmacyData.city || 'Dhaka',
           address: pharmacyData.address || '',
           phone: pharmacyData.phone || '',
           licenseNumber: pharmacyData.licenseNumber || '',
           latitude: pharmacyData.latitude || '',
           longitude: pharmacyData.longitude || '',
         });
-      }
 
-      // Fetch inventory
-      const inventoryResponse = await API.get('/inventory/my-inventory');
-      if (inventoryResponse.data.success) {
-        setInventory(inventoryResponse.data.data.inventory);
+        // Fetch inventory for this specific branch
+        const inventoryResponse = await API.get(`/inventory/my-inventory?pharmacyId=${pharmacyData.id}`);
+        if (inventoryResponse.data.success) {
+          setInventory(inventoryResponse.data.data.inventory);
+        }
       }
     } catch (err) {
       console.error('Error fetching pharmacy data:', err);
       if (err.response?.status === 404) {
-        // No pharmacy profile yet
         setPharmacy(null);
+        setBranches([]);
       } else {
         setError('Failed to load pharmacy data');
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSelectBranch = (branchId) => {
+    setSelectedBranchId(branchId);
+    setCreatingBranch(false);
+    fetchPharmacyData(branchId);
+  };
+
+  const startNewBranch = () => {
+    setCreatingBranch(true);
+    setActiveTab('profile');
+    setProfileForm({
+      name: pharmacy?.chainName || pharmacy?.name || '',
+      chainName: pharmacy?.chainName || pharmacy?.name || '',
+      branchName: '',
+      city: pharmacy?.city || 'Dhaka',
+      address: '',
+      phone: '',
+      licenseNumber: '',
+      latitude: '',
+      longitude: '',
+    });
   };
 
   const fetchMedicines = async () => {
@@ -135,17 +172,18 @@ const PharmacyDashboard = () => {
     try {
       setLoading(true);
       
-      if (pharmacy) {
-        // Update existing pharmacy
+      if (pharmacy && !creatingBranch) {
+        // Update existing pharmacy branch
         await API.put(`/pharmacies/${pharmacy.id}`, profileForm);
-        setSuccess('Pharmacy profile updated successfully');
+        setSuccess('Branch profile updated successfully');
+        fetchPharmacyData(pharmacy.id);
       } else {
-        // Create new pharmacy
-        await API.post('/pharmacies', profileForm);
-        setSuccess('Pharmacy profile created successfully. Awaiting admin approval.');
+        // Create new pharmacy or additional branch
+        const res = await API.post('/pharmacies', profileForm);
+        setSuccess('New branch registered successfully. Awaiting admin approval.');
+        setCreatingBranch(false);
+        fetchPharmacyData(res.data?.data?.pharmacy?.id || null);
       }
-      
-      fetchPharmacyData();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save pharmacy profile');
     } finally {
@@ -163,9 +201,9 @@ const PharmacyDashboard = () => {
         await API.put(`/inventory/${editingInventory.id}`, inventoryForm);
         setSuccess('Inventory updated successfully');
       } else {
-        // Add new inventory
-        await API.post('/inventory', inventoryForm);
-        setSuccess('Medicine added to inventory successfully');
+        // Add new inventory to the currently selected branch
+        await API.post('/inventory', { ...inventoryForm, pharmacyId: pharmacy?.id });
+        setSuccess('Medicine added to branch inventory successfully');
       }
       
       // Reset form and refresh data
@@ -218,9 +256,6 @@ const PharmacyDashboard = () => {
   // Medicine management functions
   const handleMedicineSubmit = async (e) => {
     e.preventDefault();
-    
-    // Debug: Add alert to see if function is called
-    alert('Form submitted! Check console for details.');
     
     try {
       setLoading(true);
@@ -311,24 +346,83 @@ const PharmacyDashboard = () => {
   return (
     <PharmacyLayout>
       <div className="space-y-6">
-        {/* Welcome Card */}
-        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-2xl shadow-xl p-8 text-white">
-          <div className="flex items-center justify-between">
+        {/* Editorial Welcome Header */}
+        <div className="bg-[#0B251D] bg-clinical-grid-dark rounded-2xl border border-[#193B2F] p-7 sm:p-8 text-[#F7F6F2]">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2">
-                Welcome back, {user?.name}! 👋
+              <span className="font-mono-data text-[11px] uppercase tracking-[0.16em] text-[#3DD598]">
+                Dispensary Management Portal
+              </span>
+              <h1 className="font-editorial text-3xl sm:text-4xl text-white mt-1.5 mb-1.5">
+                Welcome back, {user?.name}
               </h1>
-              <p className="text-blue-100 text-lg">
-                Manage your pharmacy inventory and orders
+              <p className="text-[#B7CEC5] text-sm">
+                Manage branches across cities, live shelf inventory, and local fulfillment.
               </p>
             </div>
-            <div className="hidden lg:block">
-              <div className="w-24 h-24 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                <Store className="w-12 h-12 text-white" />
+            <div className="flex items-center gap-3">
+              <div className="px-4 py-2.5 rounded-xl bg-[#113328] border border-[#1E4A3B]">
+                <div className="font-mono-data text-lg font-semibold text-white leading-none">
+                  {branches.length}
+                </div>
+                <div className="text-[11px] text-[#8FB3A5] mt-1">
+                  {branches.length === 1 ? 'Branch' : 'Branches'}
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={startNewBranch}
+                className="px-4 py-2.5 rounded-xl bg-[#F7F6F2] text-[#081C16] text-xs font-semibold hover:bg-white transition cursor-pointer"
+              >
+                + Add Branch
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Multi-Branch Switcher */}
+        {branches.length > 0 && (
+          <div className="bg-white border border-[#E4E1D8] rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">
+                Your Pharmacy Branches ({branches.length})
+              </span>
+              {creatingBranch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreatingBranch(false);
+                    if (pharmacy) handleSelectBranch(pharmacy.id);
+                  }}
+                  className="text-xs font-semibold text-[#C85A32] hover:underline cursor-pointer"
+                >
+                  Cancel new branch
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {branches.map((branch) => {
+                const active = !creatingBranch && pharmacy?.id === branch.id;
+                return (
+                  <button
+                    key={branch.id}
+                    type="button"
+                    onClick={() => handleSelectBranch(branch.id)}
+                    className={`px-3.5 py-2 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+                      active
+                        ? 'bg-[#0F4C3A] text-[#F7F6F2] border-[#0F4C3A]'
+                        : 'bg-[#FAF9F6] text-[#121816] border-[#E4E1D8] hover:border-[#0F4C3A]/40'
+                    }`}
+                  >
+                    <span>{branch.city}</span>
+                    <span className="mx-1.5 opacity-50">·</span>
+                    <span>{branch.branchName || branch.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Alerts */}
         {error && (
@@ -376,57 +470,34 @@ const PharmacyDashboard = () => {
           </div>
         )}
 
-        {/* Tabs - Modern Card Style */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1.5">
-          <nav className="flex gap-2">
-            <button
-              onClick={() => setActiveTab('profile')}
-              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
-                activeTab === 'profile'
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <User className="w-4 h-4" />
-              <span className="hidden sm:inline">Profile Info</span>
-              <span className="sm:hidden">Profile</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('medicines')}
-              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
-                activeTab === 'medicines'
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <Pill className="w-4 h-4" />
-              <span className="hidden sm:inline">Medicine Management</span>
-              <span className="sm:hidden">Medicines</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('inventory')}
-              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
-                activeTab === 'inventory'
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <Package className="w-4 h-4" />
-              <span className="hidden sm:inline">Inventory Management</span>
-              <span className="sm:hidden">Inventory</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('orders')}
-              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
-                activeTab === 'orders'
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <ClipboardList className="w-4 h-4" />
-              <span className="hidden sm:inline">Orders & Delivery</span>
-              <span className="sm:hidden">Orders</span>
-            </button>
+        {/* Responsive Segmented Tabs */}
+        <div className="bg-white rounded-xl border border-[#E4E1D8] p-1.5">
+          <nav className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+            {[
+              { id: 'profile', label: 'Branch Profile', short: 'Profile', icon: User },
+              { id: 'medicines', label: 'Medicine Catalog', short: 'Medicines', icon: Pill },
+              { id: 'inventory', label: 'Branch Inventory', short: 'Inventory', icon: Package },
+              { id: 'orders', label: 'Orders & Delivery', short: 'Orders', icon: ClipboardList },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`py-2.5 px-3 rounded-lg font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    active
+                      ? 'bg-[#0B251D] text-white'
+                      : 'text-[#4E5B55] hover:bg-[#F7F6F2] hover:text-[#121816]'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  <span className="hidden md:inline truncate">{tab.label}</span>
+                  <span className="md:hidden truncate">{tab.short}</span>
+                </button>
+              );
+            })}
           </nav>
         </div>
 
@@ -434,7 +505,7 @@ const PharmacyDashboard = () => {
         {activeTab === 'profile' && (
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Pharmacy Profile
+              {creatingBranch ? 'Register New Branch' : 'Pharmacy Branch Profile'}
             </h2>
             
             <form onSubmit={handleProfileSubmit} className="space-y-4">
@@ -449,7 +520,45 @@ const PharmacyDashboard = () => {
                     value={profileForm.name}
                     onChange={(e) => setProfileForm({...profileForm, name: e.target.value})}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter pharmacy name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Branch Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g., Dhanmondi 27 Branch"
+                    value={profileForm.branchName}
+                    onChange={(e) => setProfileForm({...profileForm, branchName: e.target.value})}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    City *
+                  </label>
+                  <select
+                    value={profileForm.city}
+                    onChange={(e) => setProfileForm({...profileForm, city: e.target.value})}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {['Dhaka', 'Chattogram', 'Khulna', 'Rajshahi', 'Sylhet', 'Barishal', 'Rangpur', 'Mymensingh'].map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Chain / Brand Name (optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Lazz Pharma"
+                    value={profileForm.chainName}
+                    onChange={(e) => setProfileForm({...profileForm, chainName: e.target.value})}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 

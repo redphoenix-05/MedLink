@@ -4,8 +4,21 @@ import AdminLayout from '../components/AdminLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
 import API, { adminAPI } from '../services/api';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { LayoutDashboard, Store, CheckCircle, Users } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Store,
+  CheckCircle,
+  Users,
+  Clock,
+  Wallet,
+  X,
+  MapPin,
+  ShieldCheck,
+  Trash2,
+  Eye,
+  Check,
+  Ban,
+} from 'lucide-react';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -14,7 +27,6 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  //State for different sections
   const [stats, setStats] = useState({
     users: { total: 0, customer: 0, pharmacy: 0, admin: 0 },
     pharmacies: { total: 0, pending: 0, approved: 0, rejected: 0 },
@@ -23,21 +35,17 @@ const AdminDashboard = () => {
     totalMedicines: 0,
     revenue: 0,
     medicineTrends: [],
-    recentActivity: { users: 0, pharmacies: 0 }
+    recentActivity: { users: 0, pharmacies: 0 },
   });
-  
+
   const [pendingPharmacies, setPendingPharmacies] = useState([]);
   const [approvedPharmacies, setApprovedPharmacies] = useState([]);
   const [users, setUsers] = useState([]);
-  const [reservations, setReservations] = useState([]);
-  const [deliveries, setDeliveries] = useState([]);
-  
-  // Modal states
   const [selectedPharmacy, setSelectedPharmacy] = useState(null);
   const [showPharmacyDetails, setShowPharmacyDetails] = useState(false);
 
   useEffect(() => {
-    fetchInitialData();
+    fetchStats();
   }, []);
 
   useEffect(() => {
@@ -49,33 +57,19 @@ const AdminDashboard = () => {
       fetchApprovedPharmacies();
     } else if (activeTab === 'users') {
       fetchUsers();
-    } else if (activeTab === 'reservations') {
-      fetchReservations();
-    } else if (activeTab === 'deliveries') {
-      fetchDeliveries();
     }
   }, [activeTab]);
-
-  const fetchInitialData = async () => {
-    await fetchStats();
-  };
 
   const fetchStats = async () => {
     try {
       setLoading(true);
-      console.log('🔍 Fetching admin stats...');
       const response = await adminAPI.getStats();
-      console.log('📊 Admin stats response:', response.data);
       if (response.data.success) {
         setStats(response.data.data);
-        console.log('✅ Stats updated:', response.data.data);
       } else {
-        console.error('❌ Stats fetch failed:', response.data);
         setError('Failed to load dashboard statistics');
       }
     } catch (err) {
-      console.error('❌ Stats fetch error:', err);
-      console.error('Error details:', err.response?.data);
       setError(err.response?.data?.message || 'Failed to load dashboard statistics');
     } finally {
       setLoading(false);
@@ -87,10 +81,9 @@ const AdminDashboard = () => {
       setLoading(true);
       const response = await adminAPI.getPendingPharmacies();
       if (response.data.success) {
-        // Backend returns data directly, not nested in .pharmacies
         setPendingPharmacies(response.data.data || []);
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load pending pharmacies');
     } finally {
       setLoading(false);
@@ -100,15 +93,11 @@ const AdminDashboard = () => {
   const fetchApprovedPharmacies = async () => {
     try {
       setLoading(true);
-      console.log('🔍 Fetching approved pharmacies...');
       const response = await adminAPI.getApprovedPharmacies();
-      console.log('✅ Approved pharmacies response:', response.data);
       if (response.data.success) {
-        // Backend returns data directly, not nested in .pharmacies
         setApprovedPharmacies(response.data.data || []);
       }
     } catch (err) {
-      console.error('❌ Failed to load approved pharmacies:', err);
       setError(err.response?.data?.message || 'Failed to load approved pharmacies');
     } finally {
       setLoading(false);
@@ -120,41 +109,10 @@ const AdminDashboard = () => {
       setLoading(true);
       const response = await adminAPI.getAllUsers();
       if (response.data.success) {
-        // Backend returns data directly, not nested in .users
         setUsers(response.data.data || []);
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load users');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchReservations = async () => {
-    try {
-      setLoading(true);
-      const response = await adminAPI.getAllReservations();
-      if (response.data.success) {
-        // Backend returns data directly, not nested in .reservations
-        setReservations(response.data.data || []);
-      }
-    } catch (err) {
-      setError('Failed to load reservations');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchDeliveries = async () => {
-    try {
-      setLoading(true);
-      const response = await adminAPI.getAllDeliveries();
-      if (response.data.success) {
-        // Backend returns data directly, not nested in .deliveries
-        setDeliveries(response.data.data || []);
-      }
-    } catch (err) {
-      setError('Failed to load deliveries');
     } finally {
       setLoading(false);
     }
@@ -194,11 +152,8 @@ const AdminDashboard = () => {
         const response = await API.delete(`/admin/pharmacies/${pharmacyId}`);
         if (response.data.success) {
           setSuccess('Pharmacy deleted successfully!');
-          if (activeTab === 'pending') {
-            fetchPendingPharmacies();
-          } else if (activeTab === 'approved') {
-            fetchApprovedPharmacies();
-          }
+          if (activeTab === 'pending') fetchPendingPharmacies();
+          else if (activeTab === 'approved') fetchApprovedPharmacies();
           fetchStats();
         }
       } catch (err) {
@@ -208,7 +163,11 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this user? This will also delete all their associated data (reservations, orders, pharmacy if applicable). This action cannot be undone.')) {
+    if (
+      window.confirm(
+        'Are you sure you want to delete this user? This will also delete all their associated data. This action cannot be undone.'
+      )
+    ) {
       try {
         const response = await adminAPI.deleteUser(userId);
         if (response.data.success) {
@@ -229,431 +188,481 @@ const AdminDashboard = () => {
         setSelectedPharmacy(response.data.data.pharmacy);
         setShowPharmacyDetails(true);
       }
-    } catch (err) {
+    } catch {
       setError('Failed to fetch pharmacy details');
     }
   };
 
   const renderOverview = () => (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Dashboard Overview</h2>
-      
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">👥</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Total Customers</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.users.customer}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
+        <div className="bg-white border border-[#E4E1D8] rounded-xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">
+              Customers
+            </span>
+            <div className="w-9 h-9 rounded-lg bg-[#E6F2EC] text-[#0F4C3A] flex items-center justify-center">
+              <Users className="w-4 h-4" />
             </div>
           </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">🏪</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Total Pharmacies</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.pharmacies.total}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">�</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Reservations Pending</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.reservations.pending}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 p-6 rounded-lg shadow-lg">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                <span className="text-yellow-600 text-sm font-bold">💰</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-yellow-100">Platform Earnings</p>
-              <p className="text-2xl font-bold text-white">৳{stats.platformEarnings?.total || '0.00'}</p>
-              <p className="text-xs text-yellow-100 mt-1">Customer fees + Pharmacy commission</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Platform Revenue Details */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">💰 Platform Revenue Breakdown</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-gray-600">Completed Orders</p>
-            <p className="text-2xl font-bold text-blue-600">{stats.orders?.completed || 0}</p>
-            <p className="text-xs text-gray-500 mt-1">Total orders processed</p>
-          </div>
-          <div className="p-4 bg-purple-50 rounded-lg">
-            <p className="text-sm text-gray-600">Customer Fees</p>
-            <p className="text-2xl font-bold text-purple-600">৳{stats.platformEarnings?.customerFees || '0.00'}</p>
-            <p className="text-xs text-gray-500 mt-1">0.3% from customers</p>
-          </div>
-          <div className="p-4 bg-yellow-50 rounded-lg">
-            <p className="text-sm text-gray-600">Pharmacy Commission</p>
-            <p className="text-2xl font-bold text-yellow-600">৳{stats.platformEarnings?.pharmacyCommission || '0.00'}</p>
-            <p className="text-xs text-gray-500 mt-1">{stats.platformEarnings?.commissionRate || 3}% from pharmacies</p>
-          </div>
-          <div className="p-4 bg-green-50 rounded-lg border-2 border-green-300">
-            <p className="text-sm text-gray-600">Total Earnings</p>
-            <p className="text-2xl font-bold text-green-600">৳{stats.platformEarnings?.total || '0.00'}</p>
-            <p className="text-xs text-gray-500 mt-1">Combined revenue</p>
-          </div>
-        </div>
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-          <p className="text-sm text-gray-700">
-            <strong>ℹ️ Revenue Sources:</strong>
+          <p className="font-mono-data text-3xl font-semibold text-[#121816]">
+            {stats.users.customer}
           </p>
-          <ul className="text-sm text-gray-700 mt-2 space-y-1 ml-4">
-            <li>• Customer Fee: 0.3% of medicine total (paid by customer)</li>
-            <li>• Pharmacy Commission: {stats.platformEarnings?.commissionRate || 3}% of gross revenue (medicine + delivery)</li>
-          </ul>
+          <p className="text-xs text-[#78857F] mt-1">
+            {stats.users.total} total registered accounts
+          </p>
+        </div>
+
+        <div className="bg-white border border-[#E4E1D8] rounded-xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">
+              Pharmacies
+            </span>
+            <div className="w-9 h-9 rounded-lg bg-[#E6F2EC] text-[#0F4C3A] flex items-center justify-center">
+              <Store className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="font-mono-data text-3xl font-semibold text-[#121816]">
+            {stats.pharmacies.total}
+          </p>
+          <p className="text-xs text-[#0F4C3A] mt-1 font-medium">
+            {stats.pharmacies.approved} approved branches
+          </p>
+        </div>
+
+        <div className="bg-white border border-[#E4E1D8] rounded-xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">
+              Pending Review
+            </span>
+            <div className="w-9 h-9 rounded-lg bg-[#FBECE6] text-[#C85A32] flex items-center justify-center">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="font-mono-data text-3xl font-semibold text-[#121816]">
+            {stats.pharmacies.pending}
+          </p>
+          <p className="text-xs text-[#78857F] mt-1">
+            {stats.reservations.pending} pending reservations
+          </p>
+        </div>
+
+        <div className="bg-[#0B251D] text-[#F7F6F2] border border-[#193B2F] rounded-xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="font-mono-data text-[11px] uppercase tracking-wider text-[#8FB3A5]">
+              Platform Earnings
+            </span>
+            <div className="w-9 h-9 rounded-lg bg-[#163D30] text-[#3DD598] flex items-center justify-center">
+              <Wallet className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="font-mono-data text-3xl font-semibold text-white">
+            ৳{stats.platformEarnings?.total || '0.00'}
+          </p>
+          <p className="text-xs text-[#8FB3A5] mt-1">
+            Customer fees + pharmacy commission
+          </p>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button
-            onClick={() => setActiveTab('pending')}
-            className="p-4 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors"
-          >
-            <h4 className="font-semibold text-orange-900">Review Pending Pharmacies</h4>
-            <p className="text-sm text-orange-700">{stats.pharmacies.pending} pharmacies awaiting approval</p>
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('approved')}
-            className="p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
-          >
-            <h4 className="font-semibold text-green-900">Approved Pharmacies</h4>
-            <p className="text-sm text-green-700">{stats.pharmacies.approved} pharmacies approved</p>
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('users')}
-            className="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
-          >
-            <h4 className="font-semibold text-blue-900">View Users</h4>
-            <p className="text-sm text-blue-700">{stats.users.total} total users in system</p>
-          </button>
+      <div className="bg-white border border-[#E4E1D8] rounded-2xl p-5 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+          <div>
+            <h3 className="text-base font-bold text-[#121816]">Platform Revenue Breakdown</h3>
+            <p className="text-xs text-[#4E5B55] mt-0.5">
+              0.3% customer fee + {stats.platformEarnings?.commissionRate || 3}% pharmacy commission on completed orders
+            </p>
+          </div>
+          <span className="font-mono-data text-xs px-2.5 py-1 rounded-md bg-[#E6F2EC] text-[#0F4C3A] w-fit">
+            BDT (৳)
+          </span>
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div className="p-4 rounded-xl bg-[#FAF9F6] border border-[#E4E1D8]">
+            <p className="text-xs text-[#4E5B55]">Completed Orders</p>
+            <p className="font-mono-data text-2xl font-semibold text-[#121816] mt-1">
+              {stats.orders?.completed || 0}
+            </p>
+          </div>
+          <div className="p-4 rounded-xl bg-[#FAF9F6] border border-[#E4E1D8]">
+            <p className="text-xs text-[#4E5B55]">Customer Fees (0.3%)</p>
+            <p className="font-mono-data text-2xl font-semibold text-[#121816] mt-1">
+              ৳{stats.platformEarnings?.customerFees || '0.00'}
+            </p>
+          </div>
+          <div className="p-4 rounded-xl bg-[#FAF9F6] border border-[#E4E1D8]">
+            <p className="text-xs text-[#4E5B55]">
+              Pharmacy Commission ({stats.platformEarnings?.commissionRate || 3}%)
+            </p>
+            <p className="font-mono-data text-2xl font-semibold text-[#121816] mt-1">
+              ৳{stats.platformEarnings?.pharmacyCommission || '0.00'}
+            </p>
+          </div>
+          <div className="p-4 rounded-xl bg-[#E6F2EC] border border-[#CBE5DA]">
+            <p className="text-xs text-[#0F4C3A] font-semibold">Combined Revenue</p>
+            <p className="font-mono-data text-2xl font-semibold text-[#0F4C3A] mt-1">
+              ৳{stats.platformEarnings?.total || '0.00'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <button
+          type="button"
+          onClick={() => setActiveTab('pending')}
+          className="text-left p-5 bg-white border border-[#E4E1D8] rounded-xl hover:border-[#C85A32]/50 transition cursor-pointer"
+        >
+          <span className="font-mono-data text-[11px] uppercase tracking-wider text-[#C85A32]">
+            Action Queue
+          </span>
+          <h4 className="font-bold text-[#121816] mt-1">Review Pending Pharmacies</h4>
+          <p className="text-xs text-[#4E5B55] mt-1">
+            {stats.pharmacies.pending} branch(es) awaiting license verification
+          </p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('approved')}
+          className="text-left p-5 bg-white border border-[#E4E1D8] rounded-xl hover:border-[#0F4C3A]/50 transition cursor-pointer"
+        >
+          <span className="font-mono-data text-[11px] uppercase tracking-wider text-[#0F4C3A]">
+            Live Directory
+          </span>
+          <h4 className="font-bold text-[#121816] mt-1">Approved Pharmacies</h4>
+          <p className="text-xs text-[#4E5B55] mt-1">
+            {stats.pharmacies.approved} active branches serving customers
+          </p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('users')}
+          className="text-left p-5 bg-white border border-[#E4E1D8] rounded-xl hover:border-[#0F4C3A]/50 transition cursor-pointer"
+        >
+          <span className="font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">
+            Accounts
+          </span>
+          <h4 className="font-bold text-[#121816] mt-1">Manage Users</h4>
+          <p className="text-xs text-[#4E5B55] mt-1">
+            {stats.users.total} total accounts across all roles
+          </p>
+        </button>
       </div>
     </div>
   );
 
   const renderPendingPharmacies = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Pending Pharmacies</h2>
-        <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-xl font-bold text-[#121816]">Pending Pharmacies</h2>
+        <span className="font-mono-data text-xs px-3 py-1 rounded-full bg-[#FBECE6] text-[#C85A32] font-semibold">
           {pendingPharmacies.length} Pending
         </span>
       </div>
 
       {pendingPharmacies.length === 0 ? (
-        <div className="bg-white p-8 rounded-lg shadow-sm border text-center">
-          <p className="text-gray-500">No pending pharmacies to review</p>
+        <div className="bg-white border border-[#E4E1D8] rounded-xl p-10 text-center text-sm text-[#4E5B55]">
+          No pending pharmacy applications to review.
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pharmacy</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">License</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {pendingPharmacies.map((pharmacy) => (
-                <tr key={pharmacy.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{pharmacy.name}</div>
-                      <div className="text-sm text-gray-500">{pharmacy.address}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{pharmacy.user?.name}</div>
-                    <div className="text-sm text-gray-500">{pharmacy.user?.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {pharmacy.licenseNumber}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(pharmacy.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleViewPharmacyDetails(pharmacy)}
-                        className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-                      >
-                        Details
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleApprovePharmacy(pharmacy.id)}
-                        className="px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRejectPharmacy(pharmacy.id)}
-                        className="px-3 py-1.5 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors text-sm font-medium"
-                      >
-                        Reject
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeletePharmacy(pharmacy.id)}
-                        className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+        <div className="bg-white border border-[#E4E1D8] rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-[#EFECE5]">
+              <thead className="bg-[#FAF9F6]">
+                <tr>
+                  <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Pharmacy</th>
+                  <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Owner</th>
+                  <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">License</th>
+                  <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Registered</th>
+                  <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#EFECE5]">
+                {pendingPharmacies.map((pharmacy) => (
+                  <tr key={pharmacy.id} className="hover:bg-[#FAF9F6] transition-colors">
+                    <td className="px-5 py-4">
+                      <div className="text-sm font-semibold text-[#121816]">{pharmacy.name}</div>
+                      <div className="text-xs text-[#4E5B55] mt-0.5">
+                        {pharmacy.city ? `${pharmacy.city} · ` : ''}{pharmacy.address}
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <div className="text-sm text-[#121816]">{pharmacy.user?.name || pharmacy.owner?.name}</div>
+                      <div className="text-xs text-[#78857F]">{pharmacy.user?.email || pharmacy.owner?.email}</div>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap font-mono-data text-xs text-[#121816]">
+                      {pharmacy.licenseNumber}
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap font-mono-data text-xs text-[#4E5B55]">
+                      {new Date(pharmacy.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <div className="flex flex-wrap gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleViewPharmacyDetails(pharmacy)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-[#D4D0C5] bg-white text-[#121816] hover:bg-[#FAF9F6] text-xs font-semibold cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          Details
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleApprovePharmacy(pharmacy.id)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#0F4C3A] text-white hover:bg-[#16634C] text-xs font-semibold cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRejectPharmacy(pharmacy.id)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#FDF8EC] text-[#8A5311] border border-[#F1DCB0] hover:bg-[#F9EED2] text-xs font-semibold cursor-pointer"
+                        >
+                          <Ban className="w-3.5 h-3.5" />
+                          Reject
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePharmacy(pharmacy.id)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#FDF2F0] text-[#9A2E1B] border border-[#F3C8BF] hover:bg-[#FADFD9] text-xs font-semibold cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
   );
 
   const renderApprovedPharmacies = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Approved Pharmacies</h2>
-        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-xl font-bold text-[#121816]">Approved Pharmacies</h2>
+        <span className="font-mono-data text-xs px-3 py-1 rounded-full bg-[#E6F2EC] text-[#0F4C3A] font-semibold">
           {approvedPharmacies.length} Approved
         </span>
       </div>
 
       {approvedPharmacies.length === 0 ? (
-        <div className="bg-white p-8 rounded-lg shadow-sm border text-center">
-          <p className="text-gray-500">No approved pharmacies yet</p>
+        <div className="bg-white border border-[#E4E1D8] rounded-xl p-10 text-center text-sm text-[#4E5B55]">
+          No approved pharmacies yet.
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pharmacy</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {approvedPharmacies.map((pharmacy) => (
-                <tr key={pharmacy.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{pharmacy.name}</div>
-                      <div className="text-sm text-gray-500">{pharmacy.address}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{pharmacy.user?.name}</div>
-                    <div className="text-sm text-gray-500">{pharmacy.user?.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {pharmacy.phone}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      Approved
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleViewPharmacyDetails(pharmacy)}
-                        className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-                      >
-                        Details
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeletePharmacy(pharmacy.id)}
-                        className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+        <div className="bg-white border border-[#E4E1D8] rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-[#EFECE5]">
+              <thead className="bg-[#FAF9F6]">
+                <tr>
+                  <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Pharmacy &amp; Branch</th>
+                  <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">City</th>
+                  <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Owner</th>
+                  <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Phone</th>
+                  <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#EFECE5]">
+                {approvedPharmacies.map((pharmacy) => (
+                  <tr key={pharmacy.id} className="hover:bg-[#FAF9F6] transition-colors">
+                    <td className="px-5 py-4">
+                      <div className="text-sm font-semibold text-[#121816]">{pharmacy.name}</div>
+                      <div className="text-xs text-[#78857F] mt-0.5">{pharmacy.address}</div>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <span className="font-mono-data text-xs px-2.5 py-1 rounded-md bg-[#F2F0E9] text-[#121816]">
+                        {pharmacy.city || 'Dhaka'}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <div className="text-sm text-[#121816]">{pharmacy.user?.name || pharmacy.owner?.name}</div>
+                      <div className="text-xs text-[#78857F]">{pharmacy.user?.email || pharmacy.owner?.email}</div>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap font-mono-data text-xs text-[#121816]">
+                      {pharmacy.phone}
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <div className="flex gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleViewPharmacyDetails(pharmacy)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-[#D4D0C5] bg-white text-[#121816] hover:bg-[#FAF9F6] text-xs font-semibold cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          Details
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePharmacy(pharmacy.id)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#FDF2F0] text-[#9A2E1B] border border-[#F3C8BF] hover:bg-[#FADFD9] text-xs font-semibold cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
   );
 
   const renderUsers = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Users List</h2>
-        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-          {users.length} Users
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-xl font-bold text-[#121816]">Users Directory</h2>
+        <span className="font-mono-data text-xs px-3 py-1 rounded-full bg-[#E6F2EC] text-[#0F4C3A] font-semibold">
+          {users.length} Accounts
         </span>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {user.phone || '-'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    user.role === 'admin' 
-                      ? 'bg-purple-100 text-purple-800'
-                      : user.role === 'pharmacy'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {user.role}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(user.createdAt).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  {user.role !== 'admin' && (
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteUser(user.id)}
-                      className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
-                    >
-                      Delete
-                    </button>
-                  )}
-                  {user.role === 'admin' && (
-                    <span className="text-xs text-gray-400 italic">Protected</span>
-                  )}
-                </td>
+      <div className="bg-white border border-[#E4E1D8] rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-[#EFECE5]">
+            <thead className="bg-[#FAF9F6]">
+              <tr>
+                <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">User</th>
+                <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Phone</th>
+                <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Role</th>
+                <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Joined</th>
+                <th className="px-5 py-3 text-left font-mono-data text-[11px] uppercase tracking-wider text-[#4E5B55]">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-[#EFECE5]">
+              {users.map((u) => (
+                <tr key={u.id} className="hover:bg-[#FAF9F6] transition-colors">
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    <div className="text-sm font-semibold text-[#121816]">{u.name}</div>
+                    <div className="text-xs text-[#78857F]">{u.email}</div>
+                  </td>
+                  <td className="px-5 py-4 whitespace-nowrap font-mono-data text-xs text-[#121816]">
+                    {u.phone || '—'}
+                  </td>
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    <span
+                      className={`font-mono-data uppercase text-[11px] px-2.5 py-0.5 rounded-full font-semibold ${
+                        u.role === 'admin'
+                          ? 'bg-[#081C16] text-[#3DD598]'
+                          : u.role === 'pharmacy'
+                          ? 'bg-[#E6F2EC] text-[#0F4C3A]'
+                          : 'bg-[#F2F0E9] text-[#4E5B55]'
+                      }`}
+                    >
+                      {u.role}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 whitespace-nowrap font-mono-data text-xs text-[#4E5B55]">
+                    {new Date(u.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    {u.role !== 'admin' ? (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteUser(u.id)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#FDF2F0] text-[#9A2E1B] border border-[#F3C8BF] hover:bg-[#FADFD9] text-xs font-semibold cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete
+                      </button>
+                    ) : (
+                      <span className="font-mono-data text-[11px] text-[#78857F]">Protected</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 
-  // Pharmacy Details Modal
-  const PharmacyDetailsModal = () => (
-    showPharmacyDetails && selectedPharmacy && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Pharmacy Details</h2>
+  const PharmacyDetailsModal = () =>
+    showPharmacyDetails &&
+    selectedPharmacy && (
+      <div className="fixed inset-0 bg-[#081C16]/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+        <div className="bg-white border border-[#E4E1D8] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="p-5 sm:p-6">
+            <div className="flex justify-between items-center pb-4 border-b border-[#EFECE5] mb-5">
+              <div>
+                <span className="font-mono-data text-[11px] uppercase tracking-wider text-[#0F4C3A]">
+                  {selectedPharmacy.city || 'Pharmacy'} · {selectedPharmacy.branchName || 'Branch'}
+                </span>
+                <h2 className="font-editorial text-3xl text-[#121816] mt-0.5">
+                  {selectedPharmacy.name}
+                </h2>
+              </div>
               <button
+                type="button"
                 onClick={() => setShowPharmacyDetails(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
+                className="p-2 rounded-lg text-[#4E5B55] hover:bg-[#F7F6F2] cursor-pointer"
               >
-                ×
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-6">
-              {/* Basic Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Basic Information</h3>
-                  <div className="space-y-2">
-                    <p><span className="font-medium">Name:</span> {selectedPharmacy.name}</p>
-                    <p><span className="font-medium">Owner:</span> {selectedPharmacy.user?.name}</p>
-                    <p><span className="font-medium">Email:</span> {selectedPharmacy.user?.email}</p>
-                    <p><span className="font-medium">Phone:</span> {selectedPharmacy.phone}</p>
-                    <p><span className="font-medium">License:</span> {selectedPharmacy.licenseNumber}</p>
-                    <p><span className="font-medium">Status:</span> 
-                      <span className={`ml-2 px-2 py-1 rounded text-sm ${
-                        selectedPharmacy.status === 'approved' 
-                          ? 'bg-green-100 text-green-800'
-                          : selectedPharmacy.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {selectedPharmacy.status}
-                      </span>
-                    </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="bg-[#FAF9F6] border border-[#E4E1D8] rounded-xl p-4 space-y-2 text-sm">
+                  <div className="flex items-center gap-2 font-semibold text-[#121816] mb-2">
+                    <ShieldCheck className="w-4 h-4 text-[#0F4C3A]" />
+                    Dispensary Credentials
                   </div>
+                  <p><span className="text-[#4E5B55]">Owner:</span> <span className="font-medium text-[#121816]">{selectedPharmacy.owner?.name || selectedPharmacy.user?.name}</span></p>
+                  <p><span className="text-[#4E5B55]">Email:</span> <span className="font-mono-data text-xs">{selectedPharmacy.owner?.email || selectedPharmacy.user?.email}</span></p>
+                  <p><span className="text-[#4E5B55]">Phone:</span> <span className="font-mono-data text-xs">{selectedPharmacy.phone}</span></p>
+                  <p><span className="text-[#4E5B55]">License:</span> <span className="font-mono-data text-xs font-semibold">{selectedPharmacy.licenseNumber}</span></p>
                 </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Address</h3>
-                  <p className="text-gray-700">{selectedPharmacy.address}</p>
+
+                <div className="bg-[#FAF9F6] border border-[#E4E1D8] rounded-xl p-4 text-sm">
+                  <div className="flex items-center gap-2 font-semibold text-[#121816] mb-2">
+                    <MapPin className="w-4 h-4 text-[#0F4C3A]" />
+                    Location &amp; Status
+                  </div>
+                  <p className="text-[#4E5B55] mb-3">{selectedPharmacy.address}</p>
+                  <span
+                    className={`font-mono-data uppercase text-xs px-2.5 py-1 rounded-full font-semibold ${
+                      selectedPharmacy.status === 'approved'
+                        ? 'bg-[#E6F2EC] text-[#0F4C3A]'
+                        : selectedPharmacy.status === 'pending'
+                        ? 'bg-[#FDF8EC] text-[#8A5311]'
+                        : 'bg-[#FDF2F0] text-[#9A2E1B]'
+                    }`}
+                  >
+                    {selectedPharmacy.status}
+                  </span>
                 </div>
               </div>
 
-              {/* Inventory */}
               {selectedPharmacy.inventory && selectedPharmacy.inventory.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Available Medicines</h3>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {selectedPharmacy.inventory.map((item) => (
-                        <div key={item.id} className="bg-white p-3 rounded border">
-                          <h4 className="font-medium text-gray-900">{item.medicine.name}</h4>
-                          <p className="text-sm text-gray-600">{item.medicine.brand}</p>
-                          <p className="text-sm text-gray-600">Stock: {item.stock}</p>
-                          <p className="text-sm text-gray-600">Price: ${item.price}</p>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[#4E5B55] mb-3">
+                    Stocked Medicines ({selectedPharmacy.inventory.length})
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {selectedPharmacy.inventory.map((item) => (
+                      <div key={item.id} className="bg-[#FAF9F6] p-3.5 rounded-xl border border-[#E4E1D8]">
+                        <h4 className="font-semibold text-sm text-[#121816]">{item.medicine?.name}</h4>
+                        <p className="text-xs text-[#4E5B55]">{item.medicine?.brand}</p>
+                        <div className="flex justify-between mt-2 pt-2 border-t border-[#E4E1D8] font-mono-data text-xs">
+                          <span className="text-[#0F4C3A]">{item.stock} in stock</span>
+                          <span className="font-semibold text-[#121816]">৳{parseFloat(item.price).toFixed(2)}</span>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -661,71 +670,59 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-    )
-  );
+    );
 
   return (
     <AdminLayout>
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="mt-2 text-gray-600">Manage pharmacies, users, and system settings</p>
+      <div className="space-y-6">
+        <div className="bg-[#081C16] bg-clinical-grid-dark rounded-2xl border border-[#16362B] p-6 sm:p-8 text-[#F7F6F2]">
+          <span className="font-mono-data text-[11px] uppercase tracking-[0.16em] text-[#3DD598]">
+            System Oversight · {user?.name || 'Administrator'}
+          </span>
+          <h1 className="font-editorial text-3xl sm:text-4xl text-white mt-1.5">
+            Administrator Console
+          </h1>
+          <p className="text-sm text-[#B7CEC5] mt-1">
+            Verify dispensary licenses, monitor nationwide branches, and track platform revenue.
+          </p>
         </div>
 
-        {/* Alert Messages */}
-        {error && (
-          <Alert 
-            type="error" 
-            message={error} 
-            onClose={() => setError('')} 
-          />
-        )}
-        {success && (
-          <Alert 
-            type="success" 
-            message={success} 
-            onClose={() => setSuccess('')} 
-          />
-        )}
+        {error && <Alert type="error" message={error} onClose={() => setError('')} />}
+        {success && <Alert type="success" message={success} onClose={() => setSuccess('')} />}
 
-        {/* Navigation Tabs - Modern Card Style */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1.5 mb-8">
-          <nav className="flex gap-2">
+        <div className="bg-white rounded-xl border border-[#E4E1D8] p-1.5">
+          <nav className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
             {[
-              { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-              { id: 'pending', label: 'Pending Pharmacies', icon: Store },
-              { id: 'approved', label: 'Approved Pharmacies', icon: CheckCircle },
-              { id: 'users', label: 'Users List', icon: Users },
+              { id: 'overview', label: 'Overview', short: 'Overview', icon: LayoutDashboard },
+              { id: 'pending', label: 'Pending Pharmacies', short: 'Pending', icon: Store },
+              { id: 'approved', label: 'Approved Pharmacies', short: 'Approved', icon: CheckCircle },
+              { id: 'users', label: 'Users List', short: 'Users', icon: Users },
             ].map((tab) => {
               const Icon = tab.icon;
+              const active = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
+                  type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
-                    activeTab === tab.id
-                      ? 'bg-gradient-to-r from-gray-900 to-black text-white shadow-lg shadow-gray-300'
-                      : 'text-gray-600 hover:bg-gray-50'
+                  className={`py-2.5 px-3 rounded-lg font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    active
+                      ? 'bg-[#081C16] text-white'
+                      : 'text-[#4E5B55] hover:bg-[#F7F6F2] hover:text-[#121816]'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span className="hidden sm:inline">{tab.label}</span>
-                  <span className="sm:hidden">
-                    {tab.id === 'overview' ? 'Overview' : 
-                     tab.id === 'pending' ? 'Pending' : 
-                     tab.id === 'approved' ? 'Approved' : 'Users'}
-                  </span>
+                  <Icon className="w-4 h-4 shrink-0" />
+                  <span className="hidden md:inline truncate">{tab.label}</span>
+                  <span className="md:hidden truncate">{tab.short}</span>
                 </button>
               );
             })}
           </nav>
         </div>
 
-        {/* Content */}
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <LoadingSpinner size="large" text="Loading..." />
+            <LoadingSpinner size="large" text="Loading console data..." />
           </div>
         ) : (
           <div>
@@ -736,7 +733,6 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Pharmacy Details Modal */}
         <PharmacyDetailsModal />
       </div>
     </AdminLayout>
