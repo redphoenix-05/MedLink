@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { XCircle, ShoppingCart, Store } from 'lucide-react';
 import CustomerLayout from '../components/CustomerLayout';
 
 const PaymentFailed = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [countdown, setCountdown] = useState(5);
-  
+
   const tranId = searchParams.get('tran_id');
   const reason = searchParams.get('reason');
 
@@ -15,7 +16,7 @@ const PaymentFailed = () => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          navigate('/cart');
+          navigate('/customer/cart');
           return 0;
         }
         return prev - 1;
@@ -27,58 +28,50 @@ const PaymentFailed = () => {
 
   return (
     <CustomerLayout>
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          {/* Error Icon */}
-          <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+      <div className="min-h-[75vh] flex items-center justify-center">
+        <div className="max-w-md w-full bg-white border border-[#E4E1D8] rounded-2xl p-8 text-center shadow-[0_16px_40px_-20px_rgba(18,24,22,0.12)]">
+          <div className="mx-auto w-14 h-14 bg-[#FDF2F0] text-[#9A2E1B] rounded-xl flex items-center justify-center mb-5">
+            <XCircle className="w-7 h-7" />
           </div>
 
-          {/* Error Message */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Failed</h1>
-          <p className="text-gray-600 mb-6">
-            {reason ? decodeURIComponent(reason) : 'Your payment could not be processed.'}
+          <span className="font-mono-data text-xs uppercase tracking-[0.14em] text-[#9A2E1B]">
+            Payment Declined
+          </span>
+          <h1 className="font-editorial text-4xl text-[#121816] mt-1.5 mb-2">
+            Payment Failed
+          </h1>
+          <p className="text-sm text-[#4E5B55] mb-6">
+            {reason ? decodeURIComponent(reason) : 'Your payment could not be completed. No charges were made.'}
           </p>
 
-          {/* Transaction Details */}
           {tranId && (
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Transaction ID:</span>
-                <span className="font-mono text-sm font-medium">{tranId}</span>
-              </div>
+            <div className="bg-[#FAF9F6] border border-[#E4E1D8] rounded-xl p-4 mb-6 flex justify-between items-center text-sm">
+              <span className="text-[#4E5B55]">Transaction ID</span>
+              <span className="font-mono-data text-xs font-semibold text-[#121816]">{tranId}</span>
             </div>
           )}
 
-          {/* Info Message */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-yellow-800">
-              <strong>Don't worry!</strong> Your cart items are still saved. 
-              No charges were made to your account. You can try again or choose a different payment method.
-            </p>
-          </div>
-
-          {/* Actions */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <button
-              onClick={() => navigate('/cart')}
-              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
+              type="button"
+              onClick={() => navigate('/customer/cart')}
+              className="w-full inline-flex items-center justify-center gap-2 bg-[#0F4C3A] text-[#F7F6F2] px-5 py-3 rounded-lg hover:bg-[#16634C] transition text-sm font-semibold cursor-pointer"
             >
-              Return to Cart & Try Again
+              <ShoppingCart className="w-4 h-4" />
+              Return to cart &amp; retry
             </button>
             <button
-              onClick={() => navigate('/browse-pharmacies')}
-              className="w-full bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition font-medium"
+              type="button"
+              onClick={() => navigate('/customer/browse')}
+              className="w-full inline-flex items-center justify-center gap-2 bg-[#FAF9F6] border border-[#D4D0C5] text-[#121816] px-5 py-3 rounded-lg hover:bg-[#EFECE5] transition text-sm font-semibold cursor-pointer"
             >
-              Continue Shopping
+              <Store className="w-4 h-4" />
+              Browse pharmacies
             </button>
           </div>
 
-          {/* Auto Redirect Notice */}
-          <p className="text-sm text-gray-500 mt-6">
-            Redirecting to cart in {countdown} second{countdown !== 1 ? 's' : ''}...
+          <p className="font-mono-data text-xs text-[#78857F] mt-6">
+            Redirecting to cart in {countdown}s...
           </p>
         </div>
       </div>

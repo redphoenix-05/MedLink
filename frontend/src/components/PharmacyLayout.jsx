@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
+import {
   LayoutDashboard,
-  Package,
   ClipboardList,
   Store,
   LogOut,
   Menu,
   X,
   ChevronRight,
-  Plus
 } from 'lucide-react';
 
 const PharmacyLayout = ({ children }) => {
@@ -19,22 +17,20 @@ const PharmacyLayout = ({ children }) => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const isActive = (path) => {
-    return location.pathname === path;
-  };
+  const isActive = (path) => location.pathname === path;
 
   const navigationItems = [
-    { 
-      name: 'Dashboard', 
-      icon: LayoutDashboard, 
+    {
+      name: 'Dashboard',
+      icon: LayoutDashboard,
       path: '/pharmacy/dashboard',
-      description: 'Manage pharmacy'
+      description: 'Profile, catalog & stock',
     },
-    { 
-      name: 'Orders', 
-      icon: ClipboardList, 
+    {
+      name: 'Orders',
+      icon: ClipboardList,
       path: '/pharmacy/orders',
-      description: 'View all orders'
+      description: 'Fulfillment & dispatch',
     },
   ];
 
@@ -48,172 +44,168 @@ const PharmacyLayout = ({ children }) => {
     navigate('/');
   };
 
+  const currentNav = navigationItems.find((item) => isActive(item.path));
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      {/* Mobile Sidebar Overlay */}
+    <div className="min-h-screen bg-[#F7F6F2] text-[#121816]">
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+        <div
+          className="fixed inset-0 bg-[#081C16]/50 backdrop-blur-xs z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
-      <aside className={`
-        fixed top-0 left-0 z-50 h-screen w-72 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0
-      `}>
+      <aside
+        className={`fixed top-0 left-0 z-50 h-screen w-72 bg-white border-r border-[#E4E1D8] transform transition-transform duration-300 ease-out ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0`}
+      >
         <div className="flex flex-col h-full">
-          {/* Sidebar Header */}
-          <div className="relative px-6 py-6 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
+          <div className="px-6 py-5 border-b border-[#E4E1D8] flex items-center justify-between">
             <button
+              type="button"
+              onClick={() => handleNavigation('/pharmacy/dashboard')}
+              className="flex items-center gap-3 text-left cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-lg bg-[#0B251D] flex items-center justify-center p-1.5">
+                <img
+                  src="/logo.png"
+                  alt="MedLink"
+                  className="w-full h-full object-contain brightness-0 invert"
+                />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-[#121816] tracking-tight leading-none">
+                  MedLink
+                </h1>
+                <p className="font-mono-data text-[10px] uppercase tracking-[0.14em] text-[#0F4C3A] mt-1">
+                  Pharmacy Portal
+                </p>
+              </div>
+            </button>
+            <button
+              type="button"
               onClick={() => setSidebarOpen(false)}
-              className="absolute top-4 right-4 lg:hidden text-white hover:bg-white/20 rounded-lg p-1.5 transition-colors"
+              className="lg:hidden p-1.5 rounded-lg text-[#4E5B55] hover:bg-[#F7F6F2]"
             >
               <X className="w-5 h-5" />
             </button>
-            
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-white/95 backdrop-blur-sm flex items-center justify-center p-1.5 shadow-lg">
-                <img src="/logo.png" alt="MedLink Logo" className="w-full h-full object-contain" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-white tracking-tight">MedLink</h1>
-                <p className="text-xs text-blue-100">Pharmacy Portal</p>
-              </div>
-            </div>
+          </div>
 
-            {/* Pharmacy Info */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-lg">
-                  <Store className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
-                  <p className="text-xs text-blue-100 font-medium tracking-wide uppercase" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    Pharmacy
-                  </p>
-                </div>
+          <div className="px-4 pt-5 pb-2">
+            <div className="bg-[#FAF9F6] border border-[#E4E1D8] rounded-xl p-3 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-[#E6F2EC] text-[#0F4C3A] flex items-center justify-center shrink-0">
+                <Store className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-[#121816] truncate">{user?.name}</p>
+                <p className="font-mono-data text-[10px] uppercase tracking-wider text-[#0F4C3A]">
+                  Dispensary Partner
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 overflow-y-auto">
-            <div className="space-y-1.5">
-              {navigationItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.path);
-                
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => handleNavigation(item.path)}
-                    className={`
-                      w-full group relative flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200
-                      ${active 
-                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200' 
-                        : 'text-gray-700 hover:bg-gray-50 hover:shadow-sm'
-                      }
-                    `}
+          <nav className="flex-1 px-4 py-4 overflow-y-auto space-y-1">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
+
+              return (
+                <button
+                  key={item.path}
+                  type="button"
+                  onClick={() => handleNavigation(item.path)}
+                  className={`w-full group flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-150 cursor-pointer ${
+                    active
+                      ? 'bg-[#0B251D] text-[#F7F6F2]'
+                      : 'text-[#4E5B55] hover:bg-[#F7F6F2] hover:text-[#121816]'
+                  }`}
+                >
+                  <div
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                      active
+                        ? 'bg-white/15 text-white'
+                        : 'bg-[#F2F0E9] text-[#4E5B55] group-hover:bg-[#E6F2EC] group-hover:text-[#0F4C3A]'
+                    }`}
                   >
-                    {/* Active Indicator */}
-                    {active && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full" />
-                    )}
-                    
-                    <div className={`
-                      w-10 h-10 rounded-lg flex items-center justify-center transition-all
-                      ${active 
-                        ? 'bg-white/20' 
-                        : 'bg-gray-100 group-hover:bg-blue-100'
-                      }
-                    `}>
-                      <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-gray-600 group-hover:text-blue-600'}`} />
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 text-left min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className={`text-sm font-semibold truncate ${
+                          active ? 'text-white' : 'text-[#121816]'
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+                      <ChevronRight
+                        className={`w-4 h-4 transition-opacity ${
+                          active
+                            ? 'opacity-70 text-white'
+                            : 'opacity-0 group-hover:opacity-60 text-[#78857F]'
+                        }`}
+                      />
                     </div>
-                    
-                    <div className="flex-1 text-left">
-                      <div className="flex items-center justify-between">
-                        <span className={`text-sm font-semibold ${active ? 'text-white' : 'text-gray-900'}`}>
-                          {item.name}
-                        </span>
-                        <ChevronRight className={`w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity ${active ? 'text-white' : 'text-gray-400'}`} />
-                      </div>
-                      <p className={`text-xs mt-0.5 ${active ? 'text-blue-100' : 'text-gray-500'}`}>
-                        {item.description}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+                    <p
+                      className={`text-xs mt-0.5 truncate ${
+                        active ? 'text-[#B7CEC5]' : 'text-[#78857F]'
+                      }`}
+                    >
+                      {item.description}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
           </nav>
 
-          {/* Sidebar Footer */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-[#E4E1D8]">
             <button
+              type="button"
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200 group"
+              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[#9A2E1B] hover:bg-[#FDF2F0] transition-colors cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-lg bg-red-50 group-hover:bg-red-100 flex items-center justify-center transition-colors">
-                <LogOut className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-lg bg-[#FDF2F0] flex items-center justify-center">
+                <LogOut className="w-4 h-4" />
               </div>
-              <span className="text-sm font-semibold">Logout</span>
+              <span className="text-sm font-semibold">Sign out</span>
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <div className="lg:pl-72">
-        {/* Top Navbar */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-sm">
-          <div className="px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              {/* Mobile Menu Button */}
+        <header className="sticky top-0 z-30 bg-[#F7F6F2]/90 backdrop-blur-md border-b border-[#E4E1D8]">
+          <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-3">
               <button
+                type="button"
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                className="lg:hidden p-2 rounded-lg text-[#4E5B55] hover:bg-[#EFECE5]"
               >
-                <Menu className="w-6 h-6" />
+                <Menu className="w-5 h-5" />
               </button>
-
-              {/* Page Title - Mobile Hidden */}
-              <div className="hidden sm:block">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {navigationItems.find(item => isActive(item.path))?.name || 'Dashboard'}
+              <div>
+                <h2 className="text-base font-bold text-[#121816] leading-tight">
+                  {currentNav?.name || 'Pharmacy Portal'}
                 </h2>
-                <p className="text-xs text-gray-500">
-                  {navigationItems.find(item => isActive(item.path))?.description || 'Manage your pharmacy'}
+                <p className="text-xs text-[#78857F] hidden sm:block">
+                  {currentNav?.description || 'Manage your dispensary'}
                 </p>
               </div>
+            </div>
 
-              {/* Right Side Actions */}
-              <div className="flex items-center gap-3">
-                {/* User Info - Desktop */}
-                <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
-                    <Store className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{user?.name}</p>
-                    <p className="text-xs text-blue-700 font-medium tracking-wide uppercase" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      Pharmacy
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-lg bg-white border border-[#E4E1D8]">
+              <span className="w-2 h-2 rounded-full bg-[#1B7A5E]" />
+              <span className="text-xs font-semibold text-[#121816]">{user?.name}</span>
             </div>
           </div>
         </header>
 
-        {/* Main Content */}
         <main className="p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
+          <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
     </div>

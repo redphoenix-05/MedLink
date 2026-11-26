@@ -120,20 +120,27 @@ const CustomerDashboard = () => {
   return (
     <CustomerLayout>
       <div className="space-y-6">
-        {/* Welcome Card */}
-        <div className="bg-gradient-to-br from-green-600 via-green-700 to-emerald-800 rounded-2xl shadow-xl p-8 text-white">
-          <div className="flex items-center justify-between">
+        {/* Editorial Welcome Header */}
+        <div className="bg-[#0B251D] bg-clinical-grid-dark rounded-2xl border border-[#193B2F] p-7 sm:p-8 text-[#F7F6F2]">
+          <div className="flex items-center justify-between gap-6">
             <div>
-              <h1 className="text-3xl font-bold mb-2">
-                Welcome back, {user?.name}! 👋
+              <span className="font-mono-data text-[11px] uppercase tracking-[0.16em] text-[#3DD598]">
+                Neighborhood Medicine Locator
+              </span>
+              <h1 className="font-editorial text-3xl sm:text-4xl text-white mt-1.5 mb-2">
+                Welcome back, {user?.name}
               </h1>
-              <p className="text-green-100 text-lg">
-                Find medicines and pharmacies in your neighborhood
+              <p className="text-[#B7CEC5] text-sm sm:text-base max-w-xl">
+                Search live stock across verified pharmacies, compare prices, and track your active orders.
               </p>
             </div>
-            <div className="hidden lg:block">
-              <div className="w-24 h-24 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                <ShoppingBag className="w-12 h-12 text-white" />
+            <div className="hidden lg:flex items-center gap-3 px-4 py-3 rounded-xl bg-[#113328] border border-[#1E4A3B]">
+              <ShoppingBag className="w-5 h-5 text-[#3DD598]" />
+              <div>
+                <div className="font-mono-data text-lg font-semibold text-white leading-none">
+                  {cartItemCount}
+                </div>
+                <div className="text-[11px] text-[#8FB3A5] mt-1">Items in cart</div>
               </div>
             </div>
           </div>
@@ -148,15 +155,15 @@ const CustomerDashboard = () => {
           />
         )}
 
-        {/* Tabs - Modern Card Style */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1.5">
-          <nav className="flex gap-2">
+        {/* Segmented Tab Switcher */}
+        <div className="bg-white rounded-xl border border-[#E4E1D8] p-1.5">
+          <nav className="flex gap-1.5">
             <button
               onClick={() => setActiveTab('search')}
-              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
+              className={`flex-1 py-2.5 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-150 cursor-pointer ${
                 activeTab === 'search'
-                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg shadow-green-200'
-                  : 'text-gray-600 hover:bg-gray-50'
+                  ? 'bg-[#0F4C3A] text-[#F7F6F2]'
+                  : 'text-[#4E5B55] hover:bg-[#F7F6F2] hover:text-[#121816]'
               }`}
             >
               <Search className="w-4 h-4" />
@@ -165,10 +172,10 @@ const CustomerDashboard = () => {
             </button>
             <button
               onClick={() => setActiveTab('map')}
-              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
+              className={`flex-1 py-2.5 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-150 cursor-pointer ${
                 activeTab === 'map'
-                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg shadow-green-200'
-                  : 'text-gray-600 hover:bg-gray-50'
+                  ? 'bg-[#0F4C3A] text-[#F7F6F2]'
+                  : 'text-[#4E5B55] hover:bg-[#F7F6F2] hover:text-[#121816]'
               }`}
             >
               <MapPin className="w-4 h-4" />
@@ -177,10 +184,10 @@ const CustomerDashboard = () => {
             </button>
             <button
               onClick={() => setActiveTab('orders')}
-              className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 ${
+              className={`flex-1 py-2.5 px-4 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-150 cursor-pointer ${
                 activeTab === 'orders'
-                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg shadow-green-200'
-                  : 'text-gray-600 hover:bg-gray-50'
+                  ? 'bg-[#0F4C3A] text-[#F7F6F2]'
+                  : 'text-[#4E5B55] hover:bg-[#F7F6F2] hover:text-[#121816]'
               }`}
             >
               <ShoppingBag className="w-4 h-4" />
@@ -194,27 +201,27 @@ const CustomerDashboard = () => {
         {activeTab === 'search' && (
           <div className="space-y-6">
             {/* Search Section */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Search for Medicines
+            <div className="bg-white border border-[#E4E1D8] rounded-xl p-6">
+              <h2 className="text-lg font-bold text-[#121816] mb-4">
+                Search Live Inventory
               </h2>
               
               <form onSubmit={handleSearch} className="space-y-4">
-                <div className="flex space-x-4">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#78857F]" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Enter medicine name or brand (e.g., Paracetamol, Napa)"
-                      className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+                      className="w-full pl-10 pr-4 py-3 bg-[#FAF9F6] border border-[#D4D0C5] rounded-lg text-sm text-[#121816] placeholder-[#78857F] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0F4C3A]/15 focus:border-[#0F4C3A] transition"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:transform-none font-medium"
+                    className="px-6 py-3 bg-[#0F4C3A] text-[#F7F6F2] rounded-lg hover:bg-[#16634C] transition-all disabled:opacity-50 font-semibold text-sm cursor-pointer"
                   >
                     {loading ? <LoadingSpinner size="small" /> : 'Search'}
                   </button>
@@ -222,7 +229,7 @@ const CustomerDashboard = () => {
                     <button
                       type="button"
                       onClick={clearSearch}
-                      className="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
+                      className="px-4 py-3 bg-[#F2F0E9] text-[#4E5B55] rounded-lg hover:bg-[#E4E1D8] transition font-semibold text-sm cursor-pointer"
                     >
                       Clear
                     </button>

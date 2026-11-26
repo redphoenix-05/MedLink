@@ -174,9 +174,9 @@ const CartPage = () => {
         {success && <Alert type="success" message={success} />}
 
         {cart.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
+          <div className="bg-white rounded-2xl border border-[#E4E1D8] p-12 text-center">
             <svg
-              className="mx-auto h-24 w-24 text-gray-400"
+              className="mx-auto h-16 w-16 text-[#9DA49F]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -184,15 +184,17 @@ const CartPage = () => {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={1.5}
                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
               />
             </svg>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">Your cart is empty</h3>
-            <p className="mt-2 text-gray-500">Start adding medicines to your cart!</p>
+            <h3 className="mt-4 font-editorial text-3xl text-[#121816]">Your cart is empty</h3>
+            <p className="mt-2 text-sm text-[#4E5B55]">
+              Browse nearby licensed pharmacies to add medicines for pickup or delivery.
+            </p>
             <button
               onClick={() => navigate('/customer/browse')}
-              className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+              className="mt-6 inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-semibold text-[#F7F6F2] bg-[#0F4C3A] hover:bg-[#16634C] transition-colors cursor-pointer"
             >
               Browse Pharmacies
             </button>
