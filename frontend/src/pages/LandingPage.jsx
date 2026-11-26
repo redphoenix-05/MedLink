@@ -14,52 +14,32 @@ import {
   Building2,
   Phone,
   Mail,
+  Loader2,
 } from 'lucide-react';
 import TopNav from '../components/TopNav';
 import Reveal from '../components/Reveal';
 import { useAuth } from '../context/AuthContext';
+import API from '../services/api';
 
-const SAMPLE_MEDICINES = [
-  {
-    key: 'Napa Extra',
-    generic: 'Paracetamol 500mg + Caffeine 65mg',
-    manufacturer: 'Beximco Pharma',
-    listings: [
-      { pharmacy: 'Lazz Pharma — Dhanmondi 27', distance: '0.4 km', stock: 48, price: 25.0, updated: '2m ago' },
-      { pharmacy: 'Tamanna Pharmacy — Green Road', distance: '0.9 km', stock: 19, price: 24.5, updated: '5m ago' },
-      { pharmacy: 'Popular Dispensary — Satmasjid', distance: '1.3 km', stock: 6, price: 25.0, updated: '1m ago', low: true },
-    ],
-  },
-  {
-    key: 'Seclo 20mg',
-    generic: 'Omeprazole 20mg Capsule',
-    manufacturer: 'Square Pharmaceuticals',
-    listings: [
-      { pharmacy: 'Arogga Corner — Banani 11', distance: '0.6 km', stock: 84, price: 60.0, updated: '1m ago' },
-      { pharmacy: 'Lazz Pharma — Gulshan 1', distance: '1.1 km', stock: 32, price: 60.0, updated: '4m ago' },
-      { pharmacy: 'City Care Chemist — Mohakhali', distance: '1.8 km', stock: 14, price: 58.0, updated: '9m ago' },
-    ],
-  },
-  {
-    key: 'Monas 10',
-    generic: 'Montelukast Sodium 10mg',
-    manufacturer: 'ACME Laboratories',
-    listings: [
-      { pharmacy: 'Wellbeing Pharmacy — Uttara 7', distance: '0.5 km', stock: 27, price: 175.0, updated: '3m ago' },
-      { pharmacy: 'LifeSpring Meds — Sector 3', distance: '1.2 km', stock: 41, price: 172.0, updated: '6m ago' },
-      { pharmacy: 'Crescent Drug House — Jasimuddin', distance: '1.9 km', stock: 5, price: 175.0, updated: '2m ago', low: true },
-    ],
-  },
-  {
-    key: 'Azithro 500',
-    generic: 'Azithromycin 500mg Tablet',
-    manufacturer: 'Incepta Pharma',
-    listings: [
-      { pharmacy: 'Central Medico — Mirpur 10', distance: '0.7 km', stock: 36, price: 140.0, updated: '2m ago' },
-      { pharmacy: 'CarePlus Pharmacy — Pallabi', distance: '1.4 km', stock: 22, price: 138.0, updated: '7m ago' },
-      { pharmacy: 'Shifa Dispensary — Kazipara', distance: '2.1 km', stock: 9, price: 140.0, updated: '4m ago', low: true },
-    ],
-  },
+const QUICK_SEARCH_MEDS = [
+  'Napa Extra',
+  'Seclo 20',
+  'Monas 10',
+  'Azithro 500',
+  'Sergel 20',
+  'Lantus',
+];
+
+const CITIES = [
+  'All Cities',
+  'Dhaka',
+  'Chattogram',
+  'Khulna',
+  'Rajshahi',
+  'Sylhet',
+  'Barishal',
+  'Rangpur',
+  'Mymensingh',
 ];
 
 const WORKFLOW_STEPS = [
@@ -99,8 +79,12 @@ const TICKER_ITEMS = [
 
 const LandingPage = () => {
   const { isAuthenticated } = useAuth();
-  const [selectedMedKey, setSelectedMedKey] = useState(SAMPLE_MEDICINES[0].key);
-  const [customQuery, setCustomQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState('Napa Extra');
+  const [selectedCity, setSelectedCity] = useState('All Cities');
+  const [liveResults, setLiveResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [visibleCount, setVisibleCount] = useState(6);
   const [activeStep, setActiveStep] = useState(0);
 
   // Auto-cycle workflow preview gently unless user interacts
@@ -113,17 +97,45 @@ const LandingPage = () => {
     return () => clearInterval(timer);
   }, [stepPaused]);
 
-  const activeMedicine =
-    SAMPLE_MEDICINES.find((m) => m.key === selectedMedKey) || SAMPLE_MEDICINES[0];
+  // Live API search against all medicines & approved stores in the database
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setLiveResults([]);
+      setSearchError('');
+      return;
+    }
 
-  const filteredListings = customQuery.trim()
-    ? activeMedicine.listings.filter(
-        (l) =>
-          l.pharmacy.toLowerCase().includes(customQuery.toLowerCase()) ||
-          activeMedicine.key.toLowerCase().includes(customQuery.toLowerCase()) ||
-          activeMedicine.generic.toLowerCase().includes(customQuery.toLowerCase())
-      )
-    : activeMedicine.listings;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        setSearchLoading(true);
+        setSearchError('');
+        const cityParam =
+          selectedCity !== 'All Cities' ? `&city=${encodeURIComponent(selectedCity)}` : '';
+        const res = await API.get(`/search?query=${encodeURIComponent(q)}${cityParam}`);
+        if (!cancelled && res.data?.success) {
+          setLiveResults(res.data.data || []);
+          setVisibleCount(6);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setLiveResults([]);
+          setSearchError(err.response?.data?.message || 'Unable to load live stock right now');
+        }
+      } finally {
+        if (!cancelled) setSearchLoading(false);
+      }
+    }, 280);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [searchQuery, selectedCity]);
+
+  const displayedResults = liveResults.slice(0, visibleCount);
+  const firstMatch = liveResults[0];
 
   const handleSmoothScroll = (e, targetId) => {
     e.preventDefault();
@@ -213,111 +225,156 @@ const LandingPage = () => {
                   </span>
                 </div>
 
-                {/* Search & Quick Filter Bar */}
+                {/* Search & City Filter Bar */}
                 <div className="p-5 border-b border-[#ECE9E0] bg-[#FAF9F6]">
-                  <div className="relative mb-3.5">
-                    <Search className="w-4 h-4 text-[#78857F] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      value={customQuery}
-                      onChange={(e) => setCustomQuery(e.target.value)}
-                      placeholder="Filter pharmacy or dosage..."
-                      aria-label="Filter preview pharmacies"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white border border-[#DCD8CC] text-sm text-[#121816] placeholder-[#78857F] focus:outline-none focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/10 transition"
-                    />
+                  <div className="flex flex-col sm:flex-row gap-2.5 mb-3.5">
+                    <div className="relative flex-1">
+                      <Search className="w-4 h-4 text-[#78857F] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search any BD medicine, generic, or brand..."
+                        aria-label="Search live medicines"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white border border-[#DCD8CC] text-sm text-[#121816] placeholder-[#78857F] focus:outline-none focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/10 transition"
+                      />
+                    </div>
+                    <select
+                      value={selectedCity}
+                      onChange={(e) => setSelectedCity(e.target.value)}
+                      aria-label="Filter by city"
+                      className="px-3 py-2.5 rounded-lg bg-white border border-[#DCD8CC] text-xs font-semibold text-[#121816] focus:outline-none focus:border-[#0F4C3A] cursor-pointer"
+                    >
+                      {CITIES.map((city) => (
+                        <option key={city} value={city}>
+                          {city}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     <span className="text-[11px] font-mono-data uppercase text-[#78857F] mr-1">
-                      Try:
+                      Popular:
                     </span>
-                    {SAMPLE_MEDICINES.map((med) => {
-                      const isSelected = med.key === selectedMedKey;
+                    {QUICK_SEARCH_MEDS.map((medName) => {
+                      const isSelected = searchQuery.trim().toLowerCase() === medName.toLowerCase();
                       return (
                         <button
-                          key={med.key}
+                          key={medName}
                           type="button"
-                          onClick={() => {
-                            setSelectedMedKey(med.key);
-                            setCustomQuery('');
-                          }}
-                          className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                          onClick={() => setSearchQuery(medName)}
+                          className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
                             isSelected
                               ? 'bg-[#0F4C3A] text-[#F7F6F2]'
                               : 'bg-white border border-[#DCD8CC] text-[#4E5B55] hover:border-[#0F4C3A]/40 hover:text-[#121816]'
                           }`}
                         >
-                          {med.key}
+                          {medName}
                         </button>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Selected Medicine Spec Header */}
+                {/* Live Search Summary Header */}
                 <div className="px-5 py-3.5 border-b border-[#ECE9E0] flex flex-wrap items-center justify-between gap-2 bg-white">
-                  <div>
-                    <div className="text-sm font-bold text-[#121816]">{activeMedicine.key}</div>
-                    <div className="text-xs text-[#4E5B55]">
-                      {activeMedicine.generic} · {activeMedicine.manufacturer}
+                  <div className="min-w-0">
+                    <div className="text-sm font-bold text-[#121816] truncate">
+                      {firstMatch
+                        ? firstMatch.medicine
+                        : searchQuery.trim().length >= 2
+                        ? `Results for "${searchQuery.trim()}"`
+                        : 'Type at least 2 characters'}
+                    </div>
+                    <div className="text-xs text-[#4E5B55] truncate">
+                      {firstMatch
+                        ? `${firstMatch.genericName || 'Medicine'} · ${firstMatch.brand || 'Verified Brand'}`
+                        : 'Searching 180+ Bangladesh medicines across 180+ stores'}
                     </div>
                   </div>
-                  <span className="font-mono-data text-[11px] px-2.5 py-1 rounded-md bg-[#E6F2EC] text-[#0F4C3A] font-medium">
-                    {filteredListings.length} nearby matches
+                  <span className="font-mono-data text-[11px] px-2.5 py-1 rounded-md bg-[#E6F2EC] text-[#0F4C3A] font-medium shrink-0">
+                    {searchLoading ? 'Syncing...' : `${liveResults.length} stocked store${liveResults.length === 1 ? '' : 's'}`}
                   </span>
                 </div>
 
                 {/* Live Pharmacy Stock Rows */}
-                <div className="divide-y divide-[#EFECE5]">
-                  {filteredListings.length > 0 ? (
-                    filteredListings.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="px-5 py-4 hover:bg-[#FAF9F6] transition-colors flex items-center justify-between gap-4"
-                      >
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-[#121816] truncate">
-                              {item.pharmacy}
-                            </span>
-                            <ShieldCheck className="w-3.5 h-3.5 text-[#0F4C3A] shrink-0" />
-                          </div>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-[#4E5B55]">
-                            <span className="inline-flex items-center gap-1 font-mono-data">
-                              <MapPin className="w-3 h-3 text-[#78857F]" />
-                              {item.distance}
-                            </span>
-                            <span className="text-[#D4D0C5]">•</span>
-                            <span
-                              className={`font-mono-data font-medium ${
-                                item.low ? 'text-[#C85A32]' : 'text-[#0F4C3A]'
-                              }`}
-                            >
-                              {item.stock} strips in stock
-                            </span>
-                            <span className="hidden sm:inline text-[#D4D0C5]">•</span>
-                            <span className="hidden sm:inline text-[#78857F]">{item.updated}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3 shrink-0">
-                          <div className="text-right">
-                            <div className="font-mono-data text-sm font-semibold text-[#121816]">
-                              ৳{item.price.toFixed(2)}
+                <div className="divide-y divide-[#EFECE5] max-h-[340px] overflow-y-auto">
+                  {searchLoading ? (
+                    <div className="px-5 py-10 flex flex-col items-center justify-center gap-2 text-xs text-[#4E5B55]">
+                      <Loader2 className="w-5 h-5 text-[#0F4C3A] animate-spin" />
+                      <span className="font-mono-data uppercase tracking-wider">Checking live store stock...</span>
+                    </div>
+                  ) : searchError ? (
+                    <div className="px-5 py-8 text-center text-sm text-[#9A2E1B]">{searchError}</div>
+                  ) : displayedResults.length > 0 ? (
+                    <>
+                      {displayedResults.map((item) => (
+                        <div
+                          key={`${item.id}-${item.inventoryId || item.medicineId}`}
+                          className="px-5 py-3.5 hover:bg-[#FAF9F6] transition-colors flex items-center justify-between gap-3"
+                        >
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-semibold text-[#121816] truncate">
+                                {item.name}
+                              </span>
+                              <ShieldCheck className="w-3.5 h-3.5 text-[#0F4C3A] shrink-0" />
                             </div>
-                            <div className="text-[10px] text-[#78857F]">per strip</div>
+                            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 mt-1 text-xs text-[#4E5B55]">
+                              {item.city && (
+                                <span className="inline-flex items-center gap-1 font-mono-data text-[11px] text-[#121816]">
+                                  <MapPin className="w-3 h-3 text-[#78857F]" />
+                                  {item.city}
+                                </span>
+                              )}
+                              <span className="text-[#D4D0C5]">•</span>
+                              <span className="truncate max-w-[160px] text-[#78857F]">
+                                {item.medicine}
+                              </span>
+                              <span className="text-[#D4D0C5]">•</span>
+                              <span
+                                className={`font-mono-data font-medium ${
+                                  item.stock <= 15 ? 'text-[#C85A32]' : 'text-[#0F4C3A]'
+                                }`}
+                              >
+                                {item.stock} in stock
+                              </span>
+                            </div>
                           </div>
-                          <Link
-                            to={isAuthenticated ? '/customer/dashboard' : '/signup'}
-                            className="px-3 py-1.5 rounded-md bg-[#F2F8F5] border border-[#CBE5DA] text-[#0F4C3A] text-xs font-semibold hover:bg-[#0F4C3A] hover:text-white transition-colors"
-                          >
-                            Reserve
-                          </Link>
+
+                          <div className="flex items-center gap-2.5 shrink-0">
+                            <div className="text-right">
+                              <div className="font-mono-data text-sm font-semibold text-[#121816]">
+                                ৳{Number(item.price).toFixed(2)}
+                              </div>
+                            </div>
+                            <Link
+                              to={isAuthenticated ? '/customer/dashboard' : '/signup'}
+                              className="px-3 py-1.5 rounded-md bg-[#F2F8F5] border border-[#CBE5DA] text-[#0F4C3A] text-xs font-semibold hover:bg-[#0F4C3A] hover:text-white transition-colors"
+                            >
+                              Reserve
+                            </Link>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      ))}
+
+                      {liveResults.length > visibleCount && (
+                        <div className="px-5 py-3 text-center bg-[#FAF9F6]">
+                          <button
+                            type="button"
+                            onClick={() => setVisibleCount((c) => c + 10)}
+                            className="text-xs font-semibold text-[#0F4C3A] hover:underline cursor-pointer"
+                          >
+                            Show more stores ({liveResults.length - visibleCount} more available)
+                          </button>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="px-5 py-8 text-center text-sm text-[#4E5B55]">
-                      No preview pharmacies match "{customQuery}". Sign in to search all 500+ live pharmacies.
+                      {searchQuery.trim().length < 2
+                        ? 'Enter at least 2 characters (e.g., Napa, Seclo, Omeprazole, Cef-3) to search live stock.'
+                        : `No stocked stores found for "${searchQuery.trim()}"${selectedCity !== 'All Cities' ? ` in ${selectedCity}` : ''}.`}
                     </div>
                   )}
                 </div>
