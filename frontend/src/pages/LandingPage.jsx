@@ -380,7 +380,7 @@ const LandingPage = () => {
                 </div>
 
                 {/* Console Footer */}
-                <div className="px-5 py-3 bg-[#FAF9F6] border-t border-[#ECE9E0] flex items-center justify-between text-xs text-[#4E5B55]">
+                <div className="px-4 sm:px-5 py-3 bg-[#FAF9F6] border-t border-[#ECE9E0] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#4E5B55]">
                   <span>Want to search real-time inventory near your GPS location?</span>
                   <Link
                     to={isAuthenticated ? '/customer/browse' : '/signup'}

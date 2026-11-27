@@ -390,20 +390,20 @@ const CustomerDashboard = () => {
                       </p>
                     </div>
                     
-                    <div className="mt-6 flex gap-3">
+                    <div className="mt-6 flex flex-wrap gap-3">
                       <button
                         onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selectedPharmacy.latitude},${selectedPharmacy.longitude}`, '_blank')}
-                        className="inline-flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 transition font-medium"
+                        className="inline-flex items-center gap-2 bg-[#0F4C3A] text-white px-4 py-2.5 rounded-lg hover:bg-[#16634C] transition text-sm font-semibold cursor-pointer"
                       >
                         <Navigation className="w-4 h-4" />
                         Get Directions
                       </button>
                       <button
-                        onClick={() => alert('Pharmacy inventory view coming soon!')}
-                        className="inline-flex items-center gap-2 bg-gray-500 text-white px-5 py-2.5 rounded-lg hover:bg-gray-600 transition font-medium"
+                        onClick={() => navigate('/customer/browse')}
+                        className="inline-flex items-center gap-2 bg-[#FAF9F6] border border-[#D4D0C5] text-[#121816] px-4 py-2.5 rounded-lg hover:bg-[#EFECE5] transition text-sm font-semibold cursor-pointer"
                       >
                         <Package className="w-4 h-4" />
-                        View Inventory
+                        Browse Inventory
                       </button>
                     </div>
                   </div>
