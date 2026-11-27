@@ -20,8 +20,10 @@ require('./models');
 
 const app = express();
 
-// Connect to database
-connectDB();
+// Connect to database on local server startup (on Vercel, Sequelize connects lazily per request)
+if (!process.env.VERCEL) {
+  connectDB();
+}
 
 // Trust proxy headers (x-forwarded-proto, x-forwarded-host) on Vercel
 app.set('trust proxy', 1);
@@ -57,6 +59,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     success: true,
     message: 'MedLink API is running!',
+    dbConfigured: Boolean(process.env.DATABASE_URL),
     timestamp: new Date().toISOString()
   });
 });

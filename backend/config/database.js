@@ -1,6 +1,10 @@
 const { Sequelize } = require('sequelize');
+const pg = require('pg');
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+
+if (!process.env.VERCEL) {
+  require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+}
 
 const rawDatabaseUrl = process.env.DATABASE_URL || '';
 const useSSL =
@@ -17,31 +21,47 @@ const cleanedDatabaseUrl = rawDatabaseUrl
   .replace(/([?&])sslmode=[^&]*&?/i, '$1')
   .replace(/[?&]$/, '');
 
-const sequelize = new Sequelize(cleanedDatabaseUrl, {
-  dialect: 'postgres',
-  logging: false, // Set to console.log to see SQL queries
-  dialectOptions: useSSL
-    ? {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false,
-        },
-      }
-    : {},
-  define: {
-    timestamps: true,
-    underscored: false,
-  },
-});
+const sequelize = new Sequelize(
+  cleanedDatabaseUrl || 'postgresql://localhost:5432/medlink_db',
+  {
+    dialect: 'postgres',
+    dialectModule: pg,
+    logging: false,
+    pool: {
+      max: process.env.VERCEL ? 3 : 10,
+      min: 0,
+      acquire: 20000,
+      idle: 10000,
+    },
+    dialectOptions: useSSL
+      ? {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false,
+          },
+        }
+      : {},
+    define: {
+      timestamps: true,
+      underscored: false,
+    },
+  }
+);
 
 const connectDB = async () => {
   try {
+    if (!rawDatabaseUrl) {
+      console.error('❌ DATABASE_URL environment variable is not set');
+      return;
+    }
     await sequelize.authenticate();
     console.log('✅ PostgreSQL connected successfully');
-    
-    // Sync all models
-    await sequelize.sync({ alter: true });
-    console.log('✅ Database models synchronized');
+
+    // Only auto-alter schema in local dev; production schema is already synced in Supabase
+    if (!process.env.VERCEL) {
+      await sequelize.sync({ alter: true });
+      console.log('✅ Database models synchronized');
+    }
   } catch (error) {
     console.error('❌ Database connection failed:', error);
     if (!process.env.VERCEL) {

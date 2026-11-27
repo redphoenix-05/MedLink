@@ -1,9 +1,22 @@
 import axios from 'axios';
 
+// Resolve API base URL safely: never call localhost from a deployed HTTPS domain
+const resolveApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (typeof window !== 'undefined') {
+    const isLocalHost =
+      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (!isLocalHost && envUrl && /localhost|127\.0\.0\.1/i.test(envUrl)) {
+      return '/api';
+    }
+  }
+  return envUrl || '/api';
+};
+
 // Create axios instance
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
-  timeout: 10000,
+  baseURL: resolveApiBaseUrl(),
+  timeout: 15000,
 });
 
 // Request interceptor to add auth token
