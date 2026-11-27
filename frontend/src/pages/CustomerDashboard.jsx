@@ -258,45 +258,45 @@ const CustomerDashboard = () => {
                         }`}
                         onClick={() => handlePharmacyClick(result)}
                       >
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900 text-lg mb-2">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-[#121816] text-base sm:text-lg mb-2">
                               {result.name}
                             </h4>
                             <div className="space-y-1.5">
-                              <p className="text-sm text-gray-600 flex items-center gap-2">
-                                <MapPin className="w-4 h-4 text-green-600" />
-                                {result.address}
+                              <p className="text-xs sm:text-sm text-[#4E5B55] flex items-start gap-2">
+                                <MapPin className="w-4 h-4 text-[#0F4C3A] shrink-0 mt-0.5" />
+                                <span>{result.address}</span>
                               </p>
-                              <p className="text-sm text-gray-600 flex items-center gap-2">
-                                <Phone className="w-4 h-4 text-green-600" />
-                                {result.phone}
+                              <p className="text-xs sm:text-sm text-[#4E5B55] flex items-center gap-2">
+                                <Phone className="w-4 h-4 text-[#0F4C3A] shrink-0" />
+                                <span className="font-mono-data">{result.phone}</span>
                               </p>
                             </div>
                             {result.medicine && (
                               <div className="mt-3 text-sm">
-                                <span className="text-green-700 font-semibold">
+                                <span className="text-[#0F4C3A] font-semibold">
                                   {result.medicine}
                                 </span>
                                 {result.genericName && (
-                                  <span className="text-gray-500 ml-2">
-                                    (Generic: {result.genericName})
+                                  <span className="text-[#78857F] ml-1.5 text-xs">
+                                    ({result.genericName})
                                   </span>
                                 )}
                               </div>
                             )}
                           </div>
-                          <div className="text-right ml-4">
-                            <div className="text-xl font-bold text-green-600 mb-1">
+                          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:text-right pt-2 sm:pt-0 border-t sm:border-t-0 border-[#EFECE5] shrink-0">
+                            <div className="font-mono-data text-lg sm:text-xl font-bold text-[#0F4C3A]">
                               ৳{parseFloat(result.price || 0).toFixed(2)}
                             </div>
-                            <div className="text-xs text-gray-500 mb-2">
+                            <div className="font-mono-data text-xs text-[#4E5B55] sm:my-1">
                               Stock: {result.stock || 'N/A'}
                             </div>
-                            <div className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
+                            <div className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${
                               result.availability 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-red-100 text-red-700'
+                                ? 'bg-[#E6F2EC] text-[#0F4C3A]' 
+                                : 'bg-[#FDF2F0] text-[#9A2E1B]'
                             }`}>
                               {result.availability ? (
                                 <>

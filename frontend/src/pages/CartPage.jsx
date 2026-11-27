@@ -202,50 +202,52 @@ const CartPage = () => {
         ) : (
           <div className="space-y-6">
             {/* Delivery Option Selection */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Delivery Option</h3>
-              <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-2xl border border-[#E4E1D8] p-5 sm:p-6">
+              <h3 className="text-base font-bold text-[#121816] mb-4">Fulfillment Option</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <button
+                  type="button"
                   onClick={() => setDeliveryType('pickup')}
-                  className={`p-4 border-2 rounded-lg text-left transition ${
+                  className={`p-4 border-2 rounded-xl text-left transition cursor-pointer ${
                     deliveryType === 'pickup'
-                      ? 'border-indigo-600 bg-indigo-50'
-                      : 'border-gray-300 hover:border-gray-400'
+                      ? 'border-[#0F4C3A] bg-[#E6F2EC]/60'
+                      : 'border-[#E4E1D8] hover:border-[#C9C4B6]'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-gray-900">🏪 Pickup</p>
-                      <p className="text-sm text-gray-600">Free - Pick up from pharmacy</p>
+                      <p className="font-semibold text-[#121816]">In-Store Pickup</p>
+                      <p className="text-xs sm:text-sm text-[#4E5B55] mt-0.5">Free · Collect from pharmacy</p>
                     </div>
                     {deliveryType === 'pickup' && (
-                      <span className="text-indigo-600">✓</span>
+                      <span className="text-[#0F4C3A] font-bold">✓</span>
                     )}
                   </div>
                 </button>
                 
                 <button
+                  type="button"
                   onClick={() => setDeliveryType('delivery')}
-                  className={`p-4 border-2 rounded-lg text-left transition ${
+                  className={`p-4 border-2 rounded-xl text-left transition cursor-pointer ${
                     deliveryType === 'delivery'
-                      ? 'border-indigo-600 bg-indigo-50'
-                      : 'border-gray-300 hover:border-gray-400'
+                      ? 'border-[#0F4C3A] bg-[#E6F2EC]/60'
+                      : 'border-[#E4E1D8] hover:border-[#C9C4B6]'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-gray-900">🚚 Delivery</p>
-                      <p className="text-sm text-gray-600">
-                        +৳{(deliveryChargePerPharmacy * numberOfPharmacies).toFixed(2)} - Delivered to you
+                      <p className="font-semibold text-[#121816]">Home Delivery</p>
+                      <p className="text-xs sm:text-sm text-[#4E5B55] mt-0.5">
+                        +৳{(deliveryChargePerPharmacy * numberOfPharmacies).toFixed(2)} · Courier delivery
                         {numberOfPharmacies > 1 && (
-                          <span className="block text-xs text-gray-500">
+                          <span className="block text-xs text-[#78857F]">
                             (৳{deliveryChargePerPharmacy.toFixed(2)} × {numberOfPharmacies} pharmacies)
                           </span>
                         )}
                       </p>
                     </div>
                     {deliveryType === 'delivery' && (
-                      <span className="text-indigo-600">✓</span>
+                      <span className="text-[#0F4C3A] font-bold">✓</span>
                     )}
                   </div>
                 </button>
@@ -315,45 +317,42 @@ const CartPage = () => {
 
             {/* Cart Items grouped by Pharmacy */}
             {pharmacyGroups.map((pharmacy) => (
-              <div key={pharmacy.pharmacyId} className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                  <div className="flex justify-between items-center">
+              <div key={pharmacy.pharmacyId} className="bg-white rounded-2xl border border-[#E4E1D8] overflow-hidden">
+                <div className="bg-[#FAF9F6] px-5 sm:px-6 py-4 border-b border-[#EFECE5]">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                     <div>
-                      <h2 className="text-xl font-semibold text-gray-900">
+                      <h2 className="text-base sm:text-lg font-bold text-[#121816]">
                         {pharmacy.pharmacyName}
                       </h2>
-                      <p className="text-sm text-gray-600">{pharmacy.pharmacyAddress}</p>
+                      <p className="text-xs sm:text-sm text-[#4E5B55]">{pharmacy.pharmacyAddress}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-600">Subtotal</p>
-                      <p className="text-xl font-bold text-gray-900">
+                    <div className="sm:text-right">
+                      <p className="text-xs text-[#78857F]">Subtotal</p>
+                      <p className="font-mono-data text-lg font-bold text-[#0F4C3A]">
                         ৳{pharmacy.totalPrice.toFixed(2)}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="divide-y divide-gray-200">
+                <div className="divide-y divide-[#EFECE5]">
                   {pharmacy.items.map((item) => (
-                    <div key={item.id} className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-medium text-gray-900">
+                    <div key={item.id} className="p-5 sm:p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base font-semibold text-[#121816]">
                             {item.medicine.name}
                           </h3>
-                          <p className="text-sm text-gray-600">
-                            {item.medicine.brand} - {item.medicine.strength}
+                          <p className="text-xs sm:text-sm text-[#4E5B55]">
+                            {item.medicine.brand} · {item.medicine.strength}
                           </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            Category: {item.medicine.category}
-                          </p>
-                          <p className="text-lg font-semibold text-indigo-600 mt-2">
+                          <p className="font-mono-data text-sm sm:text-base font-semibold text-[#0F4C3A] mt-2">
                             ৳{parseFloat(item.price).toFixed(2)} × {item.quantity} = ৳
                             {(parseFloat(item.price) * item.quantity).toFixed(2)}
                           </p>
                         </div>
 
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center justify-between sm:justify-end gap-3">
                           {/* Quantity Controls */}
                           <div className="flex items-center border border-gray-300 rounded-md">
                             <button

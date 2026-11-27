@@ -297,57 +297,56 @@ const PharmacyBrowsePage = () => {
         {success && <Alert type="success" message={success} />}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Pharmacy List */}
-          <div className="lg:col-span-1 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          {/* Pharmacy List (scrollable on mobile/tablet so selected store inventory stays accessible below) */}
+          <div className="lg:col-span-1">
+            <h2 className="text-base font-bold text-[#121816] mb-3">
               {sortedPharmacies.length} Pharmacies {userLocation && '(Sorted by Distance)'}
             </h2>
             
             {sortedPharmacies.length === 0 ? (
-              <div className="bg-white rounded-lg shadow p-6 text-center">
-                <p className="text-gray-500">No pharmacies found</p>
+              <div className="bg-white rounded-xl border border-[#E4E1D8] p-6 text-center">
+                <p className="text-sm text-[#4E5B55]">No pharmacies found</p>
               </div>
             ) : (
-              sortedPharmacies.map((pharmacy) => (
+              <div className="space-y-3 max-h-[380px] lg:max-h-[720px] overflow-y-auto pr-1">
+              {sortedPharmacies.map((pharmacy) => (
                 <div
                   key={pharmacy.id}
                   onClick={() => fetchPharmacyDetails(pharmacy.id)}
-                  className={`bg-white rounded-lg shadow p-4 cursor-pointer transition-all ${
+                  className={`bg-white rounded-xl border p-4 cursor-pointer transition-all ${
                     selectedPharmacy === pharmacy.id
-                      ? 'ring-2 ring-green-500 shadow-lg'
-                      : 'hover:shadow-md'
+                      ? 'border-[#0F4C3A] ring-2 ring-[#0F4C3A]/15 bg-[#F2F8F5]/40'
+                      : 'border-[#E4E1D8] hover:border-[#C9C4B6]'
                   }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{pharmacy.name}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{pharmacy.address}</p>
-                      <p className="text-sm text-gray-500 mt-1">📞 {pharmacy.phone}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm text-[#121816] truncate">{pharmacy.name}</h3>
+                      <p className="text-xs text-[#4E5B55] mt-1">{pharmacy.address}</p>
+                      <p className="font-mono-data text-xs text-[#78857F] mt-1">{pharmacy.phone}</p>
                     </div>
                     {pharmacy.distance !== undefined && (
-                      <div className="ml-2 flex flex-col items-end">
-                        <div className="flex items-center gap-1 text-green-600">
-                          <MapPin className="w-4 h-4" />
-                          <span className="text-sm font-semibold">
-                            {pharmacy.distance < 1 
-                              ? `${(pharmacy.distance * 1000).toFixed(0)}m`
-                              : `${pharmacy.distance.toFixed(1)}km`
-                            }
-                          </span>
-                        </div>
+                      <div className="shrink-0 flex items-center gap-1 text-[#0F4C3A]">
+                        <MapPin className="w-3.5 h-3.5" />
+                        <span className="font-mono-data text-xs font-semibold">
+                          {pharmacy.distance < 1
+                            ? `${(pharmacy.distance * 1000).toFixed(0)}m`
+                            : `${pharmacy.distance.toFixed(1)}km`}
+                        </span>
                       </div>
                     )}
                   </div>
-                  <div className="mt-2 flex justify-between items-center">
-                    <span className="text-xs text-green-600 font-medium">
-                      {pharmacy.medicinesCount} medicines available
+                  <div className="mt-2.5 flex justify-between items-center">
+                    <span className="font-mono-data text-xs text-[#0F4C3A] font-medium">
+                      {pharmacy.medicinesCount} medicines in stock
                     </span>
                     {selectedPharmacy === pharmacy.id && (
-                      <span className="text-xs text-green-600">Selected ✓</span>
+                      <span className="text-xs font-semibold text-[#0F4C3A]">Selected ✓</span>
                     )}
                   </div>
                 </div>
-              ))
+              ))}
+              </div>
             )}
           </div>
 

@@ -161,7 +161,7 @@ const LandingPage = () => {
                 </span>
               </div>
 
-              <h1 className="font-editorial text-[48px] sm:text-[62px] lg:text-[68px] leading-[1.02] tracking-[-0.02em] text-[#121816] mb-6">
+              <h1 className="font-editorial text-[36px] sm:text-[54px] lg:text-[66px] leading-[1.04] tracking-[-0.02em] text-[#121816] mb-5 sm:mb-6">
                 Know which pharmacy has your medicine{' '}
                 <span className="italic text-[#0F4C3A]">before you step out.</span>
               </h1>
@@ -187,24 +187,24 @@ const LandingPage = () => {
               </div>
 
               {/* Grounded Metric Strip */}
-              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-[#E4E1D8]">
+              <div className="grid grid-cols-3 gap-3 sm:gap-6 pt-7 sm:pt-8 border-t border-[#E4E1D8]">
                 <div>
-                  <div className="font-mono-data text-2xl sm:text-3xl font-semibold text-[#121816]">
-                    500+
+                  <div className="font-mono-data text-xl sm:text-3xl font-semibold text-[#121816]">
+                    180+
                   </div>
-                  <div className="text-xs text-[#4E5B55] mt-1">Licensed pharmacies</div>
+                  <div className="text-[11px] sm:text-xs text-[#4E5B55] mt-1">Licensed branches</div>
                 </div>
                 <div>
-                  <div className="font-mono-data text-2xl sm:text-3xl font-semibold text-[#121816]">
-                    50k+
+                  <div className="font-mono-data text-xl sm:text-3xl font-semibold text-[#121816]">
+                    25k+
                   </div>
-                  <div className="text-xs text-[#4E5B55] mt-1">Indexed medicine SKUs</div>
+                  <div className="text-[11px] sm:text-xs text-[#4E5B55] mt-1">Live stock listings</div>
                 </div>
                 <div>
-                  <div className="font-mono-data text-2xl sm:text-3xl font-semibold text-[#121816]">
+                  <div className="font-mono-data text-xl sm:text-3xl font-semibold text-[#121816]">
                     ৳60
                   </div>
-                  <div className="text-xs text-[#4E5B55] mt-1">Flat local delivery</div>
+                  <div className="text-[11px] sm:text-xs text-[#4E5B55] mt-1">Flat local delivery</div>
                 </div>
               </div>
             </div>
@@ -311,7 +311,7 @@ const LandingPage = () => {
                       {displayedResults.map((item) => (
                         <div
                           key={`${item.id}-${item.inventoryId || item.medicineId}`}
-                          className="px-5 py-3.5 hover:bg-[#FAF9F6] transition-colors flex items-center justify-between gap-3"
+                          className="px-4 sm:px-5 py-3.5 hover:bg-[#FAF9F6] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3"
                         >
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
@@ -320,7 +320,7 @@ const LandingPage = () => {
                               </span>
                               <ShieldCheck className="w-3.5 h-3.5 text-[#0F4C3A] shrink-0" />
                             </div>
-                            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 mt-1 text-xs text-[#4E5B55]">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-[#4E5B55]">
                               {item.city && (
                                 <span className="inline-flex items-center gap-1 font-mono-data text-[11px] text-[#121816]">
                                   <MapPin className="w-3 h-3 text-[#78857F]" />
@@ -328,7 +328,7 @@ const LandingPage = () => {
                                 </span>
                               )}
                               <span className="text-[#D4D0C5]">•</span>
-                              <span className="truncate max-w-[160px] text-[#78857F]">
+                              <span className="truncate max-w-[150px] text-[#78857F]">
                                 {item.medicine}
                               </span>
                               <span className="text-[#D4D0C5]">•</span>
@@ -342,8 +342,8 @@ const LandingPage = () => {
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2.5 shrink-0">
-                            <div className="text-right">
+                          <div className="flex items-center justify-between sm:justify-end gap-2.5 shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-[#F2F0E9]">
+                            <div className="sm:text-right">
                               <div className="font-mono-data text-sm font-semibold text-[#121816]">
                                 ৳{Number(item.price).toFixed(2)}
                               </div>
@@ -447,47 +447,49 @@ const LandingPage = () => {
                 </div>
 
                 {/* Mini Ledger UI */}
-                <div className="rounded-xl border border-[#E4E1D8] bg-[#FAF9F6] overflow-hidden">
-                  <div className="grid grid-cols-12 px-4 py-2.5 border-b border-[#E4E1D8] font-mono-data text-[10px] uppercase tracking-wider text-[#78857F]">
-                    <span className="col-span-5">Medicine</span>
-                    <span className="col-span-3">Status</span>
-                    <span className="col-span-2 text-right">Stock</span>
-                    <span className="col-span-2 text-right">Price</span>
-                  </div>
-                  {[
-                    { name: 'Insulin Glargine', status: 'In Stock', qty: '18 pens', price: '৳890', ok: true },
-                    { name: 'Atorvastatin 20mg', status: 'In Stock', qty: '64 strips', price: '৳120', ok: true },
-                    { name: 'Clopidogrel 75mg', status: 'Low Stock', qty: '4 strips', price: '৳145', ok: false },
-                  ].map((row, i) => (
-                    <div
-                      key={i}
-                      className="grid grid-cols-12 px-4 py-3 text-xs border-b last:border-b-0 border-[#ECE9E0] items-center bg-white"
-                    >
-                      <span className="col-span-5 font-semibold text-[#121816] truncate pr-2">
-                        {row.name}
-                      </span>
-                      <span className="col-span-3">
-                        <span
-                          className={`inline-flex items-center gap-1.5 font-mono-data text-[11px] ${
-                            row.ok ? 'text-[#0F4C3A]' : 'text-[#C85A32]'
-                          }`}
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              row.ok ? 'bg-[#1B7A5E]' : 'bg-[#C85A32]'
-                            }`}
-                          />
-                          {row.status}
-                        </span>
-                      </span>
-                      <span className="col-span-2 text-right font-mono-data text-[#4E5B55]">
-                        {row.qty}
-                      </span>
-                      <span className="col-span-2 text-right font-mono-data font-semibold text-[#121816]">
-                        {row.price}
-                      </span>
+                <div className="rounded-xl border border-[#E4E1D8] bg-[#FAF9F6] overflow-x-auto">
+                  <div className="min-w-[360px]">
+                    <div className="grid grid-cols-12 px-4 py-2.5 border-b border-[#E4E1D8] font-mono-data text-[10px] uppercase tracking-wider text-[#78857F]">
+                      <span className="col-span-5">Medicine</span>
+                      <span className="col-span-3">Status</span>
+                      <span className="col-span-2 text-right">Stock</span>
+                      <span className="col-span-2 text-right">Price</span>
                     </div>
-                  ))}
+                    {[
+                      { name: 'Insulin Glargine', status: 'In Stock', qty: '18 pens', price: '৳890', ok: true },
+                      { name: 'Atorvastatin 20mg', status: 'In Stock', qty: '64 strips', price: '৳120', ok: true },
+                      { name: 'Clopidogrel 75mg', status: 'Low Stock', qty: '4 strips', price: '৳145', ok: false },
+                    ].map((row, i) => (
+                      <div
+                        key={i}
+                        className="grid grid-cols-12 px-4 py-3 text-xs border-b last:border-b-0 border-[#ECE9E0] items-center bg-white"
+                      >
+                        <span className="col-span-5 font-semibold text-[#121816] truncate pr-2">
+                          {row.name}
+                        </span>
+                        <span className="col-span-3">
+                          <span
+                            className={`inline-flex items-center gap-1.5 font-mono-data text-[11px] ${
+                              row.ok ? 'text-[#0F4C3A]' : 'text-[#C85A32]'
+                            }`}
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                row.ok ? 'bg-[#1B7A5E]' : 'bg-[#C85A32]'
+                              }`}
+                            />
+                            {row.status}
+                          </span>
+                        </span>
+                        <span className="col-span-2 text-right font-mono-data text-[#4E5B55]">
+                          {row.qty}
+                        </span>
+                        <span className="col-span-2 text-right font-mono-data font-semibold text-[#121816]">
+                          {row.price}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </Reveal>
